@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "swiftvisuals",
+  "version": "${version}",
+  "name": "SWIFT VISUALS",
+  "description": "A visual client menu for Minecraft 1.21.11.",
+  "authors": ["SWIFT VISUALS"],
+  "license": "CC0-1.0",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["com.voidclient.VoidClientClient"],
+    "main": ["com.voidclient.VoidClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.20.1",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
