@@ -2,23 +2,34 @@ package com.voidclient;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.KeyMapping.Category;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.KeyMapping;
+import com.mojang.blaze3d.platform.InputConstants;
 import org.lwjgl.glfw.GLFW;
 
 public final class VoidClientClient implements ClientModInitializer {
-    private boolean rightShiftWasDown;
+    private static KeyMapping openMenuKey;
 
     @Override
     public void onInitializeClient() {
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            boolean down = GLFW.glfwGetKey(
-                client.getWindow().handle(),
-                GLFW.GLFW_KEY_RIGHT_SHIFT
-            ) == GLFW.GLFW_PRESS;
+        openMenuKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+            "key.swiftvisuals.open_menu",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_RIGHT_SHIFT,
+            KeyMapping.Category.MISC
+        ));
 
-            if (down && !rightShiftWasDown && client.screen == null) {
-                client.setScreen(new VoidClickScreen());
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            while (openMenuKey.consumeClick()) {
+                if (client.screen == null) {
+                    client.setScreen(new VoidClickScreen());
+                }
             }
-            rightShiftWasDown = down;
         });
     }
 }
