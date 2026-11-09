@@ -27,7 +27,9 @@ public final class VoidClickScreen extends Screen {
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g, mouseX, mouseY, partialTick);
+        // Draw a plain overlay instead of Minecraft's blurred background.
+        // This avoids invoking the optional blur/post-processing pipeline.
+        g.fill(0, 0, width, height, 0x99000000);
 
         g.fill(panelX, panelY, panelX + PANEL_W, panelY + PANEL_H, 0xF0121420);
         g.fill(panelX, panelY, panelX + PANEL_W, panelY + 2, 0xFF8B5CF6);
@@ -54,7 +56,7 @@ public final class VoidClickScreen extends Screen {
             y += 24;
         }
 
-        g.drawString(font, "SWIFT VISUALS  •  FABRIC 1.21.11",
+        g.drawString(font, "SWIFT VISUALS  -  FABRIC 1.21.11",
             panelX + 14, panelY + PANEL_H - 16, 0xFF777D91, false);
         super.render(g, mouseX, mouseY, partialTick);
     }
