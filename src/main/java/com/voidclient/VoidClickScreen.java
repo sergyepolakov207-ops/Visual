@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class VoidClickScreen extends Screen {
-    private static final int ROW_H = 46;
+    private static final int ROW_H = 42;
     private int panelX, panelY, panelW, panelH, scroll;
     private VoidModules.Category category = VoidModules.Category.VISUALS;
     private final List<String> visible = new ArrayList<>();
@@ -21,8 +21,8 @@ public final class VoidClickScreen extends Screen {
     public VoidClickScreen() { super(Component.literal("SWIFT VISUALS")); }
 
     @Override protected void init() {
-        panelW = Math.min(900, Math.max(280, width - 24));
-        panelH = Math.min(420, Math.max(230, height - 80));
+        panelW = Math.min(760, Math.max(280, width - 28));
+        panelH = Math.min(390, Math.max(220, height - 48));
         panelX = (width - panelW) / 2;
         panelY = (height - panelH) / 2;
         for (int i = 0; i < particleX.length; i++) {
@@ -37,7 +37,7 @@ public final class VoidClickScreen extends Screen {
     private int gap() { return panelW < 420 ? 8 : 12; }
     private int columns() { return panelW < 340 ? 1 : 2; }
     private int cardW() { return columns() == 1 ? panelW - sidePad() * 2 : (panelW - sidePad() * 2 - gap()) / 2; }
-    private int rowY() { return panelY + 76; }
+    private int rowY() { return panelY + 82; }
     private int visibleRows() { return Math.max(1, (panelH - 100) / ROW_H); }
 
     private void rebuild() {
@@ -65,7 +65,7 @@ public final class VoidClickScreen extends Screen {
         g.fill(0, 0, width, height, 0xC9000000);
         g.fill(panelX + 3, panelY + 4, panelX + panelW + 3, panelY + panelH + 4, 0x50000000);
         g.fill(panelX, panelY, panelX + panelW, panelY + panelH, 0xF20D0C14);
-        g.fill(panelX, panelY, panelX + panelW, panelY + 2, 0xFF7045B8);
+        g.fill(panelX, panelY, panelX + panelW, panelY + 3, 0xFF9A65F5);
 
         if (VoidModules.isEnabled("Menu Particles")) {
             int count = VoidModules.isEnabled("Reduced Effects") ? 7 : particleX.length;
@@ -76,8 +76,8 @@ public final class VoidClickScreen extends Screen {
             }
         }
 
-        String[] tabs = {"Visuals", "HUD", "Utilities"};
-        int tabY = panelY + 18;
+        String[] tabs = {"VISUALS", "HUD", "PVP"};
+        int tabY = panelY + 35;
         int tabW = Math.min(104, (panelW - sidePad() * 2) / 3);
         for (int i = 0; i < tabs.length; i++) {
             int x = panelX + sidePad() + i * (tabW + 10);
@@ -104,15 +104,15 @@ public final class VoidClickScreen extends Screen {
                 int x = panelX + sidePad() + col * (cw + gap());
                 int y = firstY + row * ROW_H, h = ROW_H - 5;
                 boolean hover = mx >= x && mx <= x + cw && my >= y && my <= y + h;
-                g.fill(x, y, x + cw, y + h, hover ? 0xFF191722 : 0xFF13121A);
+                g.fill(x, y, x + cw, y + h, hover ? 0xFF211A2D : 0xFF15131D);
                 g.fill(x, y, x + cw, y + 1, 0xFF292633);
                 g.fill(x, y + h - 1, x + cw, y + h, 0xFF24212D);
                 g.drawString(font, name, x + 13, y + (h - 8) / 2, 0xFFE0DDE8, false);
 
                 int sw = 34, sh = 18, sx = x + cw - sw - 13, sy = y + (h - sh) / 2;
-                g.fill(sx, sy, sx + sw, sy + sh, enabled ? 0xFF7950D5 : 0xFF30303D);
+                g.fill(sx, sy, sx + sw, sy + sh, enabled ? 0xFF8955D8 : 0xFF34313D);
                 g.fill(enabled ? sx + 18 : sx + 3, sy + 3, enabled ? sx + 31 : sx + 16, sy + 15,
-                    enabled ? 0xFFF6F1FF : 0xFF777584);
+                    enabled ? 0xFFFFFFFF : 0xFF898493);
             }
         }
 
@@ -130,7 +130,7 @@ public final class VoidClickScreen extends Screen {
     @Override public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         if (click.button() != 0) return super.mouseClicked(click, doubled);
         double mx = click.x(), my = click.y();
-        int tabY = panelY + 18, tabW = Math.min(104, (panelW - sidePad() * 2) / 3);
+        int tabY = panelY + 35, tabW = Math.min(104, (panelW - sidePad() * 2) / 3);
         for (int i = 0; i < 3; i++) {
             int x = panelX + sidePad() + i * (tabW + 10);
             if (mx >= x && mx <= x + tabW && my >= tabY && my <= tabY + 28) {
