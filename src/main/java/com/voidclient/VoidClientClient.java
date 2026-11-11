@@ -131,6 +131,36 @@ public final class VoidClientClient implements ClientModInitializer {
                 graphics.drawString(client.font, "ATTACK: " + percent + "%", 8, y,
                     percent >= 100 ? 0xFF72E0A1 : 0xFFFFC66D, true);
             }
+            if (VoidModules.isEnabled("Item Durability HUD")) {
+                var item = client.player.getMainHandItem();
+                if (item.isDamageableItem()) {
+                    int left = item.getMaxDamage() - item.getDamageValue();
+                    graphics.drawString(client.font, "DURABILITY: " + left + "/" + item.getMaxDamage(),
+                        8, y, left < 20 ? 0xFFFF7777 : 0xFFFFFFFF, true);
+                } else {
+                    graphics.drawString(client.font, "DURABILITY: --", 8, y, 0xFF9BA1B5, true);
+                }
+                y += 12;
+            }
+            if (VoidModules.isEnabled("Selected Item HUD")) {
+                graphics.drawString(client.font, "ITEM: " + client.player.getMainHandItem().getHoverName().getString(),
+                    8, y, 0xFFFFFFFF, true);
+                y += 12;
+            }
+            if (VoidModules.isEnabled("Movement Speed HUD")) {
+                var velocity = client.player.getDeltaMovement();
+                double speed = Math.sqrt(velocity.x * velocity.x + velocity.z * velocity.z) * 20.0;
+                graphics.drawString(client.font, String.format(java.util.Locale.ROOT, "SPEED: %.2f m/s", speed),
+                    8, y, 0xFFB89AFF, true);
+                y += 12;
+            }
+            if (VoidModules.isEnabled("World Time HUD") && client.level != null) {
+                long time = Math.floorMod(client.level.getDayTime(), 24000L);
+                long hours = (time / 1000 + 6) % 24;
+                long minutes = (time % 1000) * 60 / 1000;
+                graphics.drawString(client.font, String.format(java.util.Locale.ROOT, "WORLD: %02d:%02d", hours, minutes),
+                    8, y, 0xFFFFFFFF, true);
+            }
         });
     }
 }
