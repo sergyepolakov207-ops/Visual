@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class VoidClickScreen extends Screen {
-    private static final int ACCENT = 0xFF9B62E8;
-    private static final int TEXT = 0xFFF4F1ED;
-    private static final int MUTED = 0xFF9992A8;
+    private static final int ACCENT = 0xFF9A78D0;
+    private static final int TEXT = 0xFFE8E5EC;
+    private static final int MUTED = 0xFF96919F;
     private int panelX, panelY, panelW, panelH, scroll, tick;
     private int sideW, contentX, contentW, listY, cardH, rowGap, columns;
     private boolean settingsOpen, particlesEnabled = true, reducedMotion;
@@ -24,21 +24,21 @@ public final class VoidClickScreen extends Screen {
 
     @Override
     protected void init() {
-        panelW = Math.min(720, Math.max(270, width - 28));
-        panelH = Math.min(500, Math.max(250, height - 28));
+        panelW = Math.min(700, Math.max(270, width - 24));
+        panelH = Math.min(470, Math.max(250, height - 24));
         panelX = (width - panelW) / 2;
         panelY = (height - panelH) / 2;
-        sideW = panelW >= 520 ? 126 : 0;
+        sideW = panelW >= 540 ? 118 : 0;
         contentX = panelX + sideW;
         contentW = panelW - sideW;
         columns = contentW >= 570 ? 2 : 1;
         cardH = panelW < 400 ? 58 : 64;
         rowGap = 7;
-        listY = panelY + (sideW > 0 ? 125 : 145);
+        listY = panelY + (sideW > 0 ? 112 : 136);
         rebuild();
     }
 
-    private int pad() { return panelW < 400 ? 12 : 22; }
+    private int pad() { return panelW < 400 ? 12 : 18; }
     private int cardWidth() { return (contentW - pad() * 2 - (columns - 1) * 12) / columns; }
     private int visibleRows() { return Math.max(1, (panelY + panelH - 58 - listY) / (cardH + rowGap)); }
 
@@ -100,9 +100,9 @@ public final class VoidClickScreen extends Screen {
 
     private String categoryHint() {
         return switch (category) {
-            case VISUALS -> "Customize the look and feel of your game";
-            case HUD -> "Choose the information displayed on screen";
-            case PVP -> "Lightweight tools for everyday gameplay";
+            case VISUALS -> "Visual changes and camera options";
+            case HUD -> "Choose which HUD elements are visible";
+            case PVP -> "Small client-side gameplay helpers";
         };
     }
 
@@ -142,32 +142,30 @@ public final class VoidClickScreen extends Screen {
         // Fully opaque backdrop: no other mod screens can show through.
         panel(g, 0, 0, width, height, 0xFF080910);
         panel(g, 0, 0, width, height / 2, 0xFF101010);
-        panel(g, panelX + 5, panelY + 7, panelW, panelH, 0x90000000);
-        panel(g, panelX, panelY, panelW, panelH, 0xFF111111);
-        panel(g, panelX, panelY, panelW, 3, ACCENT);
-        panel(g, panelX + 1, panelY + 3, panelW - 2, 1, 0xFF30233F);
+        panel(g, panelX + 3, panelY + 4, panelW, panelH, 0x70000000);
+        panel(g, panelX, panelY, panelW, panelH, 0xFF121116);
+        panel(g, panelX, panelY, panelW, 1, 0xFF514365);
+        panel(g, panelX, panelY + 58, panelW, 1, 0xFF302B36);
 
         // Brand header
-        panel(g, panelX + 17, panelY + 17, 34, 34, 0xFF21182D);
-        panel(g, panelX + 17, panelY + 17, 3, 34, ACCENT);
-        g.drawCenteredString(font, "S", panelX + 34, panelY + 27, TEXT);
-        g.drawString(font, "SWIFT", panelX + 60, panelY + 18, TEXT, false);
-        g.drawString(font, "VISUAL CLIENT", panelX + 60, panelY + 31, MUTED, false);
-        String live = "● READY";
-        int liveX = panelX + panelW - pad() - font.width("SWIFT VISUALS  /  1.21.11") - font.width(live) - 18;
-        g.drawString(font, live, liveX, panelY + 28, 0xFFB58AEF, false);
-        g.drawString(font, "CYBER MINIMAL  /  1.21.11", panelX + panelW - pad() - font.width("NEON GLASS  /  1.21.11"), panelY + 28, 0xFF8D829F, false);
+        panel(g, panelX + 16, panelY + 14, 30, 30, 0xFF292333);
+        panel(g, panelX + 16, panelY + 14, 2, 30, ACCENT);
+        g.drawCenteredString(font, "S", panelX + 31, panelY + 25, TEXT);
+        g.drawString(font, "SWIFT VISUALS", panelX + 56, panelY + 16, TEXT, true);
+        g.drawString(font, "Minecraft 1.21.11  •  Fabric", panelX + 56, panelY + 31, MUTED, false);
+        String version = "CLIENT MENU";
+        g.drawString(font, version, panelX + panelW - pad() - font.width(version), panelY + 25, MUTED, false);
 
         // Compact sidebar on wide layouts; horizontal tabs remain for narrow phone screens.
         String[] names = {"VISUALS", "HUD", "PVP"};
-        String[] icons = {"◈", "▣", "⚙"};
+        String[] icons = {"V", "H", "P"};
         if (sideW > 0) {
             int sx = panelX + 12;
             int sy = panelY + 76;
             for (int i = 0; i < names.length; i++) {
                 int y = sy + i * 43;
                 boolean active = category.ordinal() == i;
-                rounded(g, sx, y, sideW - 24, 36, 6, active ? 0xFF34234A : 0xFF17141E);
+                rounded(g, sx, y, sideW - 24, 36, 3, active ? 0xFF292333 : 0xFF19181E);
                 if (active) panel(g, sx, y + 4, 2, 28, ACCENT);
                 g.drawString(font, icons[i], sx + 10, y + 11, active ? ACCENT : MUTED, false);
                 g.drawString(font, names[i], sx + 31, y + 11, active ? TEXT : MUTED, true);
@@ -182,7 +180,7 @@ public final class VoidClickScreen extends Screen {
                 int x = panelX + pad() + i * (tabW + tabGap);
                 int y = panelY + 68;
                 boolean active = category.ordinal() == i;
-                rounded(g, x, y, tabW, 31, 6, active ? 0xFF34234A : 0xFF191620);
+                rounded(g, x, y, tabW, 31, 3, active ? 0xFF292333 : 0xFF19181E);
                 if (active) panel(g, x + 9, y + 29, tabW - 18, 2, ACCENT);
                 g.drawCenteredString(font, names[i], x + tabW / 2, y + 11, active ? TEXT : MUTED);
             }
@@ -235,7 +233,7 @@ public final class VoidClickScreen extends Screen {
                 int x = contentX + pad() + col * (cw + 12);
                 int y = listY + row * (cardH + rowGap);
                 boolean hover = mx >= x && mx <= x + cw && my >= y && my <= y + cardH;
-                rounded(g, x, y, cw, cardH, 7, hover ? 0xFF241D30 : 0xFF1B1B1B);
+                rounded(g, x, y, cw, cardH, 3, hover ? 0xFF24212A : 0xFF1A191F);
                 panel(g, x, y, cw, 1, enabled ? ACCENT : 0xFF342B40);
                 panel(g, x, y + 1, 3, cardH - 2, enabled ? ACCENT : 0xFF4B4038);
                 g.drawString(font, name, x + 13, y + 11, TEXT, true);
@@ -244,9 +242,9 @@ public final class VoidClickScreen extends Screen {
                 g.drawString(font, state, x + cw - 59 - font.width(state), y + 27, enabled ? ACCENT : MUTED, true);
                 int sw = 38, sh = 20;
                 int sx = x + cw - sw - 12, sy = y + (cardH - sh) / 2;
-                rounded(g, sx, sy, sw, sh, 10, enabled ? ACCENT : 0xFF414141);
+                rounded(g, sx, sy, sw, sh, 3, enabled ? ACCENT : 0xFF45414A);
                 int knobX = enabled ? sx + 21 : sx + 3;
-                rounded(g, knobX, sy + 3, 14, 14, 7, 0xFFF5F2EF);
+                rounded(g, knobX, sy + 3, 14, 14, 3, 0xFFE9E6ED);
             }
         }
 
@@ -265,10 +263,10 @@ public final class VoidClickScreen extends Screen {
         }
 
         // Footer
-        panel(g, contentX + pad(), panelY + panelH - 37, contentW - pad() * 2, 1, 0xFF30243F);
-        g.drawString(font, "SWIFT VISUALS", contentX + pad(), panelY + panelH - 24, 0xFF777187, false);
+        panel(g, contentX + pad(), panelY + panelH - 37, contentW - pad() * 2, 1, 0xFF302B36);
+        g.drawString(font, "SWIFT VISUALS", contentX + pad(), panelY + panelH - 24, MUTED, false);
         String status = enabledCount() + " ENABLED";
-        g.drawString(font, status, contentX + contentW - pad() - font.width(status), panelY + panelH - 24, 0xFFB99AEF, true);
+        g.drawString(font, status, contentX + contentW - pad() - font.width(status), panelY + panelH - 24, ACCENT, true);
         super.render(g, mx, my, partialTick);
     }
 
@@ -279,8 +277,8 @@ public final class VoidClickScreen extends Screen {
         int bottom = panelY + panelH - 48;
         if (y + 100 > bottom) return;
 
-        g.drawString(font, "LIVE OVERVIEW", left, y, 0xFFFFA45F, true);
-        g.drawString(font, "Your client at a glance", left, y + 13, MUTED, false);
+        g.drawString(font, "LIVE OVERVIEW", left, y, 0xFFB49BCF, true);
+        g.drawString(font, "Enabled modules in this category", left, y + 13, MUTED, false);
         int top = y + 31;
         panel(g, left, top, w, 48, 0xFF191A27);
         panel(g, left, top, 2, 48, ACCENT);
@@ -290,14 +288,14 @@ public final class VoidClickScreen extends Screen {
 
         int right = left + w + gap;
         panel(g, right, top, w, 48, 0xFF191A27);
-        panel(g, right, top, 2, 48, 0xFF7A69A8);
+        panel(g, right, top, 2, 48, 0xFF6D5C83);
         g.drawString(font, "CURRENT SECTION", right + 11, top + 8, MUTED, true);
         g.drawString(font, category.name(), right + 11, top + 23, TEXT, true);
 
         int guideY = top + 56;
         panel(g, left, guideY, contentW - pad() * 2, 39, 0xFF151620);
         panel(g, left, guideY, 2, 39, 0xFF66518A);
-        g.drawString(font, "QUICK CONTROLS", left + 10, guideY + 6, 0xFFBDA2ED, true);
+        g.drawString(font, "QUICK CONTROLS", left + 10, guideY + 6, 0xFFB49BCF, true);
         g.drawString(font, "Tap a card to toggle  •  Swipe to scroll  •  RIGHT SHIFT to close",
             left + 10, guideY + 21, MUTED, false);
     }
