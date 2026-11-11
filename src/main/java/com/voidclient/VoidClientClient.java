@@ -96,8 +96,8 @@ public final class VoidClientClient implements ClientModInitializer {
                     hp <= 6 ? 0xFFFF6666 : 0xFF75D99A);
             }
             if (VoidModules.isEnabled("Low Health Alert") && client.player.getHealth() <= 6.0F) {
-                graphics.fill(0, 0, client.gui.getGuiWidth(), 3, 0xFFFF4545);
-                graphics.drawCenteredString(client.font, "LOW HEALTH", client.gui.getGuiWidth() / 2, 12, 0xFFFF7777);
+                graphics.fill(0, 0, client.getWindow().getGuiScaledWidth(), 3, 0xFFFF4545);
+                graphics.drawCenteredString(client.font, "LOW HEALTH", client.getWindow().getGuiScaledWidth() / 2, 12, 0xFFFF7777);
             }
             if (VoidModules.isEnabled("Hunger HUD"))
                 y = drawCard(graphics, client, "FOOD", client.player.getFoodData().getFoodLevel() + "/20", x, y, 0xFFFFC66D);
@@ -142,8 +142,8 @@ public final class VoidClientClient implements ClientModInitializer {
             }
 
             if (VoidModules.isEnabled("Crosshair Dot")) {
-                int cx = client.gui.getGuiWidth() / 2;
-                int cy = client.gui.getGuiHeight() / 2;
+                int cx = client.getWindow().getGuiScaledWidth() / 2;
+                int cy = client.getWindow().getGuiScaledHeight() / 2;
                 graphics.fill(cx - 1, cy - 1, cx + 2, cy + 2, 0xFFB98AFF);
             }
         });
