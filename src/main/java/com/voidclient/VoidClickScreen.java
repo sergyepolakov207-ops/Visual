@@ -34,7 +34,7 @@ public final class VoidClickScreen extends Screen {
         columns = contentW >= 570 ? 2 : 1;
         cardH = panelW < 400 ? 58 : 64;
         rowGap = 7;
-        listY = panelY + (sideW > 0 ? 105 : 145);
+        listY = panelY + (sideW > 0 ? 125 : 145);
         rebuild();
     }
 
