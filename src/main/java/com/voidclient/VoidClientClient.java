@@ -16,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 public final class VoidClientClient implements ClientModInitializer {
     private static KeyMapping openMenuKey;
     private static final DateTimeFormatter CLOCK = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private static Double previousGamma = null;
 
     @Override
     public void onInitializeClient() {
@@ -30,6 +31,16 @@ public final class VoidClientClient implements ClientModInitializer {
             while (openMenuKey.consumeClick()) {
                 if (client.screen == null) client.setScreen(new VoidClickScreen());
                 else if (client.screen instanceof VoidClickScreen) client.setScreen(null);
+            }
+
+            if (client.options != null) {
+                if (VoidModules.isEnabled("Fullbright")) {
+                    if (previousGamma == null) previousGamma = client.options.gamma().get();
+                    client.options.gamma().set(16.0);
+                } else if (previousGamma != null) {
+                    client.options.gamma().set(previousGamma);
+                    previousGamma = null;
+                }
             }
 
             if (client.player != null && VoidModules.isEnabled("Auto Sprint")) {
