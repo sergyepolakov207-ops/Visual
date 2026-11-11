@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class VoidClickScreen extends Screen {
-    private static final int ACCENT = 0xFFFF8733;
+    private static final int ACCENT = 0xFF9B62E8;
     private static final int TEXT = 0xFFF4F1ED;
-    private static final int MUTED = 0xFF8D8986;
+    private static final int MUTED = 0xFF9992A8;
     private int panelX, panelY, panelW, panelH, scroll, tick;
     private int sideW, contentX, contentW, listY, cardH, rowGap, columns;
     private boolean settingsOpen, particlesEnabled = true, reducedMotion;
@@ -28,13 +28,13 @@ public final class VoidClickScreen extends Screen {
         panelH = Math.min(500, Math.max(250, height - 28));
         panelX = (width - panelW) / 2;
         panelY = (height - panelH) / 2;
-        sideW = 0;
+        sideW = panelW >= 520 ? 126 : 0;
         contentX = panelX + sideW;
         contentW = panelW - sideW;
         columns = contentW >= 570 ? 2 : 1;
         cardH = panelW < 400 ? 58 : 64;
         rowGap = 7;
-        listY = panelY + 145;
+        listY = panelY + (sideW > 0 ? 105 : 145);
         rebuild();
     }
 
@@ -65,7 +65,7 @@ public final class VoidClickScreen extends Screen {
             int x = Math.floorMod((int) (i * 97 + Math.sin(tick * speed * 0.035 + phase) * 24), Math.max(1, width));
             int y = Math.floorMod((int) (i * 53 - tick * speed + Math.cos(phase) * 18), Math.max(1, height));
             if (x > panelX - 3 && x < panelX + panelW + 3 && y > panelY - 3 && y < panelY + panelH + 3) continue;
-            int color = (i % 4 == 0) ? 0x88FF8733 : 0x55FF8733;
+            int color = (i % 4 == 0) ? 0x669B62E8 : 0x339B62E8;
             int size = (i % 7 == 0) ? 3 : 2;
             g.fill(x, y, x + size, y + size, color);
         }
@@ -145,32 +145,47 @@ public final class VoidClickScreen extends Screen {
         panel(g, panelX + 5, panelY + 7, panelW, panelH, 0x90000000);
         panel(g, panelX, panelY, panelW, panelH, 0xFF111111);
         panel(g, panelX, panelY, panelW, 3, ACCENT);
-        panel(g, panelX + 1, panelY + 3, panelW - 2, 1, 0xFF3B2A20);
+        panel(g, panelX + 1, panelY + 3, panelW - 2, 1, 0xFF30233F);
 
         // Brand header
-        panel(g, panelX + 17, panelY + 17, 34, 34, 0xFF33251C);
+        panel(g, panelX + 17, panelY + 17, 34, 34, 0xFF21182D);
         panel(g, panelX + 17, panelY + 17, 3, 34, ACCENT);
         g.drawCenteredString(font, "S", panelX + 34, panelY + 27, TEXT);
         g.drawString(font, "SWIFT", panelX + 60, panelY + 18, TEXT, false);
         g.drawString(font, "VISUAL CLIENT", panelX + 60, panelY + 31, MUTED, false);
-        String live = "● ONLINE";
-        int liveX = panelX + panelW - pad() - font.width("SWIFT CLIENT  /  1.21.11") - font.width(live) - 18;
-        g.drawString(font, live, liveX, panelY + 28, 0xFFFFA45F, false);
-        g.drawString(font, "NEON GLASS  /  1.21.11", panelX + panelW - pad() - font.width("NEON GLASS  /  1.21.11"), panelY + 28, 0xFF777187, false);
+        String live = "● READY";
+        int liveX = panelX + panelW - pad() - font.width("SWIFT VISUALS  /  1.21.11") - font.width(live) - 18;
+        g.drawString(font, live, liveX, panelY + 28, 0xFFB58AEF, false);
+        g.drawString(font, "CYBER MINIMAL  /  1.21.11", panelX + panelW - pad() - font.width("NEON GLASS  /  1.21.11"), panelY + 28, 0xFF8D829F, false);
 
-        // Horizontal navigation inspired by the reference menu.
+        // Compact sidebar on wide layouts; horizontal tabs remain for narrow phone screens.
         String[] names = {"VISUALS", "HUD", "PVP"};
-        int tabGap = 8;
-        int tabW = (contentW - pad() * 2 - tabGap * 2) / 3;
-        for (int i = 0; i < names.length; i++) {
-            int x = panelX + pad() + i * (tabW + tabGap);
-            int y = panelY + 68;
-            boolean active = category.ordinal() == i;
-            rounded(g, x, y, tabW, 31, 6, active ? 0xFF3A281D : 0xFF1B1B1B);
-            if (active) panel(g, x + 9, y + 29, tabW - 18, 2, ACCENT);
-            g.drawCenteredString(font, names[i], x + tabW / 2, y + 11, active ? TEXT : MUTED);
-            String amount = String.format("%02d", countFor(i));
-            g.drawString(font, amount, x + tabW - font.width(amount) - 8, y + 11, active ? ACCENT : 0xFF66615D, false);
+        String[] icons = {"◈", "▣", "⚙"};
+        if (sideW > 0) {
+            int sx = panelX + 12;
+            int sy = panelY + 76;
+            for (int i = 0; i < names.length; i++) {
+                int y = sy + i * 43;
+                boolean active = category.ordinal() == i;
+                rounded(g, sx, y, sideW - 24, 36, 6, active ? 0xFF34234A : 0xFF17141E);
+                if (active) panel(g, sx, y + 4, 2, 28, ACCENT);
+                g.drawString(font, icons[i], sx + 10, y + 11, active ? ACCENT : MUTED, false);
+                g.drawString(font, names[i], sx + 31, y + 11, active ? TEXT : MUTED, true);
+                String amount = String.format("%02d", countFor(i));
+                g.drawString(font, amount, sx + sideW - 24 - font.width(amount) - 7, y + 11, MUTED, false);
+            }
+            panel(g, panelX + sideW - 1, panelY + 68, 1, panelH - 82, 0xFF30243F);
+        } else {
+            int tabGap = 8;
+            int tabW = (contentW - pad() * 2 - tabGap * 2) / 3;
+            for (int i = 0; i < names.length; i++) {
+                int x = panelX + pad() + i * (tabW + tabGap);
+                int y = panelY + 68;
+                boolean active = category.ordinal() == i;
+                rounded(g, x, y, tabW, 31, 6, active ? 0xFF34234A : 0xFF191620);
+                if (active) panel(g, x + 9, y + 29, tabW - 18, 2, ACCENT);
+                g.drawCenteredString(font, names[i], x + tabW / 2, y + 11, active ? TEXT : MUTED);
+            }
         }
 
 
@@ -180,16 +195,16 @@ public final class VoidClickScreen extends Screen {
             g.drawString(font, "CLIENT SETTINGS", sx, sy, TEXT, true);
             g.drawString(font, "Personalize the menu experience", sx, sy + 15, MUTED, false);
             String[] labels = {"MENU PARTICLES", "REDUCED MOTION"};
-            String[] hints = {"Ambient orange particles around the panel", "Disable moving effects for a calmer menu"};
+            String[] hints = {"Soft purple particles around the panel", "Reduce animation for a calmer menu"};
             boolean[] values = {particlesEnabled, reducedMotion};
             for (int i = 0; i < labels.length; i++) {
                 int y = sy + 42 + i * 62;
                 rounded(g, sx, y, contentW - pad() * 2, 52, 7, 0xFF1B1B1B);
-                panel(g, sx, y, 3, 52, values[i] ? ACCENT : 0xFF4B4038);
+                panel(g, sx, y, 3, 52, values[i] ? ACCENT : 0xFF514264);
                 g.drawString(font, labels[i], sx + 13, y + 10, TEXT, true);
                 g.drawString(font, hints[i], sx + 13, y + 27, MUTED, false);
                 int tx = sx + contentW - pad() * 2 - 48;
-                rounded(g, tx, y + 16, 36, 20, 10, values[i] ? ACCENT : 0xFF414141);
+                rounded(g, tx, y + 16, 36, 20, 10, values[i] ? ACCENT : 0xFF40364F);
                 rounded(g, tx + (values[i] ? 20 : 3), y + 19, 14, 14, 7, 0xFFF5F2EF);
             }
             g.drawString(font, "Tap a setting to switch it", sx, sy + 178, MUTED, false);
@@ -220,8 +235,8 @@ public final class VoidClickScreen extends Screen {
                 int x = contentX + pad() + col * (cw + 12);
                 int y = listY + row * (cardH + rowGap);
                 boolean hover = mx >= x && mx <= x + cw && my >= y && my <= y + cardH;
-                rounded(g, x, y, cw, cardH, 7, hover ? 0xFF29231F : 0xFF1B1B1B);
-                panel(g, x, y, cw, 1, enabled ? ACCENT : 0xFF37312C);
+                rounded(g, x, y, cw, cardH, 7, hover ? 0xFF241D30 : 0xFF1B1B1B);
+                panel(g, x, y, cw, 1, enabled ? ACCENT : 0xFF342B40);
                 panel(g, x, y + 1, 3, cardH - 2, enabled ? ACCENT : 0xFF4B4038);
                 g.drawString(font, name, x + 13, y + 11, TEXT, true);
                 g.drawString(font, description(name), x + 13, y + 27, MUTED, false);
@@ -250,7 +265,7 @@ public final class VoidClickScreen extends Screen {
         }
 
         // Footer
-        panel(g, contentX + pad(), panelY + panelH - 37, contentW - pad() * 2, 1, 0xFF292536);
+        panel(g, contentX + pad(), panelY + panelH - 37, contentW - pad() * 2, 1, 0xFF30243F);
         g.drawString(font, "SWIFT VISUALS", contentX + pad(), panelY + panelH - 24, 0xFF777187, false);
         String status = enabledCount() + " ENABLED";
         g.drawString(font, status, contentX + contentW - pad() - font.width(status), panelY + panelH - 24, 0xFFB99AEF, true);
@@ -305,15 +320,29 @@ public final class VoidClickScreen extends Screen {
         if (click.button() != 0) return super.mouseClicked(click, doubled);
         double mx = click.x(), my = click.y();
 
-        int tabGap = 8;
-        int tabW = (contentW - pad() * 2 - tabGap * 2) / 3;
-        for (int i = 0; i < 3; i++) {
-            int x = panelX + pad() + i * (tabW + tabGap);
-            if (mx >= x && mx <= x + tabW && my >= panelY + 68 && my <= panelY + 99) {
-                category = VoidModules.Category.values()[i];
-                scroll = 0;
-                rebuild();
-                return true;
+        if (sideW > 0) {
+            int sx = panelX + 12;
+            int sy = panelY + 76;
+            for (int i = 0; i < 3; i++) {
+                int y = sy + i * 43;
+                if (mx >= sx && mx <= sx + sideW - 24 && my >= y && my <= y + 36) {
+                    category = VoidModules.Category.values()[i];
+                    scroll = 0;
+                    rebuild();
+                    return true;
+                }
+            }
+        } else {
+            int tabGap = 8;
+            int tabW = (contentW - pad() * 2 - tabGap * 2) / 3;
+            for (int i = 0; i < 3; i++) {
+                int x = panelX + pad() + i * (tabW + tabGap);
+                if (mx >= x && mx <= x + tabW && my >= panelY + 68 && my <= panelY + 99) {
+                    category = VoidModules.Category.values()[i];
+                    scroll = 0;
+                    rebuild();
+                    return true;
+                }
             }
         }
 
