@@ -9,6 +9,7 @@ public final class VoidModules {
     static {
         MODULES.put("Fullbright", false);
         MODULES.put("No View Bobbing", false);
+        MODULES.put("Crosshair Dot", false);
         MODULES.put("FPS Counter", true);
         MODULES.put("Coordinates", true);
         MODULES.put("Clock", false);
@@ -22,10 +23,12 @@ public final class VoidModules {
         MODULES.put("Biome HUD", false);
         MODULES.put("Item Durability HUD", false);
         MODULES.put("Selected Item HUD", false);
+        MODULES.put("Offhand Item HUD", false);
         MODULES.put("Movement Speed HUD", false);
         MODULES.put("World Time HUD", false);
         MODULES.put("Auto Sprint", false);
         MODULES.put("Attack Cooldown", false);
+        MODULES.put("Low Health Alert", false);
     }
     private VoidModules() {}
     public static Map<String, Boolean> all() { return MODULES; }
@@ -36,9 +39,10 @@ public final class VoidModules {
     public static Category categoryOf(String name) {
         return switch (name) {
             case "FPS Counter", "Coordinates", "Clock", "Keystrokes", "Sprint Status",
-                 "Direction HUD", "Health HUD", "Hunger HUD", "Armor HUD", "Ping HUD", "Biome HUD", "Item Durability HUD",
-                 "Selected Item HUD", "Movement Speed HUD", "World Time HUD" -> Category.HUD;
-            case "Auto Sprint", "Attack Cooldown" -> Category.PVP;
+                 "Direction HUD", "Health HUD", "Hunger HUD", "Armor HUD", "Ping HUD", "Biome HUD",
+                 "Item Durability HUD", "Selected Item HUD", "Offhand Item HUD", "Movement Speed HUD",
+                 "World Time HUD" -> Category.HUD;
+            case "Auto Sprint", "Attack Cooldown", "Low Health Alert" -> Category.PVP;
             default -> Category.VISUALS;
         };
     }
