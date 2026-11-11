@@ -20,6 +20,10 @@ public final class VoidModules {
         MODULES.put("Armor HUD", false);
         MODULES.put("Ping HUD", false);
         MODULES.put("Biome HUD", false);
+        MODULES.put("Item Durability HUD", false);
+        MODULES.put("Selected Item HUD", false);
+        MODULES.put("Movement Speed HUD", false);
+        MODULES.put("World Time HUD", false);
         MODULES.put("Auto Sprint", false);
         MODULES.put("Attack Cooldown", false);
     }
@@ -32,7 +36,8 @@ public final class VoidModules {
     public static Category categoryOf(String name) {
         return switch (name) {
             case "FPS Counter", "Coordinates", "Clock", "Keystrokes", "Sprint Status",
-                 "Direction HUD", "Health HUD", "Hunger HUD", "Armor HUD", "Ping HUD", "Biome HUD" -> Category.HUD;
+                 "Direction HUD", "Health HUD", "Hunger HUD", "Armor HUD", "Ping HUD", "Biome HUD", "Item Durability HUD",
+                 "Selected Item HUD", "Movement Speed HUD", "World Time HUD" -> Category.HUD;
             case "Auto Sprint", "Attack Cooldown" -> Category.PVP;
             default -> Category.VISUALS;
         };
