@@ -122,7 +122,7 @@ public final class VoidClientClient implements ClientModInitializer {
             }
             if (VoidModules.isEnabled("Biome HUD") && client.level != null) {
                 String biome = client.level.getBiome(client.player.blockPosition()).unwrapKey()
-                    .map(key -> key.location().getPath()).orElse("unknown");
+                    .map(Object::toString).orElse("unknown");
                 graphics.drawString(client.font, "BIOME: " + biome, 8, y, 0xFF9FE0B0, true);
                 y += 12;
             }
