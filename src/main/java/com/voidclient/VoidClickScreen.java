@@ -223,6 +223,9 @@ public final class VoidClickScreen extends Screen {
         }
 
         int totalRows = (visible.size() + columns - 1) / columns;
+        if (category == VoidModules.Category.VISUALS && totalRows <= 2) {
+            drawOverview(g, listY + totalRows * (cardH + rowGap) + 10);
+        }
         if (totalRows > rows) {
             int trackX = contentX + contentW - 5;
             int trackY = listY;
@@ -239,6 +242,36 @@ public final class VoidClickScreen extends Screen {
         String status = enabledCount() + " ENABLED";
         g.drawString(font, status, contentX + contentW - pad() - font.width(status), panelY + panelH - 24, 0xFFB99AEF, true);
         super.render(g, mx, my, partialTick);
+    }
+
+    private void drawOverview(GuiGraphics g, int y) {
+        int left = contentX + pad();
+        int gap = 10;
+        int w = (contentW - pad() * 2 - gap) / 2;
+        int bottom = panelY + panelH - 48;
+        if (y + 100 > bottom) return;
+
+        g.drawString(font, "LIVE OVERVIEW", left, y, 0xFFBDA2ED, true);
+        g.drawString(font, "Your client at a glance", left, y + 13, MUTED, false);
+        int top = y + 31;
+        panel(g, left, top, w, 48, 0xFF191A27);
+        panel(g, left, top, 2, 48, ACCENT);
+        g.drawString(font, "ACTIVE MODULES", left + 11, top + 8, MUTED, true);
+        g.drawString(font, Integer.toString(enabledCount()), left + 11, top + 22, TEXT, true);
+        g.drawString(font, "of " + VoidModules.all().size() + " available", left + 34, top + 25, MUTED, false);
+
+        int right = left + w + gap;
+        panel(g, right, top, w, 48, 0xFF191A27);
+        panel(g, right, top, 2, 48, 0xFF7A69A8);
+        g.drawString(font, "CURRENT SECTION", right + 11, top + 8, MUTED, true);
+        g.drawString(font, category.name(), right + 11, top + 23, TEXT, true);
+
+        int guideY = top + 56;
+        panel(g, left, guideY, contentW - pad() * 2, 39, 0xFF151620);
+        panel(g, left, guideY, 2, 39, 0xFF66518A);
+        g.drawString(font, "QUICK CONTROLS", left + 10, guideY + 6, 0xFFBDA2ED, true);
+        g.drawString(font, "Tap a card to toggle  •  Swipe to scroll  •  RIGHT SHIFT to close",
+            left + 10, guideY + 21, MUTED, false);
     }
 
     private int countFor(int categoryIndex) {
