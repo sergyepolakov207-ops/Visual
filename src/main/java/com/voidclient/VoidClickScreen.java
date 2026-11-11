@@ -1,282 +1,180 @@
 package com.voidclient;
 
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.network.chat.Component;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.Identifier;
+import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
-import java.util.List;
 
-public final class VoidClickScreen extends Screen {
-    private static final int ACCENT = 0xFFB58CFF;
-    private static final int TEXT = 0xFFF2EEFA;
-    private static final int MUTED = 0xFF938BA5;
-    private int panelX, panelY, panelW, panelH, scroll, tick;
-    private int sideW, contentX, contentW, listY, cardH, rowGap, columns;
-    private VoidModules.Category category = VoidModules.Category.VISUALS;
-    private final List<String> visible = new ArrayList<>();
-
-    public VoidClickScreen() {
-        super(Component.literal("SWIFT VISUALS"));
-    }
+public final class VoidClientClient implements ClientModInitializer {
+    private static Double previousGamma = null;
+    private static Boolean previousBobView = null;
 
     @Override
-    protected void init() {
-        panelW = Math.min(940, Math.max(280, width - 20));
-        panelH = Math.min(590, Math.max(230, height - 20));
-        panelX = (width - panelW) / 2;
-        panelY = (height - panelH) / 2;
-        sideW = panelW >= 560 ? 142 : 0;
-        contentX = panelX + sideW;
-        contentW = panelW - sideW;
-        columns = contentW >= 570 ? 2 : 1;
-        cardH = panelW < 400 ? 48 : 54;
-        rowGap = 10;
-        listY = panelY + (sideW == 0 ? 126 : 145);
-        rebuild();
-    }
+    public void onInitializeClient() {
+        KeyMapping openMenuKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+            "key.swiftvisuals.open_menu", InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_RIGHT_SHIFT, KeyMapping.Category.MISC
+        ));
 
-    private int pad() { return panelW < 400 ? 12 : 22; }
-    private int cardWidth() { return (contentW - pad() * 2 - (columns - 1) * 12) / columns; }
-    private int visibleRows() { return Math.max(1, (panelY + panelH - 58 - listY) / (cardH + rowGap)); }
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            while (openMenuKey.consumeClick()) {
+                if (client.screen == null) client.setScreen(new VoidClickScreen());
+                else if (client.screen instanceof VoidClickScreen) client.setScreen(null);
+            }
 
-    private void rebuild() {
-        visible.clear();
-        VoidModules.all().keySet().stream()
-            .filter(name -> VoidModules.categoryOf(name) == category)
-            .forEach(visible::add);
-        int total = (visible.size() + columns - 1) / columns;
-        scroll = Math.max(0, Math.min(scroll, total - visibleRows()));
-    }
-
-    @Override
-    public void tick() {
-        super.tick();
-        tick++;
-    }
-
-    private void panel(GuiGraphics g, int x, int y, int w, int h, int color) {
-        g.fill(x, y, x + w, y + h, color);
-    }
-
-    private String categoryTitle() {
-        return switch (category) {
-            case VISUALS -> "VISUAL MODULES";
-            case HUD -> "HUD ELEMENTS";
-            case PVP -> "PVP UTILITIES";
-        };
-    }
-
-    private String categoryHint() {
-        return switch (category) {
-            case VISUALS -> "Customize the look and feel of your game";
-            case HUD -> "Choose the information displayed on screen";
-            case PVP -> "Lightweight tools for everyday gameplay";
-        };
-    }
-
-    private String description(String name) {
-        return switch (name) {
-            case "Fullbright" -> "Brighten dark areas";
-            case "No View Bobbing" -> "Keep the camera steady";
-            case "Crosshair Dot" -> "Add a precise center marker";
-            case "Menu Particles" -> "Ambient particles in this menu";
-            case "FPS Counter" -> "Show your current frame rate";
-            case "Coordinates" -> "Display your world position";
-            case "Clock" -> "Show your local time";
-            case "Keystrokes" -> "Display movement key presses";
-            case "Sprint Status" -> "Show sprint state";
-            case "Direction HUD" -> "Display the direction you face";
-            case "Health HUD" -> "Show current health";
-            case "Hunger HUD" -> "Show food level";
-            case "Armor HUD" -> "Show armor points";
-            case "Ping HUD" -> "Display server latency";
-            case "Biome HUD" -> "Show the current biome";
-            case "Item Durability HUD" -> "Track held item durability";
-            case "Selected Item HUD" -> "Show your held item";
-            case "Offhand Item HUD" -> "Show your offhand item";
-            case "Movement Speed HUD" -> "Display movement speed";
-            case "World Time HUD" -> "Show the in-game time";
-            case "Compact HUD" -> "Use smaller HUD cards";
-            case "Auto Sprint" -> "Sprint while moving forward";
-            case "Attack Cooldown" -> "Show attack readiness";
-            case "Low Health Alert" -> "Warn when health is low";
-            case "Reduced Effects" -> "Reduce menu visual effects";
-            default -> "Client-side option";
-        };
-    }
-
-    @Override
-    public void render(GuiGraphics g, int mx, int my, float partialTick) {
-        // Fully opaque backdrop: no other mod screens can show through.
-        panel(g, 0, 0, width, height, 0xFF080910);
-        panel(g, 0, 0, width, height / 2, 0xFF0B0B15);
-        panel(g, panelX + 5, panelY + 7, panelW, panelH, 0x90000000);
-        panel(g, panelX, panelY, panelW, panelH, 0xFF10111B);
-        panel(g, panelX, panelY, panelW, 3, ACCENT);
-        panel(g, panelX + 1, panelY + 3, panelW - 2, 1, 0xFF38304B);
-
-        // Brand header
-        panel(g, panelX + 17, panelY + 17, 34, 34, 0xFF29203C);
-        panel(g, panelX + 17, panelY + 17, 3, 34, ACCENT);
-        g.drawCenteredString(font, "S", panelX + 34, panelY + 27, TEXT);
-        g.drawString(font, "SWIFT", panelX + 60, panelY + 18, TEXT, true);
-        g.drawString(font, "VISUAL CLIENT", panelX + 60, panelY + 31, MUTED, false);
-        g.drawString(font, "NEON GLASS  /  1.21.11", panelX + panelW - pad() - font.width("NEON GLASS  /  1.21.11"), panelY + 28, 0xFF777187, false);
-
-        // Sidebar navigation on wide screens; compact navigation on phones.
-        if (sideW > 0) {
-            panel(g, panelX, panelY + 62, sideW, panelH - 62, 0xFF0C0D15);
-            panel(g, panelX + sideW - 1, panelY + 62, 1, panelH - 62, 0xFF292536);
-            g.drawString(font, "WORKSPACE", panelX + 17, panelY + 82, 0xFF716A80, true);
-            String[] names = {"VISUALS", "HUD", "PVP"};
-            for (int i = 0; i < names.length; i++) {
-                int y = panelY + 105 + i * 43;
-                boolean active = category.ordinal() == i;
-                if (active) {
-                    panel(g, panelX + 10, y, sideW - 20, 34, 0xFF29213A);
-                    panel(g, panelX + 10, y, 3, 34, ACCENT);
+            if (client.options != null) {
+                if (VoidModules.isEnabled("No View Bobbing")) {
+                    if (previousBobView == null) previousBobView = client.options.bobView().get();
+                    client.options.bobView().set(false);
+                } else if (previousBobView != null) {
+                    client.options.bobView().set(previousBobView);
+                    previousBobView = null;
                 }
-                g.drawString(font, names[i], panelX + 25, y + 13, active ? TEXT : MUTED, active);
-                g.drawString(font, String.format("%02d", countFor(i)), panelX + sideW - 34, y + 13, active ? ACCENT : 0xFF625C70, false);
-            }
-            panel(g, panelX + 16, panelY + panelH - 68, sideW - 32, 1, 0xFF292536);
-            g.drawString(font, "RIGHT SHIFT", panelX + 17, panelY + panelH - 53, 0xFFB7AEC8, true);
-            g.drawString(font, "TOGGLE MENU", panelX + 17, panelY + panelH - 39, 0xFF716A80, false);
-        } else {
-            String[] names = {"VISUALS", "HUD", "PVP"};
-            int tabW = (contentW - pad() * 2 - 12) / 3;
-            for (int i = 0; i < names.length; i++) {
-                int x = panelX + pad() + i * (tabW + 6);
-                boolean active = category.ordinal() == i;
-                panel(g, x, panelY + 67, tabW, 30, active ? 0xFF302441 : 0xFF191A26);
-                if (active) panel(g, x, panelY + 94, tabW, 2, ACCENT);
-                g.drawCenteredString(font, names[i], x + tabW / 2, panelY + 78, active ? TEXT : MUTED);
-            }
-        }
-
-        // Main content heading
-        int left = contentX + pad();
-        int headingY = sideW == 0 ? panelY + 111 : panelY + 82;
-        g.drawString(font, categoryTitle(), left, headingY, TEXT, true);
-        g.drawString(font, categoryHint(), left, headingY + 14, MUTED, false);
-        String count = visible.size() + " OPTIONS";
-        g.drawString(font, count, contentX + contentW - pad() - font.width(count), headingY + 3, ACCENT, true);
-
-        // Module cards
-        int cw = cardWidth();
-        int rows = visibleRows();
-        for (int row = 0; row < rows; row++) {
-            for (int col = 0; col < columns; col++) {
-                int index = (scroll + row) * columns + col;
-                if (index >= visible.size()) continue;
-                String name = visible.get(index);
-                boolean enabled = VoidModules.isEnabled(name);
-                int x = contentX + pad() + col * (cw + 12);
-                int y = listY + row * (cardH + rowGap);
-                boolean hover = mx >= x && mx <= x + cw && my >= y && my <= y + cardH;
-                panel(g, x, y, cw, cardH, hover ? 0xFF242337 : 0xFF191A27);
-                panel(g, x, y, cw, 1, enabled ? 0xFF7753A8 : 0xFF343143);
-                panel(g, x, y + 1, 3, cardH - 2, enabled ? ACCENT : 0xFF444052);
-                g.drawString(font, name, x + 13, y + 12, TEXT, enabled);
-                g.drawString(font, description(name), x + 13, y + 28, 0xFF8D879E, false);
-
-                int sw = 35, sh = 19;
-                int sx = x + cw - sw - 12, sy = y + (cardH - sh) / 2;
-                panel(g, sx, sy, sw, sh, enabled ? 0xFF8051C8 : 0xFF353543);
-                int knobX = enabled ? sx + 19 : sx + 3;
-                panel(g, knobX, sy + 3, 13, 13, enabled ? 0xFFFFFFFF : 0xFF898696);
-                if (enabled) panel(g, sx + 2, sy + 2, 2, sh - 4, 0xFFB995F2);
-            }
-        }
-
-        int totalRows = (visible.size() + columns - 1) / columns;
-        if (totalRows > rows) {
-            int trackX = contentX + contentW - 5;
-            int trackY = listY;
-            int trackH = rows * (cardH + rowGap) - rowGap;
-            panel(g, trackX, trackY, 2, trackH, 0xFF292737);
-            int thumbH = Math.max(20, trackH * rows / totalRows);
-            int thumbY = trackY + (trackH - thumbH) * scroll / (totalRows - rows);
-            panel(g, trackX, thumbY, 2, thumbH, ACCENT);
-        }
-
-        // Footer
-        panel(g, contentX + pad(), panelY + panelH - 37, contentW - pad() * 2, 1, 0xFF292536);
-        g.drawString(font, "SWIFT VISUALS", contentX + pad(), panelY + panelH - 24, 0xFF777187, false);
-        String status = enabledCount() + " ENABLED";
-        g.drawString(font, status, contentX + contentW - pad() - font.width(status), panelY + panelH - 24, 0xFFB99AEF, true);
-        super.render(g, mx, my, partialTick);
-    }
-
-    private int countFor(int categoryIndex) {
-        int count = 0;
-        for (String name : VoidModules.all().keySet())
-            if (VoidModules.categoryOf(name).ordinal() == categoryIndex) count++;
-        return count;
-    }
-
-    private int enabledCount() {
-        int count = 0;
-        for (boolean enabled : VoidModules.all().values()) if (enabled) count++;
-        return count;
-    }
-
-    @Override
-    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
-        if (click.button() != 0) return super.mouseClicked(click, doubled);
-        double mx = click.x(), my = click.y();
-
-        if (sideW > 0) {
-            for (int i = 0; i < 3; i++) {
-                int y = panelY + 105 + i * 43;
-                if (mx >= panelX + 10 && mx <= panelX + sideW - 10 && my >= y && my <= y + 34) {
-                    category = VoidModules.Category.values()[i];
-                    scroll = 0;
-                    rebuild();
-                    return true;
+                if (VoidModules.isEnabled("Fullbright")) {
+                    if (previousGamma == null) previousGamma = client.options.gamma().get();
+                    client.options.gamma().set(16.0);
+                } else if (previousGamma != null) {
+                    client.options.gamma().set(previousGamma);
+                    previousGamma = null;
                 }
             }
-        } else {
-            int tabW = (contentW - pad() * 2 - 12) / 3;
-            for (int i = 0; i < 3; i++) {
-                int x = panelX + pad() + i * (tabW + 6);
-                if (mx >= x && mx <= x + tabW && my >= panelY + 67 && my <= panelY + 97) {
-                    category = VoidModules.Category.values()[i];
-                    scroll = 0;
-                    rebuild();
-                    return true;
+
+            if (client.player != null && VoidModules.isEnabled("Auto Sprint")) {
+                boolean movingForward = client.options.keyUp.isDown();
+                if (movingForward && !client.player.isCrouching()
+                    && client.player.getFoodData().getFoodLevel() > 6) {
+                    client.player.setSprinting(true);
                 }
             }
-        }
+        });
 
-        int cw = cardWidth();
-        for (int row = 0; row < visibleRows(); row++) {
-            for (int col = 0; col < columns; col++) {
-                int index = (scroll + row) * columns + col;
-                if (index >= visible.size()) continue;
-                int x = contentX + pad() + col * (cw + 12);
-                int y = listY + row * (cardH + rowGap);
-                if (mx >= x && mx <= x + cw && my >= y && my <= y + cardH) {
-                    VoidModules.toggle(visible.get(index));
-                    return true;
-                }
+        HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("swiftvisuals", "info_hud"), (graphics, tickCounter) -> {
+            Minecraft client = Minecraft.getInstance();
+            if (client.player == null) return;
+
+            int x = 8, y = 8;
+            int accent = 0xFFAA78FF;
+            if (VoidModules.isEnabled("FPS Counter"))
+                y = drawCard(graphics, client, "FPS", Integer.toString(client.getFps()), x, y, accent);
+
+            if (VoidModules.isEnabled("Coordinates")) {
+                var pos = client.player.blockPosition();
+                y = drawCard(graphics, client, "XYZ", pos.getX() + "  " + pos.getY() + "  " + pos.getZ(), x, y, 0xFFFFFFFF);
+            }
+
+            if (VoidModules.isEnabled("Keystrokes")) {
+                String keys = (client.options.keyUp.isDown() ? "[W]" : " W ")
+                    + (client.options.keyLeft.isDown() ? "[A]" : " A ")
+                    + (client.options.keyDown.isDown() ? "[S]" : " S ")
+                    + (client.options.keyRight.isDown() ? "[D]" : " D ")
+                    + (client.options.keyJump.isDown() ? "[SPACE]" : " SPACE ");
+                y = drawCard(graphics, client, "KEYS", keys, x, y, accent);
+            }
+            if (VoidModules.isEnabled("Sprint Status"))
+                y = drawCard(graphics, client, "SPRINT", client.player.isSprinting() ? "ON" : "OFF", x, y, 0xFF72E0A1);
+
+            if (VoidModules.isEnabled("Direction HUD")) {
+                String[] directions = {"S", "SW", "W", "NW", "N", "NE", "E", "SE"};
+                int index = Math.floorMod(Math.round(client.player.getYRot() / 45.0F), 8);
+                y = drawCard(graphics, client, "FACING", directions[index], x, y, 0xFFFFFFFF);
+            }
+            if (VoidModules.isEnabled("Health HUD")) {
+                int hp = Math.round(client.player.getHealth());
+                y = drawCard(graphics, client, "HEALTH", hp + "/" + Math.round(client.player.getMaxHealth()), x, y,
+                    hp <= 6 ? 0xFFFF6666 : 0xFF75D99A);
+            }
+            if (VoidModules.isEnabled("Low Health Alert") && client.player.getHealth() <= 6.0F) {
+                graphics.fill(0, 0, client.getWindow().getGuiScaledWidth(), 3, 0xFFFF4545);
+                graphics.drawCenteredString(client.font, "LOW HEALTH", client.getWindow().getGuiScaledWidth() / 2, 12, 0xFFFF7777);
+            }
+            if (VoidModules.isEnabled("Hunger HUD"))
+                y = drawCard(graphics, client, "FOOD", client.player.getFoodData().getFoodLevel() + "/20", x, y, 0xFFFFC66D);
+            if (VoidModules.isEnabled("Armor HUD"))
+                y = drawCard(graphics, client, "ARMOR", client.player.getArmorValue() + "/20", x, y, 0xFF9BCBFF);
+
+            if (VoidModules.isEnabled("Ping HUD") && client.getConnection() != null) {
+                var info = client.getConnection().getPlayerInfo(client.player.getUUID());
+                if (info != null) y = drawCard(graphics, client, "PING", info.getLatency() + " ms", x, y, accent);
+            }
+            if (VoidModules.isEnabled("Biome HUD") && client.level != null) {
+                String biome = client.level.getBiome(client.player.blockPosition()).unwrapKey()
+                    .map(Object::toString).orElse("unknown");
+                y = drawCard(graphics, client, "BIOME", biome, x, y, 0xFF9FE0B0);
+            }
+            if (VoidModules.isEnabled("Attack Cooldown")) {
+                int percent = Math.round(client.player.getAttackStrengthScale(0.0F) * 100.0F);
+                y = drawBarCard(graphics, client, "ATTACK READY", percent, x, y, accent);
+            }
+            if (VoidModules.isEnabled("Item Durability HUD")) {
+                var item = client.player.getMainHandItem();
+                String value = item.isDamageableItem()
+                    ? (item.getMaxDamage() - item.getDamageValue()) + "/" + item.getMaxDamage() : "—";
+                y = drawCard(graphics, client, "DURABILITY", value, x, y,
+                    item.isDamageableItem() && item.getMaxDamage() - item.getDamageValue() < 20 ? 0xFFFF6666 : 0xFFFFFFFF);
+            }
+
+
+            if (VoidModules.isEnabled("Inventory HUD")) drawInventoryHud(graphics, client);\n\n            if (VoidModules.isEnabled("Crosshair Dot")) {
+                int cx = client.getWindow().getGuiScaledWidth() / 2;
+                int cy = client.getWindow().getGuiScaledHeight() / 2;
+                graphics.fill(cx - 1, cy - 1, cx + 2, cy + 2, 0xFFB98AFF);
+            }
+        });
+    }
+
+
+    private static void drawInventoryHud(net.minecraft.client.gui.GuiGraphics g, Minecraft client) {
+        int slot = 20;
+        int gap = 3;
+        int count = 9;
+        int totalW = count * slot + (count - 1) * gap + 12;
+        int x = (client.getWindow().getGuiScaledWidth() - totalW) / 2;
+        int y = client.getWindow().getGuiScaledHeight() - 58;
+        g.fill(x, y, x + totalW, y + slot + 12, 0xD910121E);
+        g.fill(x, y, x + totalW, y + 1, 0xFFAA78FF);
+        for (int i = 0; i < 9; i++) {
+            int sx = x + 6 + i * (slot + gap);
+            int sy = y + 6;
+            g.fill(sx, sy, sx + slot, sy + slot, 0xFF292536);
+            var stack = client.player.getInventory().getItem(i);
+            if (!stack.isEmpty()) {
+                g.renderItem(stack, sx + 2, sy + 2);
+                g.renderItemDecorations(client.font, stack, sx + 2, sy + 2);
             }
         }
-        return super.mouseClicked(click, doubled);
     }
 
-    @Override
-    public boolean mouseScrolled(double mx, double my, double horizontal, double vertical) {
-        int totalRows = (visible.size() + columns - 1) / columns;
-        int max = Math.max(0, totalRows - visibleRows());
-        scroll = Math.max(0, Math.min(max, scroll - (int) Math.signum(vertical)));
-        return true;
+    private static int drawCard(net.minecraft.client.gui.GuiGraphics g, Minecraft client,
+                                String label, String value, int x, int y, int color) {
+        boolean compact = VoidModules.isEnabled("Compact HUD");
+        int maxWidth = Math.max(client.font.width(label), client.font.width(value));
+        int width = Math.min(210, maxWidth + 18);
+        int height = compact ? 19 : 27;
+        g.fill(x, y, x + width, y + height, 0xB910121E);
+        g.fill(x, y, x + 2, y + height, color);
+        if (compact) {
+            g.drawString(client.font, label + "  " + value, x + 8, y + 5, color, false);
+            return y + 22;
+        }
+        g.drawString(client.font, label, x + 8, y + 4, 0xFF9298AD, false);
+        g.drawString(client.font, value, x + 8, y + 15, color, true);
+        return y + 31;
     }
 
-    @Override
-    public boolean isPauseScreen() {
-        return false;
+    private static int drawBarCard(net.minecraft.client.gui.GuiGraphics g, Minecraft client,
+                                   String label, int percent, int x, int y, int color) {
+        g.fill(x, y, x + 210, y + 29, 0xB910121E);
+        g.fill(x, y, x + 2, y + 29, color);
+        g.drawString(client.font, label + "  " + percent + "%", x + 8, y + 4, 0xFFE7E8F0, true);
+        g.fill(x + 8, y + 19, x + 202, y + 24, 0xFF34384A);
+        int fill = Math.max(0, Math.min(194, percent * 194 / 100));
+        if (fill > 0) g.fill(x + 8, y + 19, x + 8 + fill, y + 24, color);
+        return y + 33;
     }
 }
