@@ -14,6 +14,7 @@ public final class VoidClickScreen extends Screen {
     private static final int MUTED = 0xFF8D8986;
     private int panelX, panelY, panelW, panelH, scroll, tick;
     private int sideW, contentX, contentW, listY, cardH, rowGap, columns;
+    private boolean settingsOpen, particlesEnabled = true, reducedMotion;
     private VoidModules.Category category = VoidModules.Category.VISUALS;
     private final List<String> visible = new ArrayList<>();
 
@@ -64,7 +65,7 @@ public final class VoidClickScreen extends Screen {
             int x = Math.floorMod((int) (i * 97 + Math.sin(tick * speed * 0.035 + phase) * 24), Math.max(1, width));
             int y = Math.floorMod((int) (i * 53 - tick * speed + Math.cos(phase) * 18), Math.max(1, height));
             if (x > panelX - 3 && x < panelX + panelW + 3 && y > panelY - 3 && y < panelY + panelH + 3) continue;
-            int color = (i % 4 == 0) ? 0x887F54B8 : 0x557D68A8;
+            int color = (i % 4 == 0) ? 0x88FF8733 : 0x55FF8733;
             int size = (i % 7 == 0) ? 3 : 2;
             g.fill(x, y, x + size, y + size, color);
         }
@@ -172,6 +173,32 @@ public final class VoidClickScreen extends Screen {
             g.drawString(font, amount, x + tabW - font.width(amount) - 8, y + 11, active ? ACCENT : 0xFF66615D, false);
         }
 
+
+        if (settingsOpen) {
+            int sx = panelX + pad();
+            int sy = panelY + 116;
+            g.drawString(font, "CLIENT SETTINGS", sx, sy, TEXT, true);
+            g.drawString(font, "Personalize the menu experience", sx, sy + 15, MUTED, false);
+            String[] labels = {"MENU PARTICLES", "REDUCED MOTION"};
+            String[] hints = {"Ambient orange particles around the panel", "Disable moving effects for a calmer menu"};
+            boolean[] values = {particlesEnabled, reducedMotion};
+            for (int i = 0; i < labels.length; i++) {
+                int y = sy + 42 + i * 62;
+                rounded(g, sx, y, contentW - pad() * 2, 52, 7, 0xFF1B1B1B);
+                panel(g, sx, y, 3, 52, values[i] ? ACCENT : 0xFF4B4038);
+                g.drawString(font, labels[i], sx + 13, y + 10, TEXT, true);
+                g.drawString(font, hints[i], sx + 13, y + 27, MUTED, false);
+                int tx = sx + contentW - pad() * 2 - 48;
+                rounded(g, tx, y + 16, 36, 20, 10, values[i] ? ACCENT : 0xFF414141);
+                rounded(g, tx + (values[i] ? 20 : 3), y + 19, 14, 14, 7, 0xFFF5F2EF);
+            }
+            g.drawString(font, "Tap a setting to switch it", sx, sy + 178, MUTED, false);
+            panel(g, sx, panelY + panelH - 37, contentW - pad() * 2, 1, 0xFF332A24);
+            g.drawString(font, "SWIFT VISUALS", sx, panelY + panelH - 24, MUTED, false);
+            g.drawString(font, "SETTINGS", sx + contentW - pad() * 2 - font.width("SETTINGS"), panelY + panelH - 24, ACCENT, true);
+            super.render(g, mx, my, partialTick);
+            return;
+        }
 
         // Main content heading
         int left = contentX + pad();
