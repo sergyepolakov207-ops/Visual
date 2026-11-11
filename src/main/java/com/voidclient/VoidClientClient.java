@@ -44,7 +44,7 @@ public final class VoidClientClient implements ClientModInitializer {
             }
 
             if (client.player != null && VoidModules.isEnabled("Auto Sprint")) {
-                boolean movingForward = client.player.input.forwardImpulse > 0.0F;
+                boolean movingForward = client.options.keyUp.isDown();
                 if (movingForward && !client.player.isCrouching() && client.player.getFoodData().getFoodLevel() > 6) {
                     client.player.setSprinting(true);
                 }
