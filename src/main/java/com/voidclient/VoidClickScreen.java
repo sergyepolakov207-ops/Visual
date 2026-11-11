@@ -65,7 +65,11 @@ public final class VoidClickScreen extends Screen {
         g.fill(0, 0, width, height, 0xC9000000);
         g.fill(panelX + 3, panelY + 4, panelX + panelW + 3, panelY + panelH + 4, 0x50000000);
         g.fill(panelX, panelY, panelX + panelW, panelY + panelH, 0xF20D0C14);
-        g.fill(panelX, panelY, panelX + panelW, panelY + 3, 0xFF9A65F5);
+        g.fill(panelX, panelY, panelX + panelW, panelY + 3, 0xFFB17CFF);
+        g.fill(panelX, panelY + 3, panelX + 1, panelY + panelH - 1, 0xFF51366F);
+        g.fill(panelX + panelW - 1, panelY + 3, panelX + panelW, panelY + panelH - 1, 0xFF51366F);
+        g.drawString(font, "SWIFT", panelX + sidePad(), panelY + 10, 0xFFF1E9FF, true);
+        g.drawString(font, "VISUAL CLIENT", panelX + sidePad() + 43, panelY + 10, 0xFF9E91B6, false);
 
         if (VoidModules.isEnabled("Menu Particles")) {
             int count = VoidModules.isEnabled("Reduced Effects") ? 7 : particleX.length;
@@ -82,8 +86,13 @@ public final class VoidClickScreen extends Screen {
         for (int i = 0; i < tabs.length; i++) {
             int x = panelX + sidePad() + i * (tabW + 10);
             boolean active = category.ordinal() == i;
-            g.drawString(font, tabs[i], x, tabY + 5, active ? 0xFFE7D9FF : 0xFF777487, active);
-            if (active) g.fill(x, tabY + 24, x + font.width(tabs[i]), tabY + 27, 0xFF9C70F5);
+            int tabWidth = Math.min(tabW, font.width(tabs[i]) + 22);
+            g.fill(x - 6, tabY, x + tabWidth, tabY + 23, active ? 0xFF38264F : 0xFF191620);
+            if (active) {
+                g.fill(x - 6, tabY + 21, x + tabWidth, tabY + 23, 0xFFB17CFF);
+                g.fill(x - 6, tabY, x - 4, tabY + 23, 0xFFB17CFF);
+            }
+            g.drawString(font, tabs[i], x + 4, tabY + 8, active ? 0xFFF1E8FF : 0xFF8D879C, active);
         }
 
         int searchW = Math.min(210, Math.max(76, panelW / 3));
@@ -104,9 +113,10 @@ public final class VoidClickScreen extends Screen {
                 int x = panelX + sidePad() + col * (cw + gap());
                 int y = firstY + row * ROW_H, h = ROW_H - 5;
                 boolean hover = mx >= x && mx <= x + cw && my >= y && my <= y + h;
-                g.fill(x, y, x + cw, y + h, hover ? 0xFF211A2D : 0xFF15131D);
-                g.fill(x, y, x + cw, y + 1, 0xFF292633);
-                g.fill(x, y + h - 1, x + cw, y + h, 0xFF24212D);
+                g.fill(x, y, x + cw, y + h, hover ? 0xFF241B32 : 0xFF17151F);
+                g.fill(x, y, x + cw, y + 1, hover ? 0xFF986BD2 : 0xFF352B42);
+                g.fill(x, y + h - 1, x + cw, y + h, 0xFF292332);
+                g.fill(x, y + 5, x + 2, y + h - 5, enabled ? 0xFFB17CFF : 0xFF514A5B);
                 g.drawString(font, name, x + 13, y + (h - 8) / 2, 0xFFE0DDE8, false);
 
                 int sw = 34, sh = 18, sx = x + cw - sw - 13, sy = y + (h - sh) / 2;
