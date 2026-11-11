@@ -4,30 +4,34 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class VoidModules {
-    private static final Map<String, Boolean> MODULES = new LinkedHashMap<>();
+    public enum Category { VISUALS, HUD, PVP }
 
+    private static final Map<String, Boolean> MODULES = new LinkedHashMap<>();
     static {
-        MODULES.put("FPS Boost", false);
         MODULES.put("Fullbright", false);
-        MODULES.put("Particle Reducer", false);
-        MODULES.put("Coordinates HUD", false);
+        MODULES.put("Low Particles", false);
+        MODULES.put("FPS Counter", true);
+        MODULES.put("Coordinates", true);
+        MODULES.put("Clock", false);
+        MODULES.put("Armor HUD", false);
+        MODULES.put("Target HUD", false);
         MODULES.put("Custom Crosshair", false);
-        MODULES.put("Entity ESP", false);
+        MODULES.put("Auto Sprint", false);
     }
 
     private VoidModules() {}
 
-    public static Map<String, Boolean> all() {
-        return MODULES;
-    }
-
-    public static boolean isEnabled(String name) {
-        return MODULES.getOrDefault(name, false);
-    }
-
+    public static Map<String, Boolean> all() { return MODULES; }
+    public static boolean isEnabled(String name) { return MODULES.getOrDefault(name, false); }
     public static void toggle(String name) {
-        if (MODULES.containsKey(name)) {
-            MODULES.put(name, !MODULES.get(name));
-        }
+        if (MODULES.containsKey(name)) MODULES.put(name, !MODULES.get(name));
+    }
+
+    public static Category categoryOf(String name) {
+        return switch (name) {
+            case "FPS Counter", "Coordinates", "Clock", "Armor HUD", "Target HUD" -> Category.HUD;
+            case "Auto Sprint" -> Category.PVP;
+            default -> Category.VISUALS;
+        };
     }
 }
