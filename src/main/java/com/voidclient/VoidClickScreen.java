@@ -56,6 +56,20 @@ public final class VoidClickScreen extends Screen {
         tick++;
     }
 
+    private void drawParticles(GuiGraphics g) {
+        // Subtle ambient particles behind the window; deterministic and allocation-free.
+        for (int i = 0; i < 30; i++) {
+            double phase = i * 2.399963229728653;
+            double speed = 0.22 + (i % 5) * 0.055;
+            int x = Math.floorMod((int) (i * 97 + Math.sin(tick * speed * 0.035 + phase) * 24), Math.max(1, width));
+            int y = Math.floorMod((int) (i * 53 - tick * speed + Math.cos(phase) * 18), Math.max(1, height));
+            if (x > panelX - 3 && x < panelX + panelW + 3 && y > panelY - 3 && y < panelY + panelH + 3) continue;
+            int color = (i % 4 == 0) ? 0x887F54B8 : 0x557D68A8;
+            int size = (i % 7 == 0) ? 3 : 2;
+            g.fill(x, y, x + size, y + size, color);
+        }
+    }
+
     private void panel(GuiGraphics g, int x, int y, int w, int h, int color) {
         g.fill(x, y, x + w, y + h, color);
     }
@@ -138,6 +152,9 @@ public final class VoidClickScreen extends Screen {
         g.drawCenteredString(font, "S", panelX + 34, panelY + 27, TEXT);
         g.drawString(font, "SWIFT", panelX + 60, panelY + 18, TEXT, false);
         g.drawString(font, "VISUAL CLIENT", panelX + 60, panelY + 31, MUTED, false);
+        String live = "● CLIENT READY";
+        int liveX = panelX + panelW - pad() - font.width("NEON GLASS  /  1.21.11") - font.width(live) - 18;
+        g.drawString(font, live, liveX, panelY + 28, 0xFFB99AEF, false);
         g.drawString(font, "NEON GLASS  /  1.21.11", panelX + panelW - pad() - font.width("NEON GLASS  /  1.21.11"), panelY + 28, 0xFF777187, false);
 
         // Sidebar navigation on wide screens; compact navigation on phones.
