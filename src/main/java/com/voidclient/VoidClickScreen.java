@@ -60,6 +60,21 @@ public final class VoidClickScreen extends Screen {
         g.fill(x, y, x + w, y + h, color);
     }
 
+    private void rounded(GuiGraphics g, int x, int y, int w, int h, int radius, int color) {
+        int r = Math.max(1, Math.min(radius, Math.min(w, h) / 2));
+        for (int row = 0; row < h; row++) {
+            int inset = 0;
+            if (row < r) {
+                double dy = r - row - 0.5;
+                inset = Math.max(0, r - (int) Math.sqrt(r * r - dy * dy));
+            } else if (row >= h - r) {
+                double dy = row - (h - r) + 0.5;
+                inset = Math.max(0, r - (int) Math.sqrt(r * r - dy * dy));
+            }
+            g.fill(x + inset, y + row, x + w - inset, y + row + 1, color);
+        }
+    }
+
     private String categoryTitle() {
         return switch (category) {
             case VISUALS -> "VISUAL MODULES";
@@ -184,10 +199,9 @@ public final class VoidClickScreen extends Screen {
 
                 int sw = 35, sh = 19;
                 int sx = x + cw - sw - 12, sy = y + (cardH - sh) / 2;
-                panel(g, sx, sy, sw, sh, enabled ? 0xFF8051C8 : 0xFF353543);
+                rounded(g, sx, sy, sw, sh, 9, enabled ? 0xFF8051C8 : 0xFF353543);
                 int knobX = enabled ? sx + 19 : sx + 3;
-                panel(g, knobX, sy + 3, 13, 13, enabled ? 0xFFFFFFFF : 0xFF898696);
-                if (enabled) panel(g, sx + 2, sy + 2, 2, sh - 4, 0xFFB995F2);
+                rounded(g, knobX, sy + 3, 13, 13, 7, enabled ? 0xFFFFFFFF : 0xFF898696);
             }
         }
 
