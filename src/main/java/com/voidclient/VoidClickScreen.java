@@ -62,7 +62,7 @@ public final class VoidClickScreen extends Screen {
     }
 
     @Override public void render(GuiGraphics g, int mx, int my, float partialTick) {
-        g.fill(0, 0, width, height, 0xC9000000);
+        g.fill(0, 0, width, height, 0xFF08070D);
         g.fill(panelX + 3, panelY + 4, panelX + panelW + 3, panelY + panelH + 4, 0x50000000);
         g.fill(panelX, panelY, panelX + panelW, panelY + panelH, 0xF20D0C14);
         g.fill(panelX, panelY, panelX + panelW, panelY + 3, 0xFFB17CFF);
