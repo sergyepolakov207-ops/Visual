@@ -10,6 +10,7 @@ public final class VoidModules {
         MODULES.put("Fullbright", false);
         MODULES.put("No View Bobbing", false);
         MODULES.put("Crosshair Dot", false);
+        MODULES.put("Menu Particles", true);
         MODULES.put("FPS Counter", true);
         MODULES.put("Coordinates", true);
         MODULES.put("Clock", false);
@@ -26,9 +27,11 @@ public final class VoidModules {
         MODULES.put("Offhand Item HUD", false);
         MODULES.put("Movement Speed HUD", false);
         MODULES.put("World Time HUD", false);
+        MODULES.put("Compact HUD", false);
         MODULES.put("Auto Sprint", false);
         MODULES.put("Attack Cooldown", false);
         MODULES.put("Low Health Alert", false);
+        MODULES.put("Reduced Effects", false);
     }
     private VoidModules() {}
     public static Map<String, Boolean> all() { return MODULES; }
@@ -41,8 +44,8 @@ public final class VoidModules {
             case "FPS Counter", "Coordinates", "Clock", "Keystrokes", "Sprint Status",
                  "Direction HUD", "Health HUD", "Hunger HUD", "Armor HUD", "Ping HUD", "Biome HUD",
                  "Item Durability HUD", "Selected Item HUD", "Offhand Item HUD", "Movement Speed HUD",
-                 "World Time HUD" -> Category.HUD;
-            case "Auto Sprint", "Attack Cooldown", "Low Health Alert" -> Category.PVP;
+                 "World Time HUD", "Compact HUD" -> Category.HUD;
+            case "Auto Sprint", "Attack Cooldown", "Low Health Alert", "Reduced Effects" -> Category.PVP;
             default -> Category.VISUALS;
         };
     }
