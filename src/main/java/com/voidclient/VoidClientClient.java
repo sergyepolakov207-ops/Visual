@@ -151,10 +151,16 @@ public final class VoidClientClient implements ClientModInitializer {
 
     private static int drawCard(net.minecraft.client.gui.GuiGraphics g, Minecraft client,
                                 String label, String value, int x, int y, int color) {
+        boolean compact = VoidModules.isEnabled("Compact HUD");
         int maxWidth = Math.max(client.font.width(label), client.font.width(value));
         int width = Math.min(210, maxWidth + 18);
-        g.fill(x, y, x + width, y + 27, 0xB910121E);
-        g.fill(x, y, x + 2, y + 27, color);
+        int height = compact ? 19 : 27;
+        g.fill(x, y, x + width, y + height, 0xB910121E);
+        g.fill(x, y, x + 2, y + height, color);
+        if (compact) {
+            g.drawString(client.font, label + "  " + value, x + 8, y + 5, color, false);
+            return y + 22;
+        }
         g.drawString(client.font, label, x + 8, y + 4, 0xFF9298AD, false);
         g.drawString(client.font, value, x + 8, y + 15, color, true);
         return y + 31;
