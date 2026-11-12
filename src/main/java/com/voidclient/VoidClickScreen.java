@@ -10,13 +10,13 @@ import java.util.List;
 
 public final class VoidClickScreen extends Screen {
     private static final int BACKDROP = 0x99000000;
-    private static final int WINDOW = 0xFF202020;
-    private static final int ROW = 0xFF303030;
-    private static final int ROW_HOVER = 0xFF383838;
+    private static final int WINDOW = 0xF0181722;
+    private static final int ROW = 0xE91A1A27;
+    private static final int ROW_HOVER = 0xF1262638;
     private static final int TEXT = 0xFFF1F1F1;
-    private static final int MUTED = 0xFFB7B7B7;
-    private static final int BLUE = 0xFF579BFF;
-    private static final int SWITCH_OFF = 0xFF555555;
+    private static final int MUTED = 0xFF85839B;
+    private static final int BLUE = 0xFF3978FF;
+    private static final int SWITCH_OFF = 0xFF39394B;
 
     private int panelX, panelY, panelW, panelH;
     private int columns, cardW, rowH, gap, listY, listBottom, scroll;
@@ -35,10 +35,10 @@ public final class VoidClickScreen extends Screen {
         panelY = (height - panelH) / 2;
         columns = panelW >= 500 ? 2 : 1;
         gap = 9;
-        rowH = 31;
+        rowH = 36;
         cardW = (panelW - 40 - (columns - 1) * gap) / columns;
-        listY = panelY + 68;
-        listBottom = panelY + panelH - 18;
+        listY = panelY + 104;
+        listBottom = panelY + panelH - 54;
         rebuild();
     }
 
@@ -84,21 +84,27 @@ public final class VoidClickScreen extends Screen {
         g.fill(0, 0, width, height, BACKDROP);
         rounded(g, panelX, panelY, panelW, panelH, 9, WINDOW);
 
-        // Pulse-inspired compact top bar: close indicator and three category tabs.
-        rounded(g, panelX + 15, panelY + 14, 10, 10, 5, 0xFFE65F5F);
-        String[] tabs = tabLabels();
-        int tabW = panelW >= 500 ? 78 : 68;
-        for (int i = 0; i < tabs.length; i++) {
-            int x = tabStart() + i * (tabW + 7);
-            boolean active = category.ordinal() == i;
-            rounded(g, x, panelY + 9, tabW, 27, 6, active ? 0xFF454545 : 0xFF2A2A2A);
-            g.drawCenteredString(font, tabs[i], x + tabW / 2, panelY + 18, active ? TEXT : MUTED);
-        }
+        String brand = "SWIFT VISUALS";
+        g.drawCenteredString(font, brand, panelX + panelW / 2, panelY + 15, TEXT);
+        g.drawString(font, "X", panelX + panelW - 25, panelY + 15, MUTED, true);
 
-        String heading = tabs[category.ordinal()];
-        g.drawString(font, heading, panelX + 20, panelY + 49, TEXT, true);
-        String count = visible.size() + " MODULES";
-        g.drawString(font, count, panelX + panelW - 20 - font.width(count), panelY + 49, MUTED, false);
+        String[] tabs = tabLabels();
+        int tabX = panelX + 18;
+        int tabY = panelY + 49;
+        int tabW = 57;
+        for (int i = 0; i < tabs.length; i++) {
+            int x = tabX + i * (tabW + 12);
+            boolean active = category.ordinal() == i;
+            g.drawString(font, tabs[i], x, tabY, active ? TEXT : MUTED, active);
+            if (active) g.fill(x, tabY + 17, x + font.width(tabs[i]), tabY + 19, BLUE);
+            if (i < 2) g.drawString(font, "/", x + tabW + 2, tabY, 0xFF555367, false);
+        }
+        int searchW = Math.min(150, panelW / 3);
+        int searchX = panelX + panelW - searchW - 48;
+        rounded(g, searchX, panelY + 42, searchW, 25, 12, 0xCC11111B);
+        g.drawString(font, "⌕  Поиск", searchX + 10, panelY + 50, MUTED, false);
+        g.drawString(font, "⚙", panelX + panelW - 29, panelY + 49, MUTED, false);
+        g.fill(panelX + 14, panelY + 78, panelX + panelW - 14, panelY + 79, 0x553F3D55);
 
         int cw = cardW;
         for (int row = 0; row < rowsVisible(); row++) {
@@ -119,6 +125,17 @@ public final class VoidClickScreen extends Screen {
                 rounded(g, sx, sy, sw, sh, 8, enabled ? BLUE : SWITCH_OFF);
                 rounded(g, enabled ? sx + 14 : sx + 2, sy + 2, 11, 11, 6, 0xFFF7F7F7);
             }
+        }
+
+        int navW = 156;
+        int navX = panelX + (panelW - navW) / 2;
+        int navY = panelY + panelH - 39;
+        rounded(g, navX, navY, navW, 30, 9, 0xCC11111B);
+        String[] navIcons = {"⬡", "◇", "♟", "▣", "▤"};
+        for (int i = 0; i < navIcons.length; i++) {
+            int nx = navX + 5 + i * 30;
+            if (i == 0) rounded(g, nx, navY + 3, 25, 24, 6, BLUE);
+            g.drawCenteredString(font, navIcons[i], nx + 12, navY + 10, i == 0 ? TEXT : MUTED);
         }
 
         int totalRows = (visible.size() + columns - 1) / columns;
