@@ -9,17 +9,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class VoidClickScreen extends Screen {
-    private static final int BACKDROP = 0x99000000;
-    private static final int WINDOW = 0xF0181722;
-    private static final int ROW = 0xE91A1A27;
-    private static final int ROW_HOVER = 0xF1262638;
-    private static final int TEXT = 0xFFF1F1F1;
-    private static final int MUTED = 0xFF85839B;
+    private static final int OVERLAY = 0x78050916;
+    private static final int WINDOW = 0xE9161724;
+    private static final int WINDOW_EDGE = 0xAA343A59;
+    private static final int ROW = 0xB91B1D2B;
+    private static final int ROW_HOVER = 0xE1262A3D;
+    private static final int TEXT = 0xFFF2F3FA;
+    private static final int MUTED = 0xFF858BA5;
     private static final int BLUE = 0xFF3978FF;
-    private static final int SWITCH_OFF = 0xFF39394B;
+    private static final int SWITCH_OFF = 0xFF373B4D;
 
     private int panelX, panelY, panelW, panelH;
     private int columns, cardW, rowH, gap, listY, listBottom, scroll;
+    private int tabY, tabStartX, tabStep, searchX, searchY, searchW;
     private VoidModules.Category category = VoidModules.Category.VISUALS;
     private final List<String> visible = new ArrayList<>();
 
@@ -29,16 +31,22 @@ public final class VoidClickScreen extends Screen {
 
     @Override
     protected void init() {
-        panelW = Math.min(760, Math.max(290, width - 32));
-        panelH = Math.min(470, Math.max(230, height - 28));
+        panelW = Math.min(1200, Math.max(280, width - 40));
+        panelH = Math.min(520, Math.max(240, height - 32));
         panelX = (width - panelW) / 2;
         panelY = (height - panelH) / 2;
-        columns = panelW >= 500 ? 2 : 1;
-        gap = 9;
-        rowH = 36;
-        cardW = (panelW - 40 - (columns - 1) * gap) / columns;
-        listY = panelY + 104;
-        listBottom = panelY + panelH - 54;
+        columns = panelW >= 520 ? 2 : 1;
+        gap = 10;
+        rowH = Math.max(34, Math.min(44, panelH / 11));
+        cardW = (panelW - 44 - (columns - 1) * gap) / columns;
+        tabY = panelY + 57;
+        tabStartX = panelX + 20;
+        tabStep = 82;
+        searchW = Math.min(190, Math.max(90, panelW / 4));
+        searchX = panelX + panelW - searchW - 54;
+        searchY = panelY + 48;
+        listY = panelY + 105;
+        listBottom = panelY + panelH - 57;
         rebuild();
     }
 
@@ -71,81 +79,77 @@ public final class VoidClickScreen extends Screen {
     }
 
     private String[] tabLabels() {
-        return new String[] {"VISUALS", "HUD", "UTILITIES"};
-    }
-
-    private int tabStart() {
-        int tabW = panelW >= 500 ? 78 : 68;
-        return panelX + panelW - 14 - tabW * 3 - 7 * 2;
+        return new String[] {"VISUALS", "HUD", "PVP"};
     }
 
     @Override
     public void render(GuiGraphics g, int mx, int my, float partialTick) {
-        g.fill(0, 0, width, height, BACKDROP);
-        rounded(g, panelX, panelY, panelW, panelH, 9, WINDOW);
+        // Keep the world visible behind the translucent client panel.
+        g.fill(0, 0, width, height, OVERLAY);
+        rounded(g, panelX, panelY, panelW, panelH, 14, WINDOW);
+        g.fill(panelX + 1, panelY + 1, panelX + panelW - 1, panelY + 2, WINDOW_EDGE);
 
-        String brand = "SWIFT VISUALS";
-        g.drawCenteredString(font, brand, panelX + panelW / 2, panelY + 15, TEXT);
-        g.drawString(font, "X", panelX + panelW - 25, panelY + 15, MUTED, true);
+        // Centered client branding, without the Pulse logo.
+        g.drawCenteredString(font, "SWIFT VISUALS", panelX + panelW / 2, panelY + 17, TEXT);
+        g.drawString(font, "X", panelX + panelW - 25, panelY + 18, MUTED, true);
 
+        // Category navigation.
         String[] tabs = tabLabels();
-        int tabX = panelX + 18;
-        int tabY = panelY + 49;
-        int tabW = 57;
         for (int i = 0; i < tabs.length; i++) {
-            int x = tabX + i * (tabW + 12);
+            int x = tabStartX + i * tabStep;
             boolean active = category.ordinal() == i;
             g.drawString(font, tabs[i], x, tabY, active ? TEXT : MUTED, active);
-            if (active) g.fill(x, tabY + 17, x + font.width(tabs[i]), tabY + 19, BLUE);
-            if (i < 2) g.drawString(font, "/", x + tabW + 2, tabY, 0xFF555367, false);
+            if (active) rounded(g, x, tabY + 17, font.width(tabs[i]) + 5, 3, 2, BLUE);
+            if (i < tabs.length - 1) g.drawString(font, "/", x + 63, tabY, 0xFF555B72, false);
         }
-        int searchW = Math.min(150, panelW / 3);
-        int searchX = panelX + panelW - searchW - 48;
-        rounded(g, searchX, panelY + 42, searchW, 25, 12, 0xCC11111B);
-        g.drawString(font, "⌕  Поиск", searchX + 10, panelY + 50, MUTED, false);
-        g.drawString(font, "⚙", panelX + panelW - 29, panelY + 49, MUTED, false);
-        g.fill(panelX + 14, panelY + 78, panelX + panelW - 14, panelY + 79, 0x553F3D55);
 
-        int cw = cardW;
+        // Search-shaped field and settings glyph.
+        rounded(g, searchX, searchY, searchW, 27, 13, 0xA910111B);
+        g.drawString(font, "⌕  Поиск", searchX + 10, searchY + 9, MUTED, false);
+        g.drawString(font, "⚙", panelX + panelW - 31, searchY + 8, BLUE, false);
+        g.fill(panelX + 16, panelY + 87, panelX + panelW - 16, panelY + 88, 0x553F4665);
+
+        // Two-column module list. These toggles call the real module registry.
         for (int row = 0; row < rowsVisible(); row++) {
             for (int col = 0; col < columns; col++) {
                 int index = (scroll + row) * columns + col;
                 if (index >= visible.size()) continue;
                 String name = visible.get(index);
                 boolean enabled = VoidModules.isEnabled(name);
-                int x = panelX + 20 + col * (cw + gap);
+                int x = panelX + 20 + col * (cardW + gap);
                 int y = listY + row * (rowH + gap);
-                boolean hover = mx >= x && mx <= x + cw && my >= y && my <= y + rowH;
-                rounded(g, x, y, cw, rowH, 6, hover ? ROW_HOVER : ROW);
-                g.drawString(font, name, x + 11, y + 11, TEXT, false);
+                boolean hover = mx >= x && mx <= x + cardW && my >= y && my <= y + rowH;
+                rounded(g, x, y, cardW, rowH, 12, hover ? ROW_HOVER : ROW);
+                g.drawString(font, name, x + 14, y + (rowH - 8) / 2, TEXT, false);
 
-                int sw = 27, sh = 15;
-                int sx = x + cw - sw - 10;
+                int sw = 36, sh = 19;
+                int sx = x + cardW - sw - 13;
                 int sy = y + (rowH - sh) / 2;
-                rounded(g, sx, sy, sw, sh, 8, enabled ? BLUE : SWITCH_OFF);
-                rounded(g, enabled ? sx + 14 : sx + 2, sy + 2, 11, 11, 6, 0xFFF7F7F7);
+                rounded(g, sx, sy, sw, sh, 10, enabled ? BLUE : SWITCH_OFF);
+                rounded(g, enabled ? sx + 19 : sx + 3, sy + 3, 13, 13, 7, 0xFFF4F5FC);
             }
-        }
-
-        int navW = 156;
-        int navX = panelX + (panelW - navW) / 2;
-        int navY = panelY + panelH - 39;
-        rounded(g, navX, navY, navW, 30, 9, 0xCC11111B);
-        String[] navIcons = {"⬡", "◇", "♟", "▣", "▤"};
-        for (int i = 0; i < navIcons.length; i++) {
-            int nx = navX + 5 + i * 30;
-            if (i == 0) rounded(g, nx, navY + 3, 25, 24, 6, BLUE);
-            g.drawCenteredString(font, navIcons[i], nx + 12, navY + 10, i == 0 ? TEXT : MUTED);
         }
 
         int totalRows = (visible.size() + columns - 1) / columns;
         if (totalRows > rowsVisible()) {
-            int trackX = panelX + panelW - 6;
+            int trackX = panelX + panelW - 7;
             int trackH = listBottom - listY;
-            g.fill(trackX, listY, trackX + 2, listBottom, 0xFF383838);
-            int thumbH = Math.max(16, trackH * rowsVisible() / totalRows);
+            g.fill(trackX, listY, trackX + 2, listBottom, 0x553C4158);
+            int thumbH = Math.max(18, trackH * rowsVisible() / totalRows);
             int thumbY = listY + (trackH - thumbH) * scroll / (totalRows - rowsVisible());
             g.fill(trackX, thumbY, trackX + 2, thumbY + thumbH, BLUE);
+        }
+
+        // Bottom icon rail, kept subtle like the reference.
+        int navW = 174;
+        int navX = panelX + (panelW - navW) / 2;
+        int navY = panelY + panelH - 43;
+        rounded(g, navX, navY, navW, 34, 12, 0xB910111C);
+        String[] icons = {"G", "◇", "♟", "▣", "≡"};
+        for (int i = 0; i < icons.length; i++) {
+            int ix = navX + 7 + i * 32;
+            if (i == 0) rounded(g, ix, navY + 4, 27, 26, 8, BLUE);
+            g.drawCenteredString(font, icons[i], ix + 13, navY + 12, i == 0 ? TEXT : MUTED);
         }
         super.render(g, mx, my, partialTick);
     }
@@ -154,11 +158,19 @@ public final class VoidClickScreen extends Screen {
     public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
         if (click.button() != 0) return super.mouseClicked(click, doubled);
         double mx = click.x(), my = click.y();
+
+        // The X closes the screen.
+        if (mx >= panelX + panelW - 38 && mx <= panelX + panelW - 10
+                && my >= panelY + 8 && my <= panelY + 38) {
+            onClose();
+            return true;
+        }
+
         String[] tabs = tabLabels();
-        int tabW = panelW >= 500 ? 78 : 68;
         for (int i = 0; i < tabs.length; i++) {
-            int x = tabStart() + i * (tabW + 7);
-            if (mx >= x && mx <= x + tabW && my >= panelY + 9 && my <= panelY + 36) {
+            int x = tabStartX + i * tabStep;
+            int w = font.width(tabs[i]) + 8;
+            if (mx >= x - 3 && mx <= x + w && my >= tabY - 5 && my <= tabY + 22) {
                 category = VoidModules.Category.values()[i];
                 scroll = 0;
                 rebuild();
