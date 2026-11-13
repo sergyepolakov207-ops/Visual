@@ -61,7 +61,7 @@ public final class VoidClientClient implements ClientModInitializer {
 
         HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("swiftvisuals", "info_hud"), (graphics, tickCounter) -> {
             Minecraft client = Minecraft.getInstance();
-            if (client.player == null) return;
+            if (client.player == null || !VoidModules.isEnabled("HUD")) return;
 
             int x = 8, y = 8;
             int accent = 0xFFAA78FF;
