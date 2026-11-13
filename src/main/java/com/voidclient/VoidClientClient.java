@@ -63,6 +63,8 @@ public final class VoidClientClient implements ClientModInitializer {
             Minecraft client = Minecraft.getInstance();
             if (client.player == null || !VoidModules.isEnabled("HUD")) return;
 
+            graphics.pose().pushPose();
+            graphics.pose().scale(VoidModules.hudScale(), VoidModules.hudScale(), 1.0F);
             int x = 8, y = 8;
             int accent = 0xFFAA78FF;
             if (VoidModules.isEnabled("FPS Counter"))
@@ -184,6 +186,7 @@ public final class VoidClientClient implements ClientModInitializer {
                 int cy = client.getWindow().getGuiScaledHeight() / 2;
                 graphics.fill(cx - 1, cy - 1, cx + 2, cy + 2, 0xFFB98AFF);
             }
+            graphics.pose().popPose();
         });
     }
 
