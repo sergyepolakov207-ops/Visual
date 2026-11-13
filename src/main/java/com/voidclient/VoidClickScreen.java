@@ -26,7 +26,6 @@ public final class VoidClickScreen extends Screen {
     private int railW, contentX, contentW;
     private int listY, listBottom, cardW, rowH, gap, columns, scroll;
     private int searchX, searchY, searchW;
-    private boolean searchFocused;
     private String searchText = "";
     private boolean blurAvailable = true;
     private VoidModules.Category category = VoidModules.Category.VISUALS;
@@ -155,13 +154,7 @@ public final class VoidClickScreen extends Screen {
         g.fill(searchX + 1, searchY + 1, searchX + searchW - 1, searchY + 2,
             searchFocused ? ACCENT : 0xFF352A40);
         g.drawString(font, "⌕", searchX + 9, searchY + 8, ACCENT_BRIGHT, false);
-        String searchLabel = searchText.isEmpty() ? "Search modules..." : searchText;
-        g.drawString(font, searchLabel, searchX + 26, searchY + 9,
-            searchText.isEmpty() ? MUTED : TEXT, false);
-        if (searchFocused && (System.currentTimeMillis() / 500) % 2 == 0) {
-            int cursorX = searchX + 27 + font.width(searchText);
-            g.fill(cursorX, searchY + 7, cursorX + 1, searchY + 20, ACCENT_BRIGHT);
-        }
+        g.drawString(font, "Search modules", searchX + 26, searchY + 9, MUTED, false);
 
         // Two-column module cards; every switch reads and changes the real module state.
         for (int row = 0; row < rowsVisible(); row++) {
@@ -229,9 +222,6 @@ public final class VoidClickScreen extends Screen {
         }
 
         // Search focus.
-        searchFocused = mx >= searchX && mx <= searchX + searchW
-            && my >= searchY && my <= searchY + 27;
-        if (searchFocused) return true;
 
         // Tabs.
         String[] tabs = tabLabels();
@@ -261,34 +251,6 @@ public final class VoidClickScreen extends Screen {
             }
         }
         return super.mouseClicked(click, doubled);
-    }
-
-    @Override
-    public boolean charTyped(char character, int modifiers) {
-        if (searchFocused && !Character.isISOControl(character) && searchText.length() < 32) {
-            searchText += character;
-            scroll = 0;
-            rebuild();
-            return true;
-        }
-        return super.charTyped(character, modifiers);
-    }
-
-    @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (searchFocused) {
-            if (keyCode == 259 && !searchText.isEmpty()) {
-                searchText = searchText.substring(0, searchText.length() - 1);
-                scroll = 0;
-                rebuild();
-                return true;
-            }
-            if (keyCode == 256) {
-                searchFocused = false;
-                return true;
-            }
-        }
-        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
