@@ -13,13 +13,14 @@ import java.util.List;
 import java.util.Locale;
 
 public final class VoidClickScreen extends Screen {
-    private static final int TEXT = 0xFFF1F0F7;
-    private static final int MUTED = 0xFF9294A8;
-    private static final int ACCENT = 0xFFB47CFF;
-    private static final int ACCENT_DARK = 0xFF62458C;
+    private static final int WHITE = 0xFFF4F1FA;
+    private static final int MUTED = 0xFF9693A8;
+    private static final int PURPLE = 0xFFB88AFF;
+    private static final int PURPLE_DARK = 0xFF7654B5;
 
-    private int px, py, pw, ph, rail, cx, cw, gridY, gridBottom, cardW, cardH, gap, cols;
-    private int scroll, searchX, searchY, searchW;
+    private int px, py, pw, ph, rail, contentX, contentW;
+    private int searchX, searchY, searchW, gridY, gridBottom;
+    private int cardW, cardH, gap, columns, scroll;
     private boolean searchFocused, blurAvailable = true;
     private String search = "";
     private String selectedModule = "";
@@ -32,23 +33,22 @@ public final class VoidClickScreen extends Screen {
 
     @Override
     protected void init() {
-        pw = width >= 1000 ? Math.min(900, Math.max(620, (int)(width * 0.56)))
-                           : Math.max(280, (int)(width * 0.94));
-        ph = Math.max(220, Math.min(height - 24, (int)(height * 0.84)));
+        pw = Math.min(width - 28, Math.max(300, (int)(width * 0.84)));
+        ph = Math.min(height - 24, Math.max(230, (int)(height * 0.84)));
         px = (width - pw) / 2;
         py = (height - ph) / 2;
-        rail = width < 520 ? 40 : 54;
-        cx = px + rail + 12;
-        cw = pw - rail - 24;
-        gap = 8;
-        cols = cw >= 570 ? 3 : cw >= 360 ? 2 : 1;
-        cardW = (cw - gap * (cols - 1)) / cols;
-        cardH = width < 520 ? 37 : 43;
-        searchX = cx;
-        searchY = py + 104;
-        searchW = cw;
-        gridY = searchY + 36;
-        gridBottom = py + ph - 18;
+        rail = width < 520 ? 48 : 64;
+        contentX = px + rail + 18;
+        contentW = pw - rail - 36;
+        gap = 10;
+        columns = contentW >= 650 ? 3 : contentW >= 390 ? 2 : 1;
+        cardW = (contentW - gap * (columns - 1)) / columns;
+        cardH = width < 520 ? 40 : 48;
+        searchX = contentX;
+        searchY = py + 88;
+        searchW = contentW;
+        gridY = searchY + 43;
+        gridBottom = py + ph - 22;
         rebuild();
     }
 
@@ -66,15 +66,23 @@ public final class VoidClickScreen extends Screen {
                 modules.add(name);
             }
         }
-        int rows = (modules.size() + cols - 1) / cols;
+        int rows = (modules.size() + columns - 1) / columns;
         scroll = Math.max(0, Math.min(scroll, Math.max(0, rows - visibleRows())));
+        if (!modules.contains(selectedModule)) selectedModule = "";
     }
 
-    private void rounded(GuiGraphics g, int x, int y, int w, int h, int r, int color) {
-        if (w <= 0 || h <= 0) return;
-        g.fill(x + r, y, x + w - r, y + h, color);
-        g.fill(x, y + r, x + w, y + h - r, color);
-        g.fill(x + 1, y + 1, x + w - 1, y + h - 1, color);
+    private void panel(GuiGraphics g, int x, int y, int w, int h, int color) {
+        if (w < 4 || h < 4) return;
+        g.fill(x + 5, y, x + w - 5, y + h, color);
+        g.fill(x + 2, y + 3, x + w - 2, y + h - 3, color);
+        g.fill(x, y + 6, x + w, y + h - 6, color);
+    }
+
+    private void outline(GuiGraphics g, int x, int y, int w, int h, int color) {
+        g.fill(x + 6, y, x + w - 6, y + 1, color);
+        g.fill(x + 6, y + h - 1, x + w - 6, y + h, color);
+        g.fill(x, y + 6, x + 1, y + h - 6, color);
+        g.fill(x + w - 1, y + 6, x + w, y + h - 6, color);
     }
 
     private String categoryName() {
@@ -85,163 +93,193 @@ public final class VoidClickScreen extends Screen {
         };
     }
 
+    private String categoryDescription() {
+        return switch (category) {
+            case VISUALS -> "Visual effects and quality of life";
+            case HUD -> "Your interface, your layout";
+            case PVP -> "Combat information and movement";
+        };
+    }
+
     @Override
     public void render(GuiGraphics g, int mx, int my, float partialTick) {
         if (blurAvailable) {
             try { renderBlurredBackground(g); }
             catch (RuntimeException | LinkageError e) { blurAvailable = false; }
         }
-        g.fill(0, 0, width, height, 0x76000000);
+        g.fill(0, 0, width, height, 0x65060A16);
 
-        // Reference-inspired translucent glass panel and narrow icon rail.
-        rounded(g, px, py, pw, ph, 13, 0xA9151411);
-        g.fill(px + 2, py + 2, px + pw - 2, py + 3, 0x66FFFFFF);
-        g.fill(px + 1, py + 1, px + rail, py + ph - 1, 0x881A1915);
-        g.fill(px + rail, py + 1, px + rail + 1, py + ph - 1, 0x553D3930);
-        g.fill(px + rail, py + 53, px + pw - 1, py + 54, 0x553D3930);
-        g.fill(px + rail + 1, py + 1, px + pw - 1, py + 53, 0x70151510);
+        // New glass shell: cool tinted glass, fine rim and reflected light.
+        panel(g, px, py, pw, ph, 0xC9161926);
+        panel(g, px + 2, py + 2, pw - 4, ph - 4, 0x351A2032);
+        outline(g, px, py, pw, ph, 0x66D9D4FF);
+        g.fill(px + 12, py + 2, px + pw - 12, py + 3, 0x99FFFFFF);
+        g.fill(px + 2, py + 18, px + 3, py + ph - 18, 0x55FFFFFF);
+        g.fill(px + pw - 3, py + 20, px + pw - 2, py + ph - 20, 0x338C9BFF);
 
-        // Left icon navigation
-        g.drawCenteredString(font, "F", px + rail / 2, py + 18, ACCENT);
-        String[] railIcons = {"◉", "▣", "☷"};
+        // Left navigation rail.
+        g.fill(px + 1, py + 1, px + rail, py + ph - 1, 0xAA111522);
+        g.fill(px + rail, py + 12, px + rail + 1, py + ph - 12, 0x443F4660);
+        panel(g, px + 13, py + 15, rail - 26, 34, 0xFF29253A);
+        g.drawCenteredString(font, "S", px + rail / 2, py + 27, PURPLE);
+
+        String[] icons = {"✧", "▦", "⚔"};
+        String[] labels = {"VIS", "HUD", "PVP"};
         for (int i = 0; i < 3; i++) {
-            int iy = py + 66 + i * 48;
+            int iy = py + 70 + i * 58;
             boolean active = category.ordinal() == i;
-            if (active) rounded(g, px + 8, iy, rail - 16, 30, 6, 0xFF302B40);
-            g.drawCenteredString(font, railIcons[i], px + rail / 2, iy + 10,
-                active ? ACCENT : 0xFF85827A);
+            if (active) {
+                panel(g, px + 8, iy, rail - 16, 42, 0xFF342B4A);
+                g.fill(px + 7, iy + 9, px + 9, iy + 33, PURPLE);
+            }
+            g.drawCenteredString(font, icons[i], px + rail / 2, iy + 7,
+                active ? PURPLE : 0xFF85869A);
+            g.drawCenteredString(font, labels[i], px + rail / 2, iy + 25,
+                active ? WHITE : MUTED);
         }
 
-        // Header row: selected category and its purpose.
-        rounded(g, cx + 2, py + 12, 94, 29, 7, 0x552C2923);
-        g.drawString(font, "●  " + categoryName(), cx + 11, py + 22, TEXT, true);
-        String description = switch (category) {
-            case VISUALS -> "Dedicated to aesthetics, visual storytelling, and creative content";
-            case HUD -> "Useful information and clean on-screen indicators";
-            case PVP -> "Legitimate combat information and movement helpers";
-        };
-        int descX = cx + 104;
-        int descW = Math.max(0, px + pw - 12 - descX);
-        if (descW > 80) {
-            rounded(g, descX, py + 12, descW, 29, 7, 0x442C2923);
-            g.enableScissor(descX + 10, py + 12, descX + descW - 8, py + 41);
-            g.drawString(font, "☷  " + description, descX + 10, py + 22, 0xFFD2CEC4, false);
-            g.disableScissor();
-        }
+        // Header.
+        g.drawString(font, "SWIFT", contentX + 2, py + 17, WHITE, true);
+        g.drawString(font, "VISUALS  /  " + categoryName(), contentX + 2, py + 34, PURPLE, true);
+        String subtitle = categoryDescription();
+        g.drawString(font, subtitle, contentX + 2, py + 54, MUTED, false);
+        g.drawString(font, "CLIENT MENU", px + pw - 105, py + 20, 0xFFB8B5C8, true);
+        g.fill(contentX, py + 75, px + pw - 18, py + 76, 0x443E455C);
 
-        // Search remains available but visually quiet, integrated into the list header.
-        searchX = cx + 2;
-        searchY = py + 64;
-        searchW = cw - 4;
-        rounded(g, searchX, searchY, searchW, 25, 6,
-            searchFocused ? 0x995D4B70 : 0x664A463D);
-        g.drawString(font, "⌕", searchX + 8, searchY + 8, ACCENT, false);
-        String searchLabel = search.isEmpty() ? "Search modules..." : search;
-        g.enableScissor(searchX + 25, searchY, searchX + searchW - 8, searchY + 25);
-        g.drawString(font, searchLabel + (searchFocused ? "_" : ""), searchX + 26,
-            searchY + 8, search.isEmpty() ? 0xFFAAA69D : TEXT, false);
+        // Search field.
+        searchX = contentX;
+        searchY = py + 88;
+        searchW = contentW;
+        panel(g, searchX, searchY, searchW, 32,
+            searchFocused ? 0xDD302943 : 0xAA202433);
+        outline(g, searchX, searchY, searchW, 32,
+            searchFocused ? 0xCCB88AFF : 0x445D637B);
+        g.drawString(font, "⌕", searchX + 12, searchY + 11, PURPLE, false);
+        String query = search.isEmpty() ? "Search modules..." : search;
+        g.enableScissor(searchX + 34, searchY, searchX + searchW - 10, searchY + 32);
+        g.drawString(font, query + (searchFocused ? "_" : ""), searchX + 34,
+            searchY + 11, search.isEmpty() ? MUTED : WHITE, false);
         g.disableScissor();
 
-        gridY = searchY + 33;
-        gridBottom = py + ph - 15;
-        int rowCount = visibleRows();
-        for (int row = 0; row < rowCount; row++) {
-            for (int col = 0; col < cols; col++) {
-                int index = (scroll + row) * cols + col;
+        gridY = searchY + 44;
+        gridBottom = py + ph - 20;
+        int rowsVisible = visibleRows();
+        for (int row = 0; row < rowsVisible; row++) {
+            for (int col = 0; col < columns; col++) {
+                int index = (scroll + row) * columns + col;
                 if (index >= modules.size()) continue;
                 String name = modules.get(index);
-                int x = cx + col * (cardW + gap);
+                int x = contentX + col * (cardW + gap);
                 int y = gridY + row * (cardH + gap);
                 boolean enabled = VoidModules.isEnabled(name);
                 boolean hover = mx >= x && mx <= x + cardW && my >= y && my <= y + cardH;
-                rounded(g, x, y, cardW, cardH, 8,
-                    hover ? 0xA86B5C80 : 0x805D6378);
-                g.fill(x + 1, y + 1, x + cardW - 1, y + 2, 0x22FFFFFF);
-                g.drawString(font, "♟", x + 10, y + 15,
-                    enabled ? ACCENT : 0xFFAAA69D, false);
-                int switchW = 29, switchH = 15;
-                int sx = x + cardW - switchW - 10;
-                int sy = y + (cardH - switchH) / 2;
-                int tagW = 0;
-                g.enableScissor(x + 27, y, sx - 7, y + cardH);
-                g.drawString(font, name, x + 29, y + (cardH - 8) / 2,
-                    enabled ? TEXT : 0xFFB8B4AA, false);
+                boolean selected = name.equals(selectedModule);
+
+                panel(g, x, y, cardW, cardH,
+                    selected ? 0xE13B3152 : hover ? 0xD52C3044 : 0xB51D2231);
+                outline(g, x, y, cardW, cardH,
+                    selected ? 0xCCB88AFF : hover ? 0x667F78A2 : 0x333F465C);
+                if (enabled) g.fill(x + 1, y + 10, x + 3, y + cardH - 10, PURPLE);
+                g.drawString(font, enabled ? "✦" : "◇", x + 12, y + (cardH - 8) / 2,
+                    enabled ? PURPLE : MUTED, false);
+
+                int sx = x + cardW - 42;
+                int sy = y + (cardH - 17) / 2;
+                g.enableScissor(x + 34, y, sx - 8, y + cardH);
+                g.drawString(font, name, x + 35, y + (cardH - 8) / 2,
+                    enabled ? WHITE : 0xFFB5B4C1, true);
                 g.disableScissor();
-                rounded(g, sx, sy, switchW, switchH, 8,
-                    enabled ? 0xFF7562A0 : 0xFF383831);
-                rounded(g, enabled ? sx + 15 : sx + 2, sy + 2, 11, 11, 6,
-                    enabled ? 0xFFF7F3FF : 0xFF77766E);
-            }
-        }
-        if (modules.isEmpty()) {
-            g.drawCenteredString(font, "No modules in this category", cx + cw / 2,
-                gridY + 14, MUTED);
-        }
-        if (!selectedModule.isEmpty() && modules.contains(selectedModule)) {
-            int panelY = Math.max(gridY + 58, gridBottom - 76);
-            rounded(g, cx, panelY, cw, 68, 9, 0xB51C2030);
-            g.fill(cx + 2, panelY + 2, cx + cw - 2, panelY + 3, 0x66FFFFFF);
-            g.drawString(font, selectedModule, cx + 12, panelY + 9, TEXT, true);
-            g.drawString(font, VoidModules.descriptionOf(selectedModule), cx + 12, panelY + 24, MUTED, false);
-            if (selectedModule.equals("HUD")) {
-                String scaleText = "HUD SCALE  " + Math.round(VoidModules.hudScale() * 100) + "%";
-                g.drawString(font, scaleText, cx + 12, panelY + 45, ACCENT, true);
-                rounded(g, cx + cw - 82, panelY + 38, 25, 22, 6, 0xFF39334B);
-                rounded(g, cx + cw - 49, panelY + 38, 25, 22, 6, 0xFF39334B);
-                g.drawCenteredString(font, "−", cx + cw - 69, panelY + 45, TEXT);
-                g.drawCenteredString(font, "+", cx + cw - 36, panelY + 45, TEXT);
-            } else {
-                g.drawString(font, VoidModules.isEnabled(selectedModule) ? "STATUS: ENABLED" : "STATUS: DISABLED",
-                    cx + 12, panelY + 45, ACCENT, false);
+
+                panel(g, sx, sy, 31, 17, enabled ? 0xFF795CB0 : 0xFF393D4A);
+                panel(g, enabled ? sx + 16 : sx + 2, sy + 2, 13, 13,
+                    enabled ? 0xFFF7F0FF : 0xFF9A9BA8);
+                if (selected) g.drawString(font, "i", x + cardW - 58, y + 5, PURPLE, true);
             }
         }
 
-        int rows = (modules.size() + cols - 1) / cols;
-        if (rows > rowCount) {
-            int track = gridBottom - gridY;
-            int thumb = Math.max(18, track * rowCount / rows);
-            int ty = gridY + (track - thumb) * scroll / (rows - rowCount);
-            rounded(g, px + pw - 5, ty, 3, thumb, 2, ACCENT_DARK);
+        if (modules.isEmpty()) {
+            g.drawCenteredString(font, "No modules found", contentX + contentW / 2,
+                gridY + 18, MUTED);
+        }
+
+        // Settings drawer at the bottom of the content area.
+        if (!selectedModule.isEmpty()) {
+            int drawerH = category == VoidModules.Category.HUD && selectedModule.equals("HUD") ? 62 : 50;
+            int drawerY = py + ph - drawerH - 12;
+            panel(g, contentX, drawerY, contentW, drawerH, 0xF01B2030);
+            outline(g, contentX, drawerY, contentW, drawerH, 0x88B88AFF);
+            g.drawString(font, selectedModule, contentX + 12, drawerY + 9, WHITE, true);
+            g.drawString(font, VoidModules.descriptionOf(selectedModule),
+                contentX + 12, drawerY + 25, MUTED, false);
+            if (selectedModule.equals("HUD")) {
+                String scale = "SCALE  " + Math.round(VoidModules.hudScale() * 100) + "%";
+                g.drawString(font, scale, contentX + 12, drawerY + 43, PURPLE, true);
+                panel(g, contentX + contentW - 76, drawerY + 34, 26, 22, 0xFF39334B);
+                panel(g, contentX + contentW - 43, drawerY + 34, 26, 22, 0xFF39334B);
+                g.drawCenteredString(font, "−", contentX + contentW - 63, drawerY + 41, WHITE);
+                g.drawCenteredString(font, "+", contentX + contentW - 30, drawerY + 41, WHITE);
+            } else {
+                g.drawString(font, VoidModules.isEnabled(selectedModule) ? "ENABLED" : "DISABLED",
+                    contentX + contentW - 78, drawerY + 18, enabledColor(selectedModule), true);
+            }
+        }
+
+        int totalRows = (modules.size() + columns - 1) / columns;
+        if (totalRows > rowsVisible) {
+            int track = Math.max(1, gridBottom - gridY);
+            int thumb = Math.max(18, track * rowsVisible / totalRows);
+            int ty = gridY + (track - thumb) * scroll / (totalRows - rowsVisible);
+            panel(g, px + pw - 9, ty, 3, thumb, PURPLE_DARK);
         }
         super.render(g, mx, my, partialTick);
+    }
+
+    private int enabledColor(String name) {
+        return VoidModules.isEnabled(name) ? 0xFFB88AFF : MUTED;
     }
 
     @Override
     public boolean mouseClicked(MouseButtonEvent e, boolean doubled) {
         if (e.button() != 0) return super.mouseClicked(e, doubled);
         double mx = e.x(), my = e.y();
-        if (mx >= searchX && mx <= searchX + searchW && my >= searchY && my <= searchY + 25) {
+
+        if (mx >= searchX && mx <= searchX + searchW && my >= searchY && my <= searchY + 32) {
             searchFocused = true;
             return true;
         }
         searchFocused = false;
-        if ("HUD".equals(selectedModule)) {
-            int panelY = Math.max(gridY + 58, gridBottom - 76);
-            if (my >= panelY + 38 && my <= panelY + 62) {
-                if (mx >= cx + cw - 84 && mx <= cx + cw - 53)
-                    VoidModules.setHudScale(VoidModules.hudScale() - 0.05F);
-                else if (mx >= cx + cw - 51 && mx <= cx + cw - 20)
-                    VoidModules.setHudScale(VoidModules.hudScale() + 0.05F);
-                return true;
-            }
-        }
+
         for (int i = 0; i < 3; i++) {
-            int iy = py + 66 + i * 48;
-            if (mx >= px + 4 && mx <= px + rail - 4 && my >= iy - 2 && my <= iy + 32) {
+            int iy = py + 70 + i * 58;
+            if (mx >= px + 5 && mx <= px + rail - 5 && my >= iy && my <= iy + 42) {
                 category = VoidModules.Category.values()[i];
                 scroll = 0;
+                selectedModule = "";
                 rebuild();
                 return true;
             }
         }
+
+        if ("HUD".equals(selectedModule)) {
+            int drawerY = py + ph - 74;
+            if (my >= drawerY + 34 && my <= drawerY + 58) {
+                if (mx >= contentX + contentW - 78 && mx <= contentX + contentW - 48)
+                    VoidModules.setHudScale(VoidModules.hudScale() - 0.05F);
+                else if (mx >= contentX + contentW - 45 && mx <= contentX + contentW - 15)
+                    VoidModules.setHudScale(VoidModules.hudScale() + 0.05F);
+                return true;
+            }
+        }
+
         for (int row = 0; row < visibleRows(); row++) {
-            for (int col = 0; col < cols; col++) {
-                int index = (scroll + row) * cols + col;
+            for (int col = 0; col < columns; col++) {
+                int index = (scroll + row) * columns + col;
                 if (index >= modules.size()) continue;
-                int x = cx + col * (cardW + gap), y = gridY + row * (cardH + gap);
+                int x = contentX + col * (cardW + gap);
+                int y = gridY + row * (cardH + gap);
                 if (mx >= x && mx <= x + cardW && my >= y && my <= y + cardH) {
                     String name = modules.get(index);
-                    if (mx >= x + cardW - 39) VoidModules.toggle(name);
+                    if (mx >= x + cardW - 44) VoidModules.toggle(name);
                     else selectedModule = selectedModule.equals(name) ? "" : name;
                     return true;
                 }
@@ -282,7 +320,7 @@ public final class VoidClickScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mx, double my, double horizontal, double vertical) {
-        int rows = (modules.size() + cols - 1) / cols;
+        int rows = (modules.size() + columns - 1) / columns;
         scroll = Math.max(0, Math.min(Math.max(0, rows - visibleRows()),
             scroll - (int)Math.signum(vertical)));
         return true;
