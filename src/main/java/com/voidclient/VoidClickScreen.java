@@ -31,21 +31,23 @@ public final class VoidClickScreen extends Screen {
 
     @Override
     protected void init() {
-        pw = Math.max(260, Math.min(width - 12, (int)(width * 0.94)));
-        ph = Math.max(210, Math.min(height - 12, (int)(height * 0.86)));
+        pw = width >= 1000 ? Math.min(900, Math.max(620, (int)(width * 0.56)))
+                           : Math.max(280, (int)(width * 0.94));
+        ph = Math.max(220, Math.min(height - 24, (int)(height * 0.84)));
         px = (width - pw) / 2;
         py = (height - ph) / 2;
-        cx = px + 18;
-        cw = pw - 36;
-        gap = 7;
-        cols = cw >= 510 ? 3 : cw >= 300 ? 2 : 1;
+        rail = width < 520 ? 40 : 54;
+        cx = px + rail + 12;
+        cw = pw - rail - 24;
+        gap = 8;
+        cols = cw >= 570 ? 3 : cw >= 360 ? 2 : 1;
         cardW = (cw - gap * (cols - 1)) / cols;
-        cardH = width < 420 ? 36 : 43;
+        cardH = width < 520 ? 37 : 43;
         searchX = cx;
-        searchY = py + 126;
+        searchY = py + 104;
         searchW = cw;
-        gridY = searchY + 39;
-        gridBottom = py + ph - 35;
+        gridY = searchY + 36;
+        gridBottom = py + ph - 18;
         rebuild();
     }
 
@@ -87,58 +89,58 @@ public final class VoidClickScreen extends Screen {
             try { renderBlurredBackground(g); }
             catch (RuntimeException | LinkageError e) { blurAvailable = false; }
         }
-        g.fill(0, 0, width, height, 0xA9000610);
+        g.fill(0, 0, width, height, 0x76000000);
 
-        // New floating dashboard: wide canvas, compact top navigation, clean module grid.
-        rounded(g, px, py, pw, ph, 12, 0xF20A0D16);
-        g.fill(px + 12, py + 1, px + pw - 12, py + 3, ACCENT);
-        g.fill(px + 1, py + 1, px + pw - 1, py + 48, 0xFF111622);
-        g.fill(px + 1, py + 48, px + pw - 1, py + 49, 0xFF252333);
+        // Reference-inspired translucent glass panel and narrow icon rail.
+        rounded(g, px, py, pw, ph, 13, 0xD9151411);
+        g.fill(px + 1, py + 1, px + rail, py + ph - 1, 0xB91A1915);
+        g.fill(px + rail, py + 1, px + rail + 1, py + ph - 1, 0x553D3930);
+        g.fill(px + rail, py + 53, px + pw - 1, py + 54, 0x553D3930);
+        g.fill(px + rail + 1, py + 1, px + pw - 1, py + 53, 0x9B151510);
 
-        // Brand block
-        rounded(g, px + 17, py + 11, 27, 27, 8, 0xFF332447);
-        g.drawCenteredString(font, "S", px + 30, py + 20, ACCENT);
-        g.drawString(font, "SWIFT", px + 53, py + 10, TEXT, true);
-        g.drawString(font, "VISUALS  /  CLIENT", px + 53, py + 25, MUTED, false);
-        rounded(g, px + pw - 39, py + 12, 25, 24, 8, 0xFF252B39);
-        g.drawCenteredString(font, "×", px + pw - 27, py + 19, TEXT);
-
-        // Category navigation as compact chips
-        int tabY = py + 59;
-        int tabGap = 8;
-        int tabW = Math.max(48, (cw - tabGap * 2) / 3);
-        String[] tabs = {"VISUALS", "HUD", "PVP"};
+        // Left icon navigation
+        g.drawCenteredString(font, "F", px + rail / 2, py + 18, ACCENT);
+        String[] railIcons = {"◉", "▣", "☷"};
         for (int i = 0; i < 3; i++) {
-            int x = cx + i * (tabW + tabGap);
+            int iy = py + 66 + i * 48;
             boolean active = category.ordinal() == i;
-            rounded(g, x, tabY, tabW, 27, 8, active ? 0xFF39284E : 0xFF171C28);
-            if (active) g.fill(x + 9, tabY + 24, x + tabW - 9, tabY + 26, ACCENT);
-            g.drawCenteredString(font, tabs[i], x + tabW / 2, tabY + 9,
-                active ? 0xFFF2E8FF : MUTED);
+            if (active) rounded(g, px + 8, iy, rail - 16, 30, 6, 0xFF302B40);
+            g.drawCenteredString(font, railIcons[i], px + rail / 2, iy + 10,
+                active ? ACCENT : 0xFF85827A);
         }
 
-        // Page title and count
-        int headingY = py + 96;
-        g.drawString(font, categoryName(), cx + 1, headingY, TEXT, true);
-        String sub = "Choose modules and customize your client";
-        g.drawString(font, sub, cx + 1, headingY + 13, MUTED, false);
+        // Header row: selected category and its purpose.
+        rounded(g, cx + 2, py + 12, 94, 29, 7, 0x552C2923);
+        g.drawString(font, "●  " + categoryName(), cx + 11, py + 22, TEXT, true);
+        String description = switch (category) {
+            case VISUALS -> "Dedicated to aesthetics, visual storytelling, and creative content";
+            case HUD -> "Useful information and clean on-screen indicators";
+            case PVP -> "Legitimate combat information and movement helpers";
+        };
+        int descX = cx + 104;
+        int descW = Math.max(0, px + pw - 12 - descX);
+        if (descW > 80) {
+            rounded(g, descX, py + 12, descW, 29, 7, 0x442C2923);
+            g.enableScissor(descX + 10, py + 12, descX + descW - 8, py + 41);
+            g.drawString(font, "☷  " + description, descX + 10, py + 22, 0xFFD2CEC4, false);
+            g.disableScissor();
+        }
 
-        // Search control
-        searchX = cx;
-        searchY = py + 126;
-        searchW = cw;
-        rounded(g, searchX, searchY, searchW, 29, 8,
-            searchFocused ? 0xFF292136 : 0xFF171C28);
-        if (searchFocused) g.fill(searchX + 1, searchY + 5, searchX + 2, searchY + 24, ACCENT);
-        g.drawString(font, "⌕", searchX + 11, searchY + 10, ACCENT, false);
-        String label = search.isEmpty() ? "Find a module..." : search;
-        g.enableScissor(searchX + 29, searchY, searchX + searchW - 8, searchY + 29);
-        g.drawString(font, label + (searchFocused ? "_" : ""), searchX + 30,
-            searchY + 10, search.isEmpty() ? MUTED : TEXT, false);
+        // Search remains available but visually quiet, integrated into the list header.
+        searchX = cx + 2;
+        searchY = py + 64;
+        searchW = cw - 4;
+        rounded(g, searchX, searchY, searchW, 25, 6,
+            searchFocused ? 0xAA4A3B55 : 0x55312E27);
+        g.drawString(font, "⌕", searchX + 8, searchY + 8, ACCENT, false);
+        String searchLabel = search.isEmpty() ? "Search modules..." : search;
+        g.enableScissor(searchX + 25, searchY, searchX + searchW - 8, searchY + 25);
+        g.drawString(font, searchLabel + (searchFocused ? "_" : ""), searchX + 26,
+            searchY + 8, search.isEmpty() ? 0xFFAAA69D : TEXT, false);
         g.disableScissor();
 
-        gridY = searchY + 39;
-        gridBottom = py + ph - 35;
+        gridY = searchY + 33;
+        gridBottom = py + ph - 15;
         int rowCount = visibleRows();
         for (int row = 0; row < rowCount; row++) {
             for (int col = 0; col < cols; col++) {
@@ -150,26 +152,27 @@ public final class VoidClickScreen extends Screen {
                 boolean enabled = VoidModules.isEnabled(name);
                 boolean hover = mx >= x && mx <= x + cardW && my >= y && my <= y + cardH;
                 rounded(g, x, y, cardW, cardH, 8,
-                    hover ? 0xFF252B3B : 0xFF171D29);
-                if (enabled) {
-                    rounded(g, x + 8, y + 8, 23, 23, 7, 0xFF39294D);
-                    g.drawCenteredString(font, "✓", x + 19, y + 15, ACCENT);
-                } else {
-                    rounded(g, x + 8, y + 8, 23, 23, 7, 0xFF242B39);
-                    g.drawCenteredString(font, "•", x + 19, y + 15, MUTED);
-                }
-                int sx = x + cardW - 34, sy = y + (cardH - 16) / 2;
-                g.enableScissor(x + 39, y, sx - 5, y + cardH);
-                g.drawString(font, name, x + 39, y + (cardH - 8) / 2,
-                    enabled ? 0xFFF4E9FF : TEXT, false);
+                    hover ? 0xA83B352B : 0x78302C24);
+                g.fill(x + 1, y + 1, x + cardW - 1, y + 2, 0x22FFFFFF);
+                g.drawString(font, "♟", x + 10, y + 15,
+                    enabled ? ACCENT : 0xFFAAA69D, false);
+                int switchW = 29, switchH = 15;
+                int sx = x + cardW - switchW - 10;
+                int sy = y + (cardH - switchH) / 2;
+                int tagW = 0;
+                g.enableScissor(x + 27, y, sx - 7, y + cardH);
+                g.drawString(font, name, x + 29, y + (cardH - 8) / 2,
+                    enabled ? TEXT : 0xFFB8B4AA, false);
                 g.disableScissor();
-                rounded(g, sx, sy, 27, 16, 8, enabled ? 0xFF8058AD : 0xFF343B49);
-                rounded(g, enabled ? sx + 13 : sx + 2, sy + 2, 12, 12, 6,
-                    0xFFF8F4FF);
+                rounded(g, sx, sy, switchW, switchH, 8,
+                    enabled ? 0xFF7562A0 : 0xFF383831);
+                rounded(g, enabled ? sx + 15 : sx + 2, sy + 2, 11, 11, 6,
+                    enabled ? 0xFFF7F3FF : 0xFF77766E);
             }
         }
         if (modules.isEmpty()) {
-            g.drawCenteredString(font, "No modules found", cx + cw / 2, gridY + 15, MUTED);
+            g.drawCenteredString(font, "No modules in this category", cx + cw / 2,
+                gridY + 14, MUTED);
         }
 
         int rows = (modules.size() + cols - 1) / cols;
@@ -177,16 +180,8 @@ public final class VoidClickScreen extends Screen {
             int track = gridBottom - gridY;
             int thumb = Math.max(18, track * rowCount / rows);
             int ty = gridY + (track - thumb) * scroll / (rows - rowCount);
-            rounded(g, px + pw - 7, ty, 3, thumb, 2, ACCENT_DARK);
+            rounded(g, px + pw - 5, ty, 3, thumb, 2, ACCENT_DARK);
         }
-
-        int footerY = py + ph - 23;
-        g.fill(cx, footerY - 7, px + pw - 13, footerY - 6, 0xFF252333);
-        int activeCount = 0;
-        for (String n : modules) if (VoidModules.isEnabled(n)) activeCount++;
-        g.drawString(font, "SWIFT VISUALS", cx + 1, footerY, MUTED, false);
-        String count = activeCount + " ENABLED  /  " + modules.size() + " TOTAL";
-        g.drawString(font, count, px + pw - 14 - font.width(count), footerY, ACCENT, false);
         super.render(g, mx, my, partialTick);
     }
 
@@ -194,19 +189,14 @@ public final class VoidClickScreen extends Screen {
     public boolean mouseClicked(MouseButtonEvent e, boolean doubled) {
         if (e.button() != 0) return super.mouseClicked(e, doubled);
         double mx = e.x(), my = e.y();
-        if (mx >= px + pw - 27 && my >= py + 3 && my <= py + 32) {
-            onClose();
-            return true;
-        }
-        if (mx >= searchX && mx <= searchX + searchW && my >= searchY && my <= searchY + 28) {
+        if (mx >= searchX && mx <= searchX + searchW && my >= searchY && my <= searchY + 25) {
             searchFocused = true;
             return true;
         }
         searchFocused = false;
-        int tabY = py + 59, tabGap = 8, tabW = Math.max(48, (cw - tabGap * 2) / 3);
         for (int i = 0; i < 3; i++) {
-            int x = cx + i * (tabW + tabGap);
-            if (mx >= x && mx <= x + tabW && my >= tabY && my <= tabY + 27) {
+            int iy = py + 66 + i * 48;
+            if (mx >= px + 4 && mx <= px + rail - 4 && my >= iy - 2 && my <= iy + 32) {
                 category = VoidModules.Category.values()[i];
                 scroll = 0;
                 rebuild();
