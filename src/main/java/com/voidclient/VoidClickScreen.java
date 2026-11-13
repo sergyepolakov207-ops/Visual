@@ -82,6 +82,8 @@ public final class VoidClickScreen extends Screen {
 
     @Override
     public void render(GuiGraphics g, int mx, int my, float partialTick) {
+        // Use Minecraft 1.21.11 native post-process blur for the world behind this screen.
+        renderBlurredBackground(g);
         g.fill(0, 0, width, height, SHADE);
         rounded(g, panelX, panelY, panelW, panelH, 12, PANEL);
         g.fill(panelX + 1, panelY + 1, panelX + panelW - 1, panelY + 2, BORDER);
