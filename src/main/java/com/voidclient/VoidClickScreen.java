@@ -46,7 +46,7 @@ public final class VoidClickScreen extends Screen {
         contentX = panelX + railW + 12;
         contentW = panelW - railW - 24;
         gap = 7;
-        columns = contentW >= 390 ? 2 : 1;
+        columns = contentW >= 240 ? 3 : contentW >= 160 ? 2 : 1;
         cardW = (contentW - (columns - 1) * gap) / columns;
         rowH = panelH < 280 ? 24 : 28;
 
