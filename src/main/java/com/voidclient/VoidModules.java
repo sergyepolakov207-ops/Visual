@@ -7,6 +7,10 @@ public final class VoidModules {
     public enum Category { VISUALS, HUD, PVP }
 
     private static final Map<String, Boolean> MODULES = new LinkedHashMap<>();
+    private static float hudScale = 1.0F;
+
+    public static float hudScale() { return hudScale; }
+    public static void setHudScale(float value) { hudScale = Math.max(0.75F, Math.min(1.50F, value)); }
 
     static {
         // Visual quality of life
