@@ -14,7 +14,10 @@ public final class VoidModules {
         MODULES.put("No View Bobbing", false);
         MODULES.put("Crosshair Dot", false);
 
-        // HUD and information
+        // Master switch for the complete HUD overlay
+        MODULES.put("HUD", true);
+
+        // Optional HUD elements (individual settings remain available)
         MODULES.put("FPS Counter", true);
         MODULES.put("Coordinates", true);
         MODULES.put("Health HUD", false);
@@ -58,6 +61,9 @@ public final class VoidModules {
     public static Category categoryOf(String name) {
         return switch (name) {
             case "Fullbright", "No View Bobbing", "Crosshair Dot" -> Category.VISUALS;
+            case "HUD", "FPS Counter", "Coordinates", "Health HUD", "Armor HUD",
+                 "Hunger HUD", "Keystrokes", "Sprint Status", "Direction HUD",
+                 "Biome HUD", "Item Durability HUD", "Inventory HUD", "Compact HUD" -> Category.HUD;
             case "Auto Sprint", "Low Health Alert", "Ping HUD", "Attack Cooldown",
                  "Target HUD", "Target Range", "Totem Counter", "Armor Durability",
                  "Pearl Cooldown", "Shield Status" -> Category.PVP;
@@ -70,6 +76,7 @@ public final class VoidModules {
             case "Fullbright" -> "Brightens dark areas";
             case "No View Bobbing" -> "Keeps the camera steady";
             case "Crosshair Dot" -> "Adds a precise center dot";
+            case "HUD" -> "Master switch for all on-screen information";
             case "FPS Counter" -> "Shows current frame rate";
             case "Coordinates" -> "Displays your XYZ position";
             case "Health HUD" -> "Shows your current health";
