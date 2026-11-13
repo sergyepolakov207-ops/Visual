@@ -13,17 +13,17 @@ import java.util.List;
 import java.util.Locale;
 
 public final class VoidClickScreen extends Screen {
-    private static final int SHADE = 0x55030008;
-    private static final int PANEL = 0xB80B0912;
-    private static final int PANEL_EDGE = 0x887B55A0;
-    private static final int SURFACE = 0x70352D40;
-    private static final int SURFACE_HOVER = 0xA04A315F;
-    private static final int SURFACE_ACTIVE = 0xB85A3280;
-    private static final int TEXT = 0xFFF4ECFF;
-    private static final int MUTED = 0xFF9B8BAA;
-    private static final int ACCENT = 0xFFB34CFF;
-    private static final int ACCENT_BRIGHT = 0xFFD18BFF;
-    private static final int SWITCH_OFF = 0x995A5262;
+    private static final int SHADE = 0x66000000;
+    private static final int PANEL = 0xD90C0B10;
+    private static final int PANEL_EDGE = 0x885D4778;
+    private static final int SURFACE = 0xB51B1920;
+    private static final int SURFACE_HOVER = 0xD52B2533;
+    private static final int SURFACE_ACTIVE = 0xE13A2B4B;
+    private static final int TEXT = 0xFFF6F1FA;
+    private static final int MUTED = 0xFFAAA0B2;
+    private static final int ACCENT = 0xFFB86BFF;
+    private static final int ACCENT_BRIGHT = 0xFFE0B5FF;
+    private static final int SWITCH_OFF = 0xFF514B59;
 
     private int panelX, panelY, panelW, panelH;
     private int railW, contentX, contentW;
@@ -41,23 +41,23 @@ public final class VoidClickScreen extends Screen {
 
     @Override
     protected void init() {
-        panelW = Math.max(260, Math.min(width - 16, (int) (width * 0.90)));
-        panelH = Math.max(220, Math.min(height - 16, (int) (height * 0.93)));
+        panelW = Math.max(260, Math.min(width - 16, (int) (width * 0.92)));
+        panelH = Math.max(220, Math.min(height - 16, (int) (height * 0.88)));
         panelX = (width - panelW) / 2;
         panelY = (height - panelH) / 2;
 
         railW = panelW >= 430 ? 42 : 30;
         contentX = panelX + railW + 12;
         contentW = panelW - railW - 24;
-        gap = 7;
+        gap = 8;
         columns = contentW >= 240 ? 3 : contentW >= 160 ? 2 : 1;
         cardW = (contentW - (columns - 1) * gap) / columns;
-        rowH = panelH < 280 ? 24 : 28;
+        rowH = panelH < 280 ? 25 : 30;
 
         searchX = contentX;
-        searchY = panelY + 86;
+        searchY = panelY + 87;
         searchW = contentW;
-        listY = searchY + 34;
+        listY = searchY + 38;
         listBottom = panelY + panelH - 38;
         rebuild();
     }
@@ -123,12 +123,12 @@ public final class VoidClickScreen extends Screen {
             0x665B3A70, 0x22110D18);
         g.fill(panelX + 1, panelY + 1, panelX + panelW - 1, panelY + 2, 0x99E7C9FF);
         g.drawString(font, "SWIFT VISUALS", contentX + 2, panelY + 13, TEXT, true);
-        g.drawString(font, "GLASS INTERFACE", contentX + 94, panelY + 13, MUTED, false);
+        g.drawString(font, "PREMIUM CLIENT  •  1.21.11", contentX + 104, panelY + 13, MUTED, false);
         g.drawString(font, "×", panelX + panelW - 19, panelY + 9, ACCENT_BRIGHT, true);
 
         // Left icon rail.
         g.fill(panelX + railW, panelY + 39, panelX + railW + 1, panelY + panelH - 2, 0x447B55A0);
-        String[] railIcons = {"◇", "▤", "⚙"};
+        String[] railIcons = {"✦", "▦", "⚙"};
         for (int i = 0; i < railIcons.length; i++) {
             int y = panelY + 52 + i * 35;
             boolean active = category.ordinal() == i;
@@ -158,7 +158,7 @@ public final class VoidClickScreen extends Screen {
         g.fill(searchX + 1, searchY + 1, searchX + searchW - 1, searchY + 2,
             0x886E587D);
         g.drawString(font, "⌕", searchX + 9, searchY + 8, ACCENT_BRIGHT, false);
-        String searchLabel = searchText.isEmpty() ? "Search modules" : searchText;
+        String searchLabel = searchText.isEmpty() ? "Search modules..." : searchText;
         g.drawString(font, searchLabel + (searchFocused ? "_" : ""), searchX + 26, searchY + 9,
             searchText.isEmpty() ? MUTED : TEXT, false);
 
@@ -205,10 +205,12 @@ public final class VoidClickScreen extends Screen {
         // Compact footer/status strip.
         int footerY = panelY + panelH - 27;
         g.fill(contentX, footerY - 5, panelX + panelW - 10, footerY - 4, 0x557B55A0);
-        g.drawString(font, "SWIFT", contentX + 2, footerY + 3, ACCENT_BRIGHT, true);
+        g.drawString(font, "SWIFT VISUALS", contentX + 2, footerY + 3, ACCENT_BRIGHT, true);
         g.drawString(font, "•", contentX + 38, footerY + 3, ACCENT);
         g.drawString(font, "1.21.11", contentX + 47, footerY + 3, MUTED, false);
-        String count = visible.size() + " MODULES";
+        int enabledCount = 0;
+        for (String module : visible) if (VoidModules.isEnabled(module)) enabledCount++;
+        String count = enabledCount + " / " + visible.size() + " ENABLED";
         g.drawString(font, count, panelX + panelW - 14 - font.width(count),
             footerY + 3, MUTED, false);
 
@@ -227,10 +229,33 @@ public final class VoidClickScreen extends Screen {
             return true;
         }
 
-        // Search field focus and typing.
-        searchFocused = mx >= searchX && mx <= searchX + searchW
+        // Search focus and clear action.
+        boolean inSearch = mx >= searchX && mx <= searchX + searchW
             && my >= searchY && my <= searchY + 27;
-        if (searchFocused) return true;
+        if (inSearch) {
+            if (mx >= searchX + searchW - 22 && !searchText.isEmpty()) {
+                searchText = "";
+                scroll = 0;
+                rebuild();
+                searchFocused = true;
+            } else {
+                searchFocused = true;
+            }
+            return true;
+        }
+        searchFocused = false;
+
+        // Sidebar category shortcuts.
+        for (int i = 0; i < 3; i++) {
+            int ry = panelY + 52 + i * 35;
+            if (mx >= panelX + 4 && mx <= panelX + railW - 4
+                && my >= ry - 5 && my <= ry + 20) {
+                category = VoidModules.Category.values()[i];
+                scroll = 0;
+                rebuild();
+                return true;
+            }
+        }
 
         // Tabs.
         String[] tabs = tabLabels();
@@ -266,7 +291,7 @@ public final class VoidClickScreen extends Screen {
     @Override
     public boolean charTyped(CharacterEvent event) {
         if (searchFocused) {
-            char ch = event.character();
+            char ch = (char) event.codepoint();
             if (ch >= 32 && ch != 127 && searchText.length() < 48) {
                 searchText += ch;
                 scroll = 0;
