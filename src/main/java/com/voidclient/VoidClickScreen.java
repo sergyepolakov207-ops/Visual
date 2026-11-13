@@ -59,6 +59,7 @@ public final class VoidClickScreen extends Screen {
         modules.clear();
         String q = search.toLowerCase(Locale.ROOT).trim();
         for (String name : VoidModules.all().keySet()) {
+            if (category == VoidModules.Category.HUD && !name.equals("HUD")) continue;
             if (VoidModules.categoryOf(name) == category
                 && (q.isEmpty() || name.toLowerCase(Locale.ROOT).contains(q))) {
                 modules.add(name);
@@ -92,11 +93,12 @@ public final class VoidClickScreen extends Screen {
         g.fill(0, 0, width, height, 0x76000000);
 
         // Reference-inspired translucent glass panel and narrow icon rail.
-        rounded(g, px, py, pw, ph, 13, 0xD9151411);
-        g.fill(px + 1, py + 1, px + rail, py + ph - 1, 0xB91A1915);
+        rounded(g, px, py, pw, ph, 13, 0xA9151411);
+        g.fill(px + 2, py + 2, px + pw - 2, py + 3, 0x30FFFFFF);
+        g.fill(px + 1, py + 1, px + rail, py + ph - 1, 0x881A1915);
         g.fill(px + rail, py + 1, px + rail + 1, py + ph - 1, 0x553D3930);
         g.fill(px + rail, py + 53, px + pw - 1, py + 54, 0x553D3930);
-        g.fill(px + rail + 1, py + 1, px + pw - 1, py + 53, 0x9B151510);
+        g.fill(px + rail + 1, py + 1, px + pw - 1, py + 53, 0x70151510);
 
         // Left icon navigation
         g.drawCenteredString(font, "F", px + rail / 2, py + 18, ACCENT);
@@ -131,7 +133,7 @@ public final class VoidClickScreen extends Screen {
         searchY = py + 64;
         searchW = cw - 4;
         rounded(g, searchX, searchY, searchW, 25, 6,
-            searchFocused ? 0xAA4A3B55 : 0x55312E27);
+            searchFocused ? 0x995D4B70 : 0x664A463D);
         g.drawString(font, "⌕", searchX + 8, searchY + 8, ACCENT, false);
         String searchLabel = search.isEmpty() ? "Search modules..." : search;
         g.enableScissor(searchX + 25, searchY, searchX + searchW - 8, searchY + 25);
@@ -152,7 +154,7 @@ public final class VoidClickScreen extends Screen {
                 boolean enabled = VoidModules.isEnabled(name);
                 boolean hover = mx >= x && mx <= x + cardW && my >= y && my <= y + cardH;
                 rounded(g, x, y, cardW, cardH, 8,
-                    hover ? 0xA83B352B : 0x78302C24);
+                    hover ? 0xA85B526B : 0x70514A40);
                 g.fill(x + 1, y + 1, x + cardW - 1, y + 2, 0x22FFFFFF);
                 g.drawString(font, "♟", x + 10, y + 15,
                     enabled ? ACCENT : 0xFFAAA69D, false);
