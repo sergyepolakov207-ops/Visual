@@ -94,7 +94,7 @@ public final class VoidClickScreen extends Screen {
 
         // Reference-inspired translucent glass panel and narrow icon rail.
         rounded(g, px, py, pw, ph, 13, 0xA9151411);
-        g.fill(px + 2, py + 2, px + pw - 2, py + 3, 0x30FFFFFF);
+        g.fill(px + 2, py + 2, px + pw - 2, py + 3, 0x66FFFFFF);
         g.fill(px + 1, py + 1, px + rail, py + ph - 1, 0x881A1915);
         g.fill(px + rail, py + 1, px + rail + 1, py + ph - 1, 0x553D3930);
         g.fill(px + rail, py + 53, px + pw - 1, py + 54, 0x553D3930);
@@ -154,7 +154,7 @@ public final class VoidClickScreen extends Screen {
                 boolean enabled = VoidModules.isEnabled(name);
                 boolean hover = mx >= x && mx <= x + cardW && my >= y && my <= y + cardH;
                 rounded(g, x, y, cardW, cardH, 8,
-                    hover ? 0xA85B526B : 0x70514A40);
+                    hover ? 0xA86B5C80 : 0x805D6378);
                 g.fill(x + 1, y + 1, x + cardW - 1, y + 2, 0x22FFFFFF);
                 g.drawString(font, "♟", x + 10, y + 15,
                     enabled ? ACCENT : 0xFFAAA69D, false);
