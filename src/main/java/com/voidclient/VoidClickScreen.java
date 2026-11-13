@@ -42,9 +42,9 @@ public final class VoidClickScreen extends Screen {
         ph = Math.max(210, Math.min(height - 12, (int)(height * 0.86)));
         px = (width - pw) / 2;
         py = (height - ph) / 2;
-        rail = width < 420 ? 34 : 48;
-        cx = px + rail + 10;
-        cw = px + pw - cx - 12;
+        rail = 0;
+        cx = px + 18;
+        cw = pw - 36;
         gap = 7;
         cols = cw >= 510 ? 3 : cw >= 300 ? 2 : 1;
         cardW = (cw - gap * (cols - 1)) / cols;
@@ -108,6 +108,8 @@ public final class VoidClickScreen extends Screen {
         g.drawCenteredString(font, "S", px + 30, py + 20, ACCENT);
         g.drawString(font, "SWIFT", px + 53, py + 10, TEXT, true);
         g.drawString(font, "VISUALS  /  CLIENT", px + 53, py + 25, MUTED, false);
+        rounded(g, px + pw - 39, py + 12, 25, 24, 8, 0xFF252B39);
+        g.drawCenteredString(font, "×", px + pw - 27, py + 19, TEXT);
 
         // Category navigation as compact chips
         int tabY = py + 59;
@@ -209,16 +211,7 @@ public final class VoidClickScreen extends Screen {
             return true;
         }
         searchFocused = false;
-        for (int i = 0; i < 3; i++) {
-            int y = py + 51 + i * 42;
-            if (mx >= px + 2 && mx <= px + rail - 2 && my >= y && my <= y + 28) {
-                category = VoidModules.Category.values()[i];
-                scroll = 0;
-                rebuild();
-                return true;
-            }
-        }
-        int tabY = py + 49, tabGap = 7, tabW = (cw - tabGap * 2) / 3;
+        int tabY = py + 59, tabGap = 8, tabW = Math.max(48, (cw - tabGap * 2) / 3);
         for (int i = 0; i < 3; i++) {
             int x = cx + i * (tabW + tabGap);
             if (mx >= x && mx <= x + tabW && my >= tabY && my <= tabY + 27) {
