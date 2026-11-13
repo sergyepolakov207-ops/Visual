@@ -3,6 +3,9 @@ package com.voidclient;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import org.lwjgl.glfw.GLFW;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
@@ -28,6 +31,7 @@ public final class VoidClickScreen extends Screen {
     private int searchX, searchY, searchW;
     private String searchText = "";
     private boolean blurAvailable = true;
+    private boolean searchFocused = false;
     private VoidModules.Category category = VoidModules.Category.VISUALS;
     private final List<String> visible = new ArrayList<>();
 
@@ -37,8 +41,8 @@ public final class VoidClickScreen extends Screen {
 
     @Override
     protected void init() {
-        panelW = Math.min(700, Math.max(260, width - 16));
-        panelH = Math.min(470, Math.max(220, height - 24));
+        panelW = Math.max(260, Math.min(width - 16, (int) (width * 0.90)));
+        panelH = Math.max(220, Math.min(height - 16, (int) (height * 0.93)));
         panelX = (width - panelW) / 2;
         panelY = (height - panelH) / 2;
 
@@ -154,7 +158,9 @@ public final class VoidClickScreen extends Screen {
         g.fill(searchX + 1, searchY + 1, searchX + searchW - 1, searchY + 2,
             0x886E587D);
         g.drawString(font, "⌕", searchX + 9, searchY + 8, ACCENT_BRIGHT, false);
-        g.drawString(font, "Search modules", searchX + 26, searchY + 9, MUTED, false);
+        String searchLabel = searchText.isEmpty() ? "Search modules" : searchText;
+        g.drawString(font, searchLabel + (searchFocused ? "_" : ""), searchX + 26, searchY + 9,
+            searchText.isEmpty() ? MUTED : TEXT, false);
 
         // Two-column module cards; every switch reads and changes the real module state.
         for (int row = 0; row < rowsVisible(); row++) {
@@ -221,12 +227,15 @@ public final class VoidClickScreen extends Screen {
             return true;
         }
 
-        // Search focus.
+        // Search field focus and typing.
+        searchFocused = mx >= searchX && mx <= searchX + searchW
+            && my >= searchY && my <= searchY + 27;
+        if (searchFocused) return true;
 
         // Tabs.
         String[] tabs = tabLabels();
         int tw = tabWidth();
-        int tabY = panelY + 53;
+        int tabY = panelY + 43;
         for (int i = 0; i < tabs.length; i++) {
             int x = contentX + i * tw;
             if (mx >= x && mx <= x + tw - 4 && my >= tabY && my <= tabY + 25) {
@@ -251,6 +260,38 @@ public final class VoidClickScreen extends Screen {
             }
         }
         return super.mouseClicked(click, doubled);
+    }
+
+
+    @Override
+    public boolean charTyped(CharacterEvent event) {
+        if (searchFocused) {
+            char ch = event.character();
+            if (ch >= 32 && ch != 127 && searchText.length() < 48) {
+                searchText += ch;
+                scroll = 0;
+                rebuild();
+            }
+            return true;
+        }
+        return super.charTyped(event);
+    }
+
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        if (searchFocused) {
+            if (event.key() == GLFW.GLFW_KEY_BACKSPACE && !searchText.isEmpty()) {
+                searchText = searchText.substring(0, searchText.length() - 1);
+                scroll = 0;
+                rebuild();
+                return true;
+            }
+            if (event.key() == GLFW.GLFW_KEY_ESCAPE) {
+                searchFocused = false;
+                return true;
+            }
+        }
+        return super.keyPressed(event);
     }
 
     @Override
