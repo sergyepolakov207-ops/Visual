@@ -18,7 +18,7 @@ public final class VoidClickScreen extends Screen {
     private static final int ACCENT = 0xFFB47CFF;
     private static final int ACCENT_DARK = 0xFF62458C;
 
-    private int px, py, pw, ph, cx, cw, gridY, gridBottom, cardW, cardH, gap, cols;
+    private int px, py, pw, ph, rail, cx, cw, gridY, gridBottom, cardW, cardH, gap, cols;
     private int scroll, searchX, searchY, searchW;
     private boolean searchFocused, blurAvailable = true;
     private String search = "";
