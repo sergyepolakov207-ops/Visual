@@ -10,17 +10,17 @@ import java.util.List;
 import java.util.Locale;
 
 public final class VoidClickScreen extends Screen {
-    private static final int SHADE = 0x9905000D;
-    private static final int PANEL = 0xF00D0A13;
-    private static final int PANEL_EDGE = 0xFF382047;
-    private static final int SURFACE = 0xFF15101D;
-    private static final int SURFACE_HOVER = 0xFF21152D;
-    private static final int SURFACE_ACTIVE = 0xFF2B1740;
+    private static final int SHADE = 0x55030008;
+    private static final int PANEL = 0xB80B0912;
+    private static final int PANEL_EDGE = 0x887B55A0;
+    private static final int SURFACE = 0x70352D40;
+    private static final int SURFACE_HOVER = 0xA04A315F;
+    private static final int SURFACE_ACTIVE = 0xB85A3280;
     private static final int TEXT = 0xFFF4ECFF;
     private static final int MUTED = 0xFF9B8BAA;
     private static final int ACCENT = 0xFFB34CFF;
     private static final int ACCENT_BRIGHT = 0xFFD18BFF;
-    private static final int SWITCH_OFF = 0xFF403747;
+    private static final int SWITCH_OFF = 0x995A5262;
 
     private int panelX, panelY, panelW, panelH;
     private int railW, contentX, contentW;
@@ -37,8 +37,8 @@ public final class VoidClickScreen extends Screen {
 
     @Override
     protected void init() {
-        panelW = Math.min(660, Math.max(260, width - 20));
-        panelH = Math.min(430, Math.max(220, height - 28));
+        panelW = Math.min(700, Math.max(260, width - 16));
+        panelH = Math.min(470, Math.max(220, height - 24));
         panelX = (width - panelW) / 2;
         panelY = (height - panelH) / 2;
 
@@ -51,9 +51,9 @@ public final class VoidClickScreen extends Screen {
         rowH = panelH < 280 ? 24 : 28;
 
         searchX = contentX;
-        searchY = panelY + 91;
+        searchY = panelY + 86;
         searchW = contentW;
-        listY = searchY + 35;
+        listY = searchY + 34;
         listBottom = panelY + panelH - 38;
         rebuild();
     }
@@ -112,21 +112,21 @@ public final class VoidClickScreen extends Screen {
         // Main glass panel and violet edge.
         rounded(g, panelX, panelY, panelW, panelH, 11, PANEL);
         g.fill(panelX + 1, panelY + 1, panelX + panelW - 1, panelY + 2, PANEL_EDGE);
-        g.fill(panelX + 1, panelY + panelH - 2, panelX + panelW - 1, panelY + panelH - 1, 0xAA6D28A0);
+        g.fill(panelX + 1, panelY + panelH - 2, panelX + panelW - 1, panelY + panelH - 1, 0x667D4BA0);
 
-        // Header banner.
-        g.fillGradient(panelX + 1, panelY + 1, panelX + panelW - 1, panelY + 43,
-            0xFF32134C, 0xFF130D20);
-        g.fill(panelX + 1, panelY + 42, panelX + panelW - 1, panelY + 44, ACCENT);
-        g.drawCenteredString(font, "SWIFT VISUALS", panelX + panelW / 2, panelY + 10, TEXT);
-        g.drawCenteredString(font, "CUSTOM CLIENT  /  FABRIC", panelX + panelW / 2, panelY + 26, ACCENT_BRIGHT);
+        // Slim glass header with a subtle violet reflection.
+        g.fillGradient(panelX + 1, panelY + 1, panelX + panelW - 1, panelY + 38,
+            0x665B3A70, 0x22110D18);
+        g.fill(panelX + 1, panelY + 1, panelX + panelW - 1, panelY + 2, 0x99E7C9FF);
+        g.drawString(font, "SWIFT VISUALS", contentX + 2, panelY + 13, TEXT, true);
+        g.drawString(font, "GLASS INTERFACE", contentX + 94, panelY + 13, MUTED, false);
         g.drawString(font, "×", panelX + panelW - 19, panelY + 9, ACCENT_BRIGHT, true);
 
         // Left icon rail.
-        g.fill(panelX + railW, panelY + 44, panelX + railW + 1, panelY + panelH - 2, 0x553E2850);
+        g.fill(panelX + railW, panelY + 39, panelX + railW + 1, panelY + panelH - 2, 0x447B55A0);
         String[] railIcons = {"◇", "▤", "⚙"};
         for (int i = 0; i < railIcons.length; i++) {
-            int y = panelY + 58 + i * 35;
+            int y = panelY + 52 + i * 35;
             boolean active = category.ordinal() == i;
             if (active) rounded(g, panelX + 6, y - 5, railW - 12, 25, 6, SURFACE_ACTIVE);
             g.drawCenteredString(font, railIcons[i], panelX + railW / 2, y + 2,
@@ -136,7 +136,7 @@ public final class VoidClickScreen extends Screen {
         // Category tabs.
         String[] tabs = tabLabels();
         int tw = tabWidth();
-        int tabY = panelY + 53;
+        int tabY = panelY + 43;
         for (int i = 0; i < tabs.length; i++) {
             int x = contentX + i * tw;
             boolean active = category.ordinal() == i;
@@ -152,7 +152,7 @@ public final class VoidClickScreen extends Screen {
         rounded(g, searchX, searchY, searchW, 27, 7,
             SURFACE);
         g.fill(searchX + 1, searchY + 1, searchX + searchW - 1, searchY + 2,
-            0xFF352A40);
+            0x886E587D);
         g.drawString(font, "⌕", searchX + 9, searchY + 8, ACCENT_BRIGHT, false);
         g.drawString(font, "Search modules", searchX + 26, searchY + 9, MUTED, false);
 
@@ -167,7 +167,7 @@ public final class VoidClickScreen extends Screen {
                 int y = listY + row * (rowH + gap);
                 boolean hover = mx >= x && mx <= x + cardW && my >= y && my <= y + rowH;
                 rounded(g, x, y, cardW, rowH, 6, hover ? SURFACE_HOVER : SURFACE);
-                g.fill(x + 1, y + 1, x + cardW - 1, y + 2, 0x443E2C4D);
+                g.fill(x + 1, y + 1, x + cardW - 1, y + 2, 0x557D6394);
 
                 int switchW = 24, switchH = 13;
                 int sx = x + cardW - switchW - 7;
@@ -198,7 +198,7 @@ public final class VoidClickScreen extends Screen {
 
         // Compact footer/status strip.
         int footerY = panelY + panelH - 27;
-        g.fill(contentX, footerY - 5, panelX + panelW - 10, footerY - 4, 0x553E2850);
+        g.fill(contentX, footerY - 5, panelX + panelW - 10, footerY - 4, 0x557B55A0);
         g.drawString(font, "SWIFT", contentX + 2, footerY + 3, ACCENT_BRIGHT, true);
         g.drawString(font, "•", contentX + 38, footerY + 3, ACCENT);
         g.drawString(font, "1.21.11", contentX + 47, footerY + 3, MUTED, false);
