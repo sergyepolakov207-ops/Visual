@@ -13,19 +13,12 @@ import java.util.List;
 import java.util.Locale;
 
 public final class VoidClickScreen extends Screen {
-    private static final int DIM = 0x72050910;
-    private static final int PANEL = 0xE90C0D14;
-    private static final int HEADER = 0xF0141520;
-    private static final int CARD = 0xE51A1D29;
-    private static final int CARD_HOVER = 0xF02A2D3C;
-    private static final int RAIL = 0xF0090A10;
     private static final int TEXT = 0xFFF1F0F7;
     private static final int MUTED = 0xFF9294A8;
     private static final int ACCENT = 0xFFB47CFF;
     private static final int ACCENT_DARK = 0xFF62458C;
-    private static final int OFF = 0xFF3C3E4C;
 
-    private int px, py, pw, ph, rail, cx, cw, gridY, gridBottom, cardW, cardH, gap, cols;
+    private int px, py, pw, ph, cx, cw, gridY, gridBottom, cardW, cardH, gap, cols;
     private int scroll, searchX, searchY, searchW;
     private boolean searchFocused, blurAvailable = true;
     private String search = "";
@@ -42,7 +35,6 @@ public final class VoidClickScreen extends Screen {
         ph = Math.max(210, Math.min(height - 12, (int)(height * 0.86)));
         px = (width - pw) / 2;
         py = (height - ph) / 2;
-        rail = 0;
         cx = px + 18;
         cw = pw - 36;
         gap = 7;
