@@ -8,6 +8,10 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.EntityHitResult;
 import org.lwjgl.glfw.GLFW;
 
 
@@ -110,6 +114,58 @@ public final class VoidClientClient implements ClientModInitializer {
             if (VoidModules.isEnabled("Attack Cooldown")) {
                 int percent = Math.round(client.player.getAttackStrengthScale(0.0F) * 100.0F);
                 y = drawBarCard(graphics, client, "ATTACK READY", percent, x, y, accent);
+            }
+
+            if (VoidModules.isEnabled("Target HUD") || VoidModules.isEnabled("Target Range")) {
+                if (client.hitResult instanceof EntityHitResult hit
+                    && hit.getEntity() instanceof LivingEntity target && target.isAlive()) {
+                    if (VoidModules.isEnabled("Target HUD")) {
+                        String targetName = target.getName().getString();
+                        String hp = Math.round(target.getHealth()) + "/" + Math.round(target.getMaxHealth());
+                        y = drawCard(graphics, client, "TARGET " + targetName, hp, x, y,
+                            target.getHealth() <= 6.0F ? 0xFFFF6868 : 0xFFB88CFF);
+                    }
+                    if (VoidModules.isEnabled("Target Range")) {
+                        String distance = String.format(java.util.Locale.ROOT, "%.1f blocks",
+                            client.player.distanceTo(target));
+                        y = drawCard(graphics, client, "TARGET RANGE", distance, x, y, accent);
+                    }
+                }
+            }
+
+            if (VoidModules.isEnabled("Totem Counter")) {
+                int totems = 0;
+                for (int i = 0; i < client.player.getInventory().getContainerSize(); i++) {
+                    if (client.player.getInventory().getItem(i).is(Items.TOTEM_OF_UNDYING)) totems +=
+                        client.player.getInventory().getItem(i).getCount();
+                }
+                y = drawCard(graphics, client, "TOTEMS", Integer.toString(totems), x, y, 0xFFFFD36A);
+            }
+
+            if (VoidModules.isEnabled("Armor Durability")) {
+                StringBuilder armor = new StringBuilder();
+                EquipmentSlot[] slots = {EquipmentSlot.HEAD, EquipmentSlot.CHEST,
+                    EquipmentSlot.LEGS, EquipmentSlot.FEET};
+                for (EquipmentSlot slot : slots) {
+                    var stack = client.player.getItemBySlot(slot);
+                    if (stack.isEmpty()) armor.append("— ");
+                    else if (stack.isDamageableItem()) {
+                        int remaining = stack.getMaxDamage() - stack.getDamageValue();
+                        armor.append(remaining).append(" ");
+                    } else armor.append("• ");
+                }
+                y = drawCard(graphics, client, "ARMOR DURABILITY", armor.toString().trim(), x, y, 0xFF9BCBFF);
+            }
+
+            if (VoidModules.isEnabled("Pearl Cooldown")) {
+                boolean cooling = client.player.getCooldowns().isOnCooldown(Items.ENDER_PEARL);
+                y = drawCard(graphics, client, "PEARL", cooling ? "COOLDOWN" : "READY", x, y,
+                    cooling ? 0xFFFF9B70 : 0xFF75D99A);
+            }
+
+            if (VoidModules.isEnabled("Shield Status")) {
+                y = drawCard(graphics, client, "SHIELD", client.player.isBlocking() ? "BLOCKING" : "READY",
+                    x, y, client.player.isBlocking() ? 0xFF75D99A : 0xFF9BCBFF);
             }
             if (VoidModules.isEnabled("Item Durability HUD")) {
                 var item = client.player.getMainHandItem();
