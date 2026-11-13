@@ -23,6 +23,7 @@ public final class VoidClickScreen extends Screen {
     private int panelX, panelY, panelW, panelH;
     private int columns, cardW, rowH, gap, listX, listY, listBottom, scroll;
     private int sidebarW, gridW;
+    private boolean blurAvailable = true;
     private VoidModules.Category category = VoidModules.Category.VISUALS;
     private final List<String> visible = new ArrayList<>();
 
@@ -82,7 +83,14 @@ public final class VoidClickScreen extends Screen {
 
     @Override
     public void render(GuiGraphics g, int mx, int my, float partialTick) {
-        // Keep rendering compatible with mobile launchers; avoid the native post-process blur path.
+        // Try Minecraft's native background blur, but disable it if the mobile renderer rejects it.
+        if (blurAvailable) {
+            try {
+                renderBlurredBackground(g);
+            } catch (RuntimeException | LinkageError blurError) {
+                blurAvailable = false;
+            }
+        }
         g.fill(0, 0, width, height, SHADE);
         rounded(g, panelX, panelY, panelW, panelH, 12, PANEL);
         g.fill(panelX + 1, panelY + 1, panelX + panelW - 1, panelY + 2, BORDER);
