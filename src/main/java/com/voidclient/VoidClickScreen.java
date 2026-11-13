@@ -100,8 +100,12 @@ public final class VoidClickScreen extends Screen {
         }
         g.fill(0, 0, width, height, DIM);
         rounded(g, px, py, pw, ph, 10, PANEL);
+        // Refined frame and layered header preserve the familiar layout.
         g.fill(px + 1, py + 1, px + pw - 1, py + 40, HEADER);
-        g.fill(px + 1, py + 1, px + pw - 1, py + 3, ACCENT_DARK);
+        g.fill(px + 1, py + 1, px + pw - 1, py + 3, ACCENT);
+        g.fill(px + 1, py + 40, px + pw - 1, py + 41, 0x553F3454);
+        g.fill(px, py + 8, px + 1, py + ph - 8, 0x664D3B69);
+        g.fill(px + pw - 1, py + 8, px + pw, py + ph - 8, 0x664D3B69);
 
         // Sidebar
         g.fill(px + 1, py + 40, px + rail, py + ph - 1, RAIL);
@@ -116,9 +120,12 @@ public final class VoidClickScreen extends Screen {
         }
 
         // Header branding and small status
-        g.drawString(font, "SWIFT VISUALS", cx + 2, py + 13, TEXT, true);
-        g.drawString(font, "COMBAT READY  •  1.21.11", cx + 105, py + 14, MUTED, false);
-        g.drawString(font, "×", px + pw - 19, py + 11, TEXT, true);
+        rounded(g, cx, py + 8, 25, 25, 7, 0xFF302440);
+        g.drawCenteredString(font, "S", cx + 12, py + 16, ACCENT);
+        g.drawString(font, "SWIFT VISUALS", cx + 33, py + 9, TEXT, true);
+        g.drawString(font, "CLIENT MENU  /  1.21.11", cx + 33, py + 23, MUTED, false);
+        rounded(g, px + pw - 31, py + 8, 21, 22, 6, 0xFF292331);
+        g.drawCenteredString(font, "×", px + pw - 20, py + 14, TEXT);
 
         // Category tabs
         int tabY = py + 49;
@@ -129,12 +136,16 @@ public final class VoidClickScreen extends Screen {
             int x = cx + i * (tabW + tabGap);
             boolean active = category.ordinal() == i;
             rounded(g, x, tabY, tabW, 27, 6, active ? 0xFF352943 : 0x66202430);
-            if (active) g.fill(x + 10, tabY + 25, x + tabW - 10, tabY + 27, ACCENT);
+            if (active) {
+                g.fill(x + 10, tabY + 25, x + tabW - 10, tabY + 27, ACCENT);
+                g.fill(x + 1, tabY + 5, x + 2, tabY + 22, ACCENT_DARK);
+            }
             g.drawCenteredString(font, tabs[i], x + tabW / 2, tabY + 9, active ? ACCENT : MUTED);
         }
 
         // Search bar
-        rounded(g, searchX, searchY, searchW, 28, 6, 0xC51A1B27);
+        rounded(g, searchX, searchY, searchW, 28, 6, searchFocused ? 0xEE211B2C : 0xC51A1B27);
+        if (searchFocused) g.fill(searchX + 7, searchY + 5, searchX + 8, searchY + 23, ACCENT);
         g.drawString(font, "⌕", searchX + 10, searchY + 9, ACCENT, false);
         String label = search.isEmpty() ? "Search " + categoryName().toLowerCase() + " modules..." : search;
         g.enableScissor(searchX + 28, searchY, searchX + searchW - 8, searchY + 28);
@@ -154,6 +165,8 @@ public final class VoidClickScreen extends Screen {
                 boolean hover = mx >= x && mx <= x + cardW && my >= y && my <= y + cardH;
                 rounded(g, x, y, cardW, cardH, 5, hover ? CARD_HOVER : CARD);
                 g.fill(x + 1, y + 1, x + cardW - 1, y + 2, 0x332F3042);
+                if (enabled) rounded(g, x + 1, y + 7, 2, cardH - 14, 1, ACCENT);
+                else if (hover) g.fill(x + 1, y + 7, x + 2, y + cardH - 7, 0x886D6680);
                 int sw = 26, sh = 14, sx = x + cardW - sw - 9, sy = y + (cardH - sh) / 2;
                 g.enableScissor(x + 9, y, sx - 5, y + cardH);
                 g.drawString(font, name, x + 10, y + 7, TEXT, false);
