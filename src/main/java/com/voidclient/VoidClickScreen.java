@@ -48,12 +48,12 @@ public final class VoidClickScreen extends Screen {
         gap = 7;
         cols = cw >= 510 ? 3 : cw >= 300 ? 2 : 1;
         cardW = (cw - gap * (cols - 1)) / cols;
-        cardH = width < 420 ? 33 : 39;
+        cardH = width < 420 ? 36 : 43;
         searchX = cx;
-        searchY = py + 93;
+        searchY = py + 126;
         searchW = cw;
-        gridY = searchY + 38;
-        gridBottom = py + ph - 37;
+        gridY = searchY + 39;
+        gridBottom = py + ph - 35;
         rebuild();
     }
 
@@ -92,69 +92,61 @@ public final class VoidClickScreen extends Screen {
     @Override
     public void render(GuiGraphics g, int mx, int my, float partialTick) {
         if (blurAvailable) {
-            try {
-                renderBlurredBackground(g);
-            } catch (RuntimeException | LinkageError e) {
-                blurAvailable = false;
-            }
+            try { renderBlurredBackground(g); }
+            catch (RuntimeException | LinkageError e) { blurAvailable = false; }
         }
-        g.fill(0, 0, width, height, DIM);
-        rounded(g, px, py, pw, ph, 10, PANEL);
-        // Refined frame and layered header preserve the familiar layout.
-        g.fill(px + 1, py + 1, px + pw - 1, py + 40, HEADER);
-        g.fill(px + 1, py + 1, px + pw - 1, py + 3, ACCENT);
-        g.fill(px + 1, py + 40, px + pw - 1, py + 41, 0x553F3454);
-        g.fill(px, py + 8, px + 1, py + ph - 8, 0x664D3B69);
-        g.fill(px + pw - 1, py + 8, px + pw, py + ph - 8, 0x664D3B69);
+        g.fill(0, 0, width, height, 0xA9000610);
 
-        // Sidebar
-        g.fill(px + 1, py + 40, px + rail, py + ph - 1, RAIL);
-        g.fill(px + rail, py + 40, px + rail + 1, py + ph - 1, 0x553C354F);
-        g.drawCenteredString(font, "S", px + rail / 2, py + 13, ACCENT);
-        String[] icons = {"✦", "▦", "⚔"};
-        for (int i = 0; i < 3; i++) {
-            int y = py + 56 + i * 42;
-            if (category.ordinal() == i) rounded(g, px + 5, y - 5, rail - 10, 29, 6, 0xFF30263F);
-            g.drawCenteredString(font, icons[i], px + rail / 2, y + 4,
-                category.ordinal() == i ? ACCENT : MUTED);
-        }
+        // New floating dashboard: wide canvas, compact top navigation, clean module grid.
+        rounded(g, px, py, pw, ph, 12, 0xF20A0D16);
+        g.fill(px + 12, py + 1, px + pw - 12, py + 3, ACCENT);
+        g.fill(px + 1, py + 1, px + pw - 1, py + 48, 0xFF111622);
+        g.fill(px + 1, py + 48, px + pw - 1, py + 49, 0xFF252333);
 
-        // Header branding and small status
-        rounded(g, cx, py + 8, 25, 25, 7, 0xFF302440);
-        g.drawCenteredString(font, "S", cx + 12, py + 16, ACCENT);
-        g.drawString(font, "SWIFT VISUALS", cx + 33, py + 9, TEXT, true);
-        g.drawString(font, "CLIENT MENU  /  1.21.11", cx + 33, py + 23, MUTED, false);
-        rounded(g, px + pw - 31, py + 8, 21, 22, 6, 0xFF292331);
-        g.drawCenteredString(font, "×", px + pw - 20, py + 14, TEXT);
+        // Brand block
+        rounded(g, px + 17, py + 11, 27, 27, 8, 0xFF332447);
+        g.drawCenteredString(font, "S", px + 30, py + 20, ACCENT);
+        g.drawString(font, "SWIFT", px + 53, py + 10, TEXT, true);
+        g.drawString(font, "VISUALS  /  CLIENT", px + 53, py + 25, MUTED, false);
 
-        // Category tabs
-        int tabY = py + 49;
-        int tabGap = 7;
-        int tabW = (cw - tabGap * 2) / 3;
+        // Category navigation as compact chips
+        int tabY = py + 59;
+        int tabGap = 8;
+        int tabW = Math.max(48, (cw - tabGap * 2) / 3);
         String[] tabs = {"VISUALS", "HUD", "PVP"};
         for (int i = 0; i < 3; i++) {
             int x = cx + i * (tabW + tabGap);
             boolean active = category.ordinal() == i;
-            rounded(g, x, tabY, tabW, 27, 6, active ? 0xFF352943 : 0x66202430);
-            if (active) {
-                g.fill(x + 10, tabY + 25, x + tabW - 10, tabY + 27, ACCENT);
-                g.fill(x + 1, tabY + 5, x + 2, tabY + 22, ACCENT_DARK);
-            }
-            g.drawCenteredString(font, tabs[i], x + tabW / 2, tabY + 9, active ? ACCENT : MUTED);
+            rounded(g, x, tabY, tabW, 27, 8, active ? 0xFF39284E : 0xFF171C28);
+            if (active) g.fill(x + 9, tabY + 24, x + tabW - 9, tabY + 26, ACCENT);
+            g.drawCenteredString(font, tabs[i], x + tabW / 2, tabY + 9,
+                active ? 0xFFF2E8FF : MUTED);
         }
 
-        // Search bar
-        rounded(g, searchX, searchY, searchW, 28, 6, searchFocused ? 0xEE211B2C : 0xC51A1B27);
-        if (searchFocused) g.fill(searchX + 7, searchY + 5, searchX + 8, searchY + 23, ACCENT);
-        g.drawString(font, "⌕", searchX + 10, searchY + 9, ACCENT, false);
-        String label = search.isEmpty() ? "Search " + categoryName().toLowerCase() + " modules..." : search;
-        g.enableScissor(searchX + 28, searchY, searchX + searchW - 8, searchY + 28);
-        g.drawString(font, label + (searchFocused ? "_" : ""), searchX + 29, searchY + 9,
-            search.isEmpty() ? MUTED : TEXT, false);
+        // Page title and count
+        int headingY = py + 96;
+        g.drawString(font, categoryName(), cx + 1, headingY, TEXT, true);
+        String sub = "Choose modules and customize your client";
+        g.drawString(font, sub, cx + 1, headingY + 13, MUTED, false);
+
+        // Search control
+        searchX = cx;
+        searchY = py + 126;
+        searchW = cw;
+        rounded(g, searchX, searchY, searchW, 29, 8,
+            searchFocused ? 0xFF292136 : 0xFF171C28);
+        if (searchFocused) g.fill(searchX + 1, searchY + 5, searchX + 2, searchY + 24, ACCENT);
+        g.drawString(font, "⌕", searchX + 11, searchY + 10, ACCENT, false);
+        String label = search.isEmpty() ? "Find a module..." : search;
+        g.enableScissor(searchX + 29, searchY, searchX + searchW - 8, searchY + 29);
+        g.drawString(font, label + (searchFocused ? "_" : ""), searchX + 30,
+            searchY + 10, search.isEmpty() ? MUTED : TEXT, false);
         g.disableScissor();
 
-        // Module cards
-        for (int row = 0; row < visibleRows(); row++) {
+        gridY = searchY + 39;
+        gridBottom = py + ph - 35;
+        int rowCount = visibleRows();
+        for (int row = 0; row < rowCount; row++) {
             for (int col = 0; col < cols; col++) {
                 int index = (scroll + row) * cols + col;
                 if (index >= modules.size()) continue;
@@ -163,36 +155,44 @@ public final class VoidClickScreen extends Screen {
                 int y = gridY + row * (cardH + gap);
                 boolean enabled = VoidModules.isEnabled(name);
                 boolean hover = mx >= x && mx <= x + cardW && my >= y && my <= y + cardH;
-                rounded(g, x, y, cardW, cardH, 5, hover ? CARD_HOVER : CARD);
-                g.fill(x + 1, y + 1, x + cardW - 1, y + 2, 0x332F3042);
-                if (enabled) rounded(g, x + 1, y + 7, 2, cardH - 14, 1, ACCENT);
-                else if (hover) g.fill(x + 1, y + 7, x + 2, y + cardH - 7, 0x886D6680);
-                int sw = 26, sh = 14, sx = x + cardW - sw - 9, sy = y + (cardH - sh) / 2;
-                g.enableScissor(x + 9, y, sx - 5, y + cardH);
-                g.drawString(font, name, x + 10, y + 7, TEXT, false);
+                rounded(g, x, y, cardW, cardH, 8,
+                    hover ? 0xFF252B3B : 0xFF171D29);
+                if (enabled) {
+                    rounded(g, x + 8, y + 8, 23, 23, 7, 0xFF39294D);
+                    g.drawCenteredString(font, "✓", x + 19, y + 15, ACCENT);
+                } else {
+                    rounded(g, x + 8, y + 8, 23, 23, 7, 0xFF242B39);
+                    g.drawCenteredString(font, "•", x + 19, y + 15, MUTED);
+                }
+                int sx = x + cardW - 34, sy = y + (cardH - 16) / 2;
+                g.enableScissor(x + 39, y, sx - 5, y + cardH);
+                g.drawString(font, name, x + 39, y + (cardH - 8) / 2,
+                    enabled ? 0xFFF4E9FF : TEXT, false);
                 g.disableScissor();
-                rounded(g, sx, sy, sw, sh, 7, enabled ? ACCENT_DARK : OFF);
-                rounded(g, enabled ? sx + 14 : sx + 2, sy + 2, 10, 10, 5,
-                    enabled ? 0xFFFFFFFF : 0xFFB7B5C2);
+                rounded(g, sx, sy, 27, 16, 8, enabled ? 0xFF8058AD : 0xFF343B49);
+                rounded(g, enabled ? sx + 13 : sx + 2, sy + 2, 12, 12, 6,
+                    0xFFF8F4FF);
             }
         }
-        if (modules.isEmpty()) g.drawCenteredString(font, "No modules found", cx + cw / 2, gridY + 12, MUTED);
-
-        int totalRows = (modules.size() + cols - 1) / cols;
-        if (totalRows > visibleRows()) {
-            int trackH = gridBottom - gridY;
-            int thumbH = Math.max(16, trackH * visibleRows() / totalRows);
-            int thumbY = gridY + (trackH - thumbH) * scroll / (totalRows - visibleRows());
-            rounded(g, px + pw - 5, thumbY, 3, thumbH, 2, ACCENT_DARK);
+        if (modules.isEmpty()) {
+            g.drawCenteredString(font, "No modules found", cx + cw / 2, gridY + 15, MUTED);
         }
 
-        int footer = py + ph - 24;
-        g.fill(cx, footer - 5, px + pw - 10, footer - 4, 0x554A405A);
-        g.drawString(font, "SWIFT  /  " + categoryName(), cx + 2, footer + 2, ACCENT, true);
-        int enabled = 0;
-        for (String n : modules) if (VoidModules.isEnabled(n)) enabled++;
-        String status = enabled + " ACTIVE  •  " + modules.size() + " MODULES";
-        g.drawString(font, status, px + pw - 14 - font.width(status), footer + 2, MUTED, false);
+        int rows = (modules.size() + cols - 1) / cols;
+        if (rows > rowCount) {
+            int track = gridBottom - gridY;
+            int thumb = Math.max(18, track * rowCount / rows);
+            int ty = gridY + (track - thumb) * scroll / (rows - rowCount);
+            rounded(g, px + pw - 7, ty, 3, thumb, 2, ACCENT_DARK);
+        }
+
+        int footerY = py + ph - 23;
+        g.fill(cx, footerY - 7, px + pw - 13, footerY - 6, 0xFF252333);
+        int activeCount = 0;
+        for (String n : modules) if (VoidModules.isEnabled(n)) activeCount++;
+        g.drawString(font, "SWIFT VISUALS", cx + 1, footerY, MUTED, false);
+        String count = activeCount + " ENABLED  /  " + modules.size() + " TOTAL";
+        g.drawString(font, count, px + pw - 14 - font.width(count), footerY, ACCENT, false);
         super.render(g, mx, my, partialTick);
     }
 
