@@ -33,7 +33,7 @@ public final class VoidClickScreen extends Screen {
     @Override
     protected void init() {
         panelW = Math.min(1200, Math.max(280, width - 16));
-        panelH = Math.min(520, Math.max(220, height - 24));
+        panelH = Math.min(360, Math.max(240, height - 80));
         panelX = (width - panelW) / 2;
         panelY = (height - panelH) / 2;
         sidebarW = 34;
@@ -41,7 +41,7 @@ public final class VoidClickScreen extends Screen {
         columns = panelW >= 340 ? 3 : panelW >= 270 ? 2 : 1;
         gridW = panelW - sidebarW - 26;
         cardW = (gridW - (columns - 1) * gap) / columns;
-        rowH = Math.max(25, Math.min(34, panelH / 15));
+        rowH = Math.max(25, Math.min(34, panelH / 12));
         listX = panelX + sidebarW + 8;
         listY = panelY + 70;
         listBottom = panelY + panelH - 13;
@@ -86,6 +86,7 @@ public final class VoidClickScreen extends Screen {
         g.fill(0, 0, width, height, SHADE);
         rounded(g, panelX, panelY, panelW, panelH, 12, PANEL);
         g.fill(panelX + 1, panelY + 1, panelX + panelW - 1, panelY + 2, BORDER);
+        rounded(g, panelX + 12, panelY + 3, Math.max(40, panelW / 7), 2, 1, 0xAA36A7FF);
         g.fill(panelX + sidebarW, panelY + 1, panelX + sidebarW + 1, panelY + panelH - 1, 0x443D352B);
 
         // Header and compact category tabs.
