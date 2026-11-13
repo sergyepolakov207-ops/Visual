@@ -22,6 +22,7 @@ public final class VoidClickScreen extends Screen {
     private int scroll, searchX, searchY, searchW;
     private boolean searchFocused, blurAvailable = true;
     private String search = "";
+    private String selectedModule = "";
     private VoidModules.Category category = VoidModules.Category.VISUALS;
     private final List<String> modules = new ArrayList<>();
 
@@ -176,6 +177,24 @@ public final class VoidClickScreen extends Screen {
             g.drawCenteredString(font, "No modules in this category", cx + cw / 2,
                 gridY + 14, MUTED);
         }
+        if (!selectedModule.isEmpty() && modules.contains(selectedModule)) {
+            int panelY = Math.max(gridY + 58, gridBottom - 76);
+            rounded(g, cx, panelY, cw, 68, 9, 0xB51C2030);
+            g.fill(cx + 2, panelY + 2, cx + cw - 2, panelY + 3, 0x66FFFFFF);
+            g.drawString(font, selectedModule, cx + 12, panelY + 9, TEXT, true);
+            g.drawString(font, VoidModules.descriptionOf(selectedModule), cx + 12, panelY + 24, MUTED, false);
+            if (selectedModule.equals("HUD")) {
+                String scaleText = "HUD SCALE  " + Math.round(VoidModules.hudScale() * 100) + "%";
+                g.drawString(font, scaleText, cx + 12, panelY + 45, ACCENT, true);
+                rounded(g, cx + cw - 82, panelY + 38, 25, 22, 6, 0xFF39334B);
+                rounded(g, cx + cw - 49, panelY + 38, 25, 22, 6, 0xFF39334B);
+                g.drawCenteredString(font, "−", cx + cw - 69, panelY + 45, TEXT);
+                g.drawCenteredString(font, "+", cx + cw - 36, panelY + 45, TEXT);
+            } else {
+                g.drawString(font, VoidModules.isEnabled(selectedModule) ? "STATUS: ENABLED" : "STATUS: DISABLED",
+                    cx + 12, panelY + 45, ACCENT, false);
+            }
+        }
 
         int rows = (modules.size() + cols - 1) / cols;
         if (rows > rowCount) {
@@ -196,6 +215,16 @@ public final class VoidClickScreen extends Screen {
             return true;
         }
         searchFocused = false;
+        if ("HUD".equals(selectedModule)) {
+            int panelY = Math.max(gridY + 58, gridBottom - 76);
+            if (my >= panelY + 38 && my <= panelY + 62) {
+                if (mx >= cx + cw - 84 && mx <= cx + cw - 53)
+                    VoidModules.setHudScale(VoidModules.hudScale() - 0.05F);
+                else if (mx >= cx + cw - 51 && mx <= cx + cw - 20)
+                    VoidModules.setHudScale(VoidModules.hudScale() + 0.05F);
+                return true;
+            }
+        }
         for (int i = 0; i < 3; i++) {
             int iy = py + 66 + i * 48;
             if (mx >= px + 4 && mx <= px + rail - 4 && my >= iy - 2 && my <= iy + 32) {
@@ -211,7 +240,9 @@ public final class VoidClickScreen extends Screen {
                 if (index >= modules.size()) continue;
                 int x = cx + col * (cardW + gap), y = gridY + row * (cardH + gap);
                 if (mx >= x && mx <= x + cardW && my >= y && my <= y + cardH) {
-                    VoidModules.toggle(modules.get(index));
+                    String name = modules.get(index);
+                    if (mx >= x + cardW - 39) VoidModules.toggle(name);
+                    else selectedModule = selectedModule.equals(name) ? "" : name;
                     return true;
                 }
             }
