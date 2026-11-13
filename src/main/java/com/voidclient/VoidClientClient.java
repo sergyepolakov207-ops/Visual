@@ -11,6 +11,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.EntityHitResult;
 import org.lwjgl.glfw.GLFW;
 
@@ -158,7 +159,7 @@ public final class VoidClientClient implements ClientModInitializer {
             }
 
             if (VoidModules.isEnabled("Pearl Cooldown")) {
-                boolean cooling = client.player.getCooldowns().isOnCooldown(Items.ENDER_PEARL);
+                boolean cooling = client.player.getCooldowns().isOnCooldown(new ItemStack(Items.ENDER_PEARL));
                 y = drawCard(graphics, client, "PEARL", cooling ? "COOLDOWN" : "READY", x, y,
                     cooling ? 0xFFFF9B70 : 0xFF75D99A);
             }
