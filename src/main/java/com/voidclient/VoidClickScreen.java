@@ -150,9 +150,9 @@ public final class VoidClickScreen extends Screen {
 
         // Functional search field.
         rounded(g, searchX, searchY, searchW, 27, 7,
-            searchFocused ? 0xFF21162D : SURFACE);
+            SURFACE);
         g.fill(searchX + 1, searchY + 1, searchX + searchW - 1, searchY + 2,
-            searchFocused ? ACCENT : 0xFF352A40);
+            0xFF352A40);
         g.drawString(font, "⌕", searchX + 9, searchY + 8, ACCENT_BRIGHT, false);
         g.drawString(font, "Search modules", searchX + 26, searchY + 9, MUTED, false);
 
