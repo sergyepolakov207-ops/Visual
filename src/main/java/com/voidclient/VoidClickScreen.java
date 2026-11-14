@@ -136,8 +136,6 @@ public final class VoidClickScreen extends Screen {
             }
             g.drawCenteredString(font, icons[i], px + rail / 2, iy + 14,
                 active ? PURPLE : 0xFF85869A);
-            g.drawCenteredString(font, labels[i], px + rail / 2, iy + 25,
-                active ? WHITE : MUTED);
         }
 
         // Compact Phantom-style header: category chip and short description.
