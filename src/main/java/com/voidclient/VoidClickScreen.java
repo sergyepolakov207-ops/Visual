@@ -72,9 +72,13 @@ public final class VoidClickScreen extends Screen {
 
     private void panel(GuiGraphics g, int x, int y, int w, int h, int color) {
         if (w < 4 || h < 4) return;
-        g.fill(x + 5, y, x + w - 5, y + h, color);
-        g.fill(x + 2, y + 3, x + w - 2, y + h - 3, color);
-        g.fill(x, y + 6, x + w, y + h - 6, color);
+        int radius = Math.min(7, Math.min(w / 2, h / 2));
+        for (int dy = 0; dy < h; dy++) {
+            int edge = dy < radius ? radius - (int)Math.sqrt(radius * radius - (radius - dy) * (radius - dy))
+                : dy >= h - radius ? radius - (int)Math.sqrt(radius * radius - (dy - (h - radius - 1)) * (dy - (h - radius - 1)))
+                : 0;
+            g.fill(x + edge, y + dy, x + w - edge, y + dy + 1, color);
+        }
     }
 
     private void outline(GuiGraphics g, int x, int y, int w, int h, int color) {
@@ -159,6 +163,7 @@ public final class VoidClickScreen extends Screen {
         g.drawString(font, query + (searchFocused ? "_" : ""), searchX + 34,
             searchY + 11, search.isEmpty() ? MUTED : WHITE, false);
         g.disableScissor();
+        if (!search.isEmpty()) g.drawCenteredString(font, "×", searchX + searchW - 16, searchY + 10, PURPLE);
 
         gridY = searchY + 44;
         gridBottom = py + ph - 20;
@@ -243,7 +248,14 @@ public final class VoidClickScreen extends Screen {
         double mx = e.x(), my = e.y();
 
         if (mx >= searchX && mx <= searchX + searchW && my >= searchY && my <= searchY + 32) {
-            searchFocused = true;
+            if (!search.isEmpty() && mx >= searchX + searchW - 30) {
+                search = "";
+                scroll = 0;
+                rebuild();
+                searchFocused = false;
+            } else {
+                searchFocused = true;
+            }
             return true;
         }
         searchFocused = false;
