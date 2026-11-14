@@ -127,7 +127,6 @@ public final class VoidClickScreen extends Screen {
         g.drawCenteredString(font, "S", px + rail / 2, py + 27, PURPLE);
 
         String[] icons = {"✧", "▦", "⚔"};
-        String[] labels = {"VIS", "HUD", "PVP"};
         for (int i = 0; i < 3; i++) {
             int iy = py + 62 + i * 54;
             boolean active = category.ordinal() == i;
@@ -135,7 +134,7 @@ public final class VoidClickScreen extends Screen {
                 panel(g, px + 7, iy, rail - 14, 40, 0xFF30263B);
                 g.fill(px + 7, iy + 8, px + 9, iy + 32, PURPLE);
             }
-            g.drawCenteredString(font, icons[i], px + rail / 2, iy + 7,
+            g.drawCenteredString(font, icons[i], px + rail / 2, iy + 14,
                 active ? PURPLE : 0xFF85869A);
             g.drawCenteredString(font, labels[i], px + rail / 2, iy + 25,
                 active ? WHITE : MUTED);
@@ -238,17 +237,6 @@ public final class VoidClickScreen extends Screen {
         if (e.button() != 0) return super.mouseClicked(e, doubled);
         double mx = e.x(), my = e.y();
 
-        if (mx >= searchX && mx <= searchX + searchW && my >= searchY && my <= searchY + 32) {
-            if (!search.isEmpty() && mx >= searchX + searchW - 30) {
-                search = "";
-                scroll = 0;
-                rebuild();
-                searchFocused = false;
-            } else {
-                searchFocused = true;
-            }
-            return true;
-        }
         searchFocused = false;
 
         for (int i = 0; i < 3; i++) {
