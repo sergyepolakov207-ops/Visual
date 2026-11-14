@@ -60,7 +60,6 @@ public final class VoidClickScreen extends Screen {
         modules.clear();
         String q = search.toLowerCase(Locale.ROOT).trim();
         for (String name : VoidModules.all().keySet()) {
-            if (category == VoidModules.Category.HUD && !name.equals("HUD")) continue;
             if (VoidModules.categoryOf(name) == category
                 && (q.isEmpty() || name.toLowerCase(Locale.ROOT).contains(q))) {
                 modules.add(name);
