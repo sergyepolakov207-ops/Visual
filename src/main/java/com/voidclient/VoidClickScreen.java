@@ -33,21 +33,21 @@ public final class VoidClickScreen extends Screen {
 
     @Override
     protected void init() {
-        pw = Math.min(width - 28, Math.max(300, (int)(width * 0.78)));
-        ph = Math.min(height - 24, Math.max(230, (int)(height * 0.82)));
+        pw = Math.min(width - 28, Math.max(300, (int)(width * 0.54)));
+        ph = Math.min(height - 24, Math.max(230, (int)(height * 0.83)));
         px = (width - pw) / 2;
         py = (height - ph) / 2;
-        rail = width < 520 ? 48 : 56;
-        contentX = px + rail + 18;
-        contentW = pw - rail - 36;
+        rail = width < 520 ? 46 : 54;
+        contentX = px + rail + 8;
+        contentW = pw - rail - 24;
         gap = 8;
-        columns = contentW >= 360 ? 3 : contentW >= 230 ? 2 : 1;
+        columns = contentW >= 500 ? 3 : contentW >= 300 ? 2 : 1;
         cardW = (contentW - gap * (columns - 1)) / columns;
-        cardH = width < 520 ? 40 : 42;
+        cardH = width < 520 ? 38 : 42;
         searchX = contentX;
         searchY = py + 58;
         searchW = contentW;
-        gridY = searchY + 36;
+        gridY = searchY + 38;
         gridBottom = py + ph - 22;
         rebuild();
     }
@@ -141,31 +141,22 @@ public final class VoidClickScreen extends Screen {
                 active ? WHITE : MUTED);
         }
 
-        // Header styled after the compact Phantom Visuals reference.
-        panel(g, contentX + 2, py + 9, 82, 24, 0xFF29232F);
-        g.drawCenteredString(font, categoryName(), contentX + 43, py + 17, WHITE);
+        // Compact Phantom-style header: category chip and short description.
+        panel(g, contentX + 2, py + 10, 88, 30, 0xFF211D25);
+        g.drawCenteredString(font, categoryName(), contentX + 46, py + 21, WHITE);
         String subtitle = categoryDescription();
-        g.drawString(font, subtitle, contentX + 96, py + 17, MUTED, false);
-        g.drawString(font, "SWIFT VISUALS", px + pw - 104, py + 17, PURPLE, true);
-        g.fill(contentX, py + 43, px + pw - 18, py + 44, 0x443E455C);
+        panel(g, contentX + 98, py + 10, Math.max(120, Math.min(contentW - 220, font.width(subtitle) + 22)), 30, 0xFF211D25);
+        g.drawString(font, "☷", contentX + 108, py + 21, MUTED, false);
+        g.drawString(font, subtitle, contentX + 124, py + 21, WHITE, false);
+        g.fill(contentX, py + 49, px + pw - 12, py + 50, 0x332E2937);
 
-        // Search field.
+        // Module grid begins directly under the compact header (no oversized search bar).
         searchX = contentX;
-        searchY = py + 56;
+        searchY = py + 54;
         searchW = contentW;
-        panel(g, searchX, searchY, searchW, 32,
-            searchFocused ? 0xDD302943 : 0xBB252033);
-        outline(g, searchX, searchY, searchW, 32,
-            searchFocused ? 0xCCB88AFF : 0x445D637B);
-        g.drawString(font, "⌕", searchX + 12, searchY + 11, PURPLE, false);
-        String query = search.isEmpty() ? "Search modules..." : search;
-        g.enableScissor(searchX + 34, searchY, searchX + searchW - 10, searchY + 32);
-        g.drawString(font, query + (searchFocused ? "_" : ""), searchX + 34,
-            searchY + 11, search.isEmpty() ? MUTED : WHITE, false);
-        g.disableScissor();
-        if (!search.isEmpty()) g.drawCenteredString(font, "×", searchX + searchW - 16, searchY + 10, PURPLE);
+        gridY = searchY + 8;
+        gridBottom = py + ph - 20;
 
-        gridY = searchY + 37;
         gridBottom = py + ph - 20;
         int rowsVisible = visibleRows();
         for (int row = 0; row < rowsVisible; row++) {
