@@ -41,9 +41,9 @@ public final class VoidClickScreen extends Screen {
         contentX = px + rail + 18;
         contentW = pw - rail - 36;
         gap = 8;
-        columns = contentW >= 420 ? 3 : contentW >= 250 ? 2 : 1;
+        columns = contentW >= 360 ? 3 : contentW >= 230 ? 2 : 1;
         cardW = (contentW - gap * (columns - 1)) / columns;
-        cardH = width < 520 ? 38 : 40;
+        cardH = width < 520 ? 40 : 42;
         searchX = contentX;
         searchY = py + 58;
         searchW = contentW;
@@ -110,21 +110,21 @@ public final class VoidClickScreen extends Screen {
             try { renderBlurredBackground(g); }
             catch (RuntimeException | LinkageError e) { blurAvailable = false; }
         }
-        g.fill(0, 0, width, height, 0x65060A16);
+        g.fill(0, 0, width, height, 0x5A08060D);
 
         // New glass shell: cool tinted glass, fine rim and reflected light.
-        panel(g, px, py, pw, ph, 0xC91A1720);
-        panel(g, px + 2, py + 2, pw - 4, ph - 4, 0x281F1A17);
+        panel(g, px, py, pw, ph, 0xD9161319);
+        panel(g, px + 2, py + 2, pw - 4, ph - 4, 0x241F1926);
         outline(g, px, py, pw, ph, 0x448D70C4);
         g.fill(px + 12, py + 2, px + pw - 12, py + 3, 0x44FFFFFF);
         g.fill(px + 2, py + 18, px + 3, py + ph - 18, 0x55FFFFFF);
         g.fill(px + pw - 3, py + 20, px + pw - 2, py + ph - 20, 0x338C9BFF);
 
         // Left navigation rail.
-        g.fill(px + 1, py + 1, px + rail, py + ph - 1, 0xCC17131F);
+        g.fill(px + 1, py + 1, px + rail, py + ph - 1, 0xDD17131D);
         g.fill(px + rail, py + 12, px + rail + 1, py + ph - 12, 0x443F4660);
         panel(g, px + 13, py + 15, rail - 26, 34, 0xFF29253A);
-        g.drawCenteredString(font, "P", px + rail / 2, py + 27, PURPLE);
+        g.drawCenteredString(font, "S", px + rail / 2, py + 27, PURPLE);
 
         String[] icons = {"✧", "▦", "⚔"};
         String[] labels = {"VIS", "HUD", "PVP"};
@@ -141,18 +141,17 @@ public final class VoidClickScreen extends Screen {
                 active ? WHITE : MUTED);
         }
 
-        // Header.
-        g.drawString(font, "SWIFT VISUALS", contentX + 2, py + 13, WHITE, true);
-        panel(g, contentX + 112, py + 9, 58, 20, 0xFF30243F);
-        g.drawCenteredString(font, categoryName(), contentX + 141, py + 15, PURPLE);
+        // Header styled after the compact Phantom Visuals reference.
+        panel(g, contentX + 2, py + 9, 82, 24, 0xFF29232F);
+        g.drawCenteredString(font, categoryName(), contentX + 43, py + 17, WHITE);
         String subtitle = categoryDescription();
-        g.drawString(font, subtitle, contentX + 182, py + 15, MUTED, false);
-        g.drawString(font, "FABRIC 1.21.11", px + pw - 112, py + 15, 0xFFB8B5C8, true);
-        g.fill(contentX, py + 39, px + pw - 18, py + 40, 0x443E455C);
+        g.drawString(font, subtitle, contentX + 96, py + 17, MUTED, false);
+        g.drawString(font, "SWIFT VISUALS", px + pw - 104, py + 17, PURPLE, true);
+        g.fill(contentX, py + 43, px + pw - 18, py + 44, 0x443E455C);
 
         // Search field.
         searchX = contentX;
-        searchY = py + 68;
+        searchY = py + 56;
         searchW = contentW;
         panel(g, searchX, searchY, searchW, 32,
             searchFocused ? 0xDD302943 : 0xBB252033);
@@ -166,7 +165,7 @@ public final class VoidClickScreen extends Screen {
         g.disableScissor();
         if (!search.isEmpty()) g.drawCenteredString(font, "×", searchX + searchW - 16, searchY + 10, PURPLE);
 
-        gridY = searchY + 39;
+        gridY = searchY + 37;
         gridBottom = py + ph - 20;
         int rowsVisible = visibleRows();
         for (int row = 0; row < rowsVisible; row++) {
@@ -181,9 +180,9 @@ public final class VoidClickScreen extends Screen {
                 boolean selected = name.equals(selectedModule);
 
                 panel(g, x, y, cardW, cardH,
-                    selected ? 0xE13B2D50 : hover ? 0xC532293D : 0xB5221D2B);
+                    selected ? 0xE13B2D50 : hover ? 0xC532293D : 0xB51B171D);
                 outline(g, x, y, cardW, cardH,
-                    selected ? 0xCCB88AFF : hover ? 0x887F6A91 : 0x554D405D);
+                    selected ? 0xCCB88AFF : hover ? 0x887F6A91 : 0x443D3548);
                 if (enabled) g.fill(x + 1, y + 10, x + 3, y + cardH - 10, PURPLE);
                 g.drawString(font, enabled ? "✦" : "◇", x + 12, y + (cardH - 8) / 2,
                     enabled ? PURPLE : MUTED, false);
@@ -195,7 +194,7 @@ public final class VoidClickScreen extends Screen {
                     enabled ? WHITE : 0xFFB5B4C1, true);
                 g.disableScissor();
 
-                panel(g, sx, sy, 31, 17, enabled ? 0xFF795CB0 : 0xFF464052);
+                panel(g, sx, sy, 31, 17, enabled ? 0xFF795CB0 : 0xFF39343F);
                 panel(g, enabled ? sx + 16 : sx + 2, sy + 2, 13, 13,
                     enabled ? 0xFFF7F0FF : 0xFF9A9BA8);
                 if (selected) g.drawString(font, "i", x + cardW - 58, y + 5, PURPLE, true);
