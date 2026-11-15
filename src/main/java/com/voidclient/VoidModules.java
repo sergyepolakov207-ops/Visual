@@ -34,6 +34,12 @@ public final class VoidModules {
         MODULES.put("Item Durability HUD", false);
         MODULES.put("Inventory HUD", false);
         MODULES.put("Compact HUD", false);
+        MODULES.put("Status Bar", true);
+        MODULES.put("Hotkeys HUD", true);
+        MODULES.put("Potions HUD", true);
+        MODULES.put("Player Card", true);
+        MODULES.put("Online Players HUD", false);
+        MODULES.put("Movement HUD", true);
 
         // Legitimate PvP information and movement helpers
         MODULES.put("Auto Sprint", false);
@@ -67,7 +73,9 @@ public final class VoidModules {
             case "Fullbright", "No View Bobbing", "Crosshair Dot" -> Category.VISUALS;
             case "HUD", "FPS Counter", "Coordinates", "Health HUD", "Armor HUD",
                  "Hunger HUD", "Keystrokes", "Sprint Status", "Direction HUD",
-                 "Biome HUD", "Item Durability HUD", "Inventory HUD", "Compact HUD" -> Category.HUD;
+                 "Biome HUD", "Item Durability HUD", "Inventory HUD", "Compact HUD",
+                 "Status Bar", "Hotkeys HUD", "Potions HUD", "Player Card",
+                 "Online Players HUD", "Movement HUD" -> Category.HUD;
             case "Auto Sprint", "Low Health Alert", "Ping HUD", "Attack Cooldown",
                  "Target HUD", "Target Range", "Totem Counter", "Armor Durability",
                  "Pearl Cooldown", "Shield Status" -> Category.PVP;
@@ -93,6 +101,12 @@ public final class VoidModules {
             case "Item Durability HUD" -> "Main-hand item durability";
             case "Inventory HUD" -> "Shows your hotbar contents";
             case "Compact HUD" -> "Uses a smaller information layout";
+            case "Status Bar" -> "Shows FPS, ping, coordinates and session info";
+            case "Hotkeys HUD" -> "Displays movement and action key states";
+            case "Potions HUD" -> "Lists active potion effects and durations";
+            case "Player Card" -> "Shows your name, health and armor";
+            case "Online Players HUD" -> "Shows players currently in the tab list";
+            case "Movement HUD" -> "Displays horizontal movement speed";
             case "Auto Sprint" -> "Sprints while moving forward";
             case "Low Health Alert" -> "Warns when health is critical";
             case "Ping HUD" -> "Shows your server latency";
