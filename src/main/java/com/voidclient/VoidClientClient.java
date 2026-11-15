@@ -181,6 +181,8 @@ public final class VoidClientClient implements ClientModInitializer {
 
             if (VoidModules.isEnabled("Inventory HUD")) drawInventoryHud(graphics, client);
 
+            drawPhantomHud(graphics, client);
+
             if (VoidModules.isEnabled("Crosshair Dot")) {
                 int cx = client.getWindow().getGuiScaledWidth() / 2;
                 int cy = client.getWindow().getGuiScaledHeight() / 2;
@@ -190,6 +192,118 @@ public final class VoidClientClient implements ClientModInitializer {
         });
     }
 
+
+
+    private static void drawPhantomHud(net.minecraft.client.gui.GuiGraphics g, Minecraft client) {
+        int sw = client.getWindow().getGuiScaledWidth();
+        int sh = client.getWindow().getGuiScaledHeight();
+        int purple = 0xFFAA83FF;
+        int white = 0xFFF0EDF7;
+        int muted = 0xFFAAA5B8;
+
+        if (VoidModules.isEnabled("Status Bar")) {
+            String ping = "—";
+            if (client.getConnection() != null) {
+                var info = client.getConnection().getPlayerInfo(client.player.getUUID());
+                if (info != null) ping = info.getLatency() + " ms";
+            }
+            String line = "✦  " + client.player.getName().getString()
+                + "   ◈ " + ping + "   ▣ " + client.getFps() + " FPS"
+                + "   ⌖ " + client.player.blockPosition().getX() + " "
+                + client.player.blockPosition().getY() + " "
+                + client.player.blockPosition().getZ();
+            drawGlassPanel(g, 8, 8, Math.min(sw - 16, client.font.width(line) + 22), 22);
+            g.drawString(client.font, line, 18, 15, white, false);
+        }
+
+        if (VoidModules.isEnabled("Hotkeys HUD")) {
+            int x = 8, y = 38, w = 112, h = 91;
+            drawGlassPanel(g, x, y, w, h);
+            g.drawString(client.font, "HOTKEYS", x + 9, y + 7, purple, true);
+            String[] keys = {
+                (client.options.keyUp.isDown() ? "W" : "·") + "  Forward",
+                (client.options.keyLeft.isDown() ? "A" : "·") + "  Left",
+                (client.options.keyDown.isDown() ? "S" : "·") + "  Back",
+                (client.options.keyRight.isDown() ? "D" : "·") + "  Right",
+                (client.options.keyJump.isDown() ? "SPACE" : "·") + "  Jump"
+            };
+            for (int i = 0; i < keys.length; i++)
+                g.drawString(client.font, keys[i], x + 9, y + 22 + i * 12,
+                    keys[i].startsWith("·") ? muted : white, false);
+        }
+
+        if (VoidModules.isEnabled("Potions HUD") && !client.player.getActiveEffects().isEmpty()) {
+            int x = Math.max(8, sw - 178), y = 8;
+            int rows = Math.min(6, client.player.getActiveEffects().size());
+            drawGlassPanel(g, x, y, 170, 24 + rows * 15);
+            g.drawString(client.font, "POTIONS", x + 9, y + 7, purple, true);
+            int i = 0;
+            for (var effect : client.player.getActiveEffects()) {
+                if (i >= 6) break;
+                String name = effect.getEffect().value().getDisplayName().getString();
+                if (effect.getAmplifier() > 0) name += " " + (effect.getAmplifier() + 1);
+                int ticks = effect.getDuration();
+                String time = ticks == -1 ? "∞" : String.format(java.util.Locale.ROOT, "%d:%02d",
+                    ticks / 1200, (ticks / 20) % 60);
+                g.drawString(client.font, name, x + 9, y + 22 + i * 15, white, false);
+                g.drawString(client.font, time, x + 164 - client.font.width(time), y + 22 + i * 15, purple, false);
+                i++;
+            }
+        }
+
+        if (VoidModules.isEnabled("Player Card")) {
+            String name = client.player.getName().getString();
+            String hp = "♥ " + Math.round(client.player.getHealth()) + "  "
+                + "◆ " + client.player.getArmorValue();
+            int w = Math.max(142, client.font.width(name) + 28);
+            int x = sw - w - 8, y = sh - 42;
+            drawGlassPanel(g, x, y, w, 34);
+            g.drawString(client.font, name, x + 9, y + 6, white, true);
+            g.drawString(client.font, hp, x + 9, y + 19, purple, false);
+        }
+
+        if (VoidModules.isEnabled("Online Players HUD") && client.getConnection() != null) {
+            var players = client.getConnection().getOnlinePlayers();
+            int count = Math.min(5, players.size());
+            int w = 158, h = 23 + count * 13;
+            int x = (sw - w) / 2, y = sh - h - 10;
+            drawGlassPanel(g, x, y, w, h);
+            g.drawString(client.font, "ONLINE  " + players.size(), x + 9, y + 6, purple, true);
+            int i = 0;
+            for (var playerInfo : players) {
+                if (i >= 5) break;
+                String playerName = playerInfo.getProfile().name();
+                g.drawString(client.font, playerName, x + 9, y + 19 + i * 13, white, false);
+                i++;
+            }
+        }
+
+        if (VoidModules.isEnabled("Movement HUD")) {
+            double speed = Math.sqrt(client.player.getDeltaMovement().x * client.player.getDeltaMovement().x
+                + client.player.getDeltaMovement().z * client.player.getDeltaMovement().z) * 20.0;
+            String value = String.format(java.util.Locale.ROOT, "%.2f m/s", speed);
+            int x = 8, y = sh - 31, w = client.font.width(value) + 68;
+            drawGlassPanel(g, x, y, w, 22);
+            g.drawString(client.font, "BPS", x + 9, y + 7, purple, true);
+            g.drawString(client.font, value, x + 43, y + 7, white, false);
+        }
+    }
+
+    private static void drawGlassPanel(net.minecraft.client.gui.GuiGraphics g, int x, int y, int w, int h) {
+        int radius = Math.min(7, Math.min(w / 2, h / 2));
+        for (int row = 0; row < h; row++) {
+            int inset = 0;
+            if (row < radius) inset = radius - (int)Math.sqrt(radius * radius - (radius - row) * (radius - row));
+            else if (row >= h - radius) {
+                int d = row - (h - radius - 1);
+                inset = radius - (int)Math.sqrt(radius * radius - d * d);
+            }
+            g.fill(x + inset, y + row, x + w - inset, y + row + 1, 0xD90D0C16);
+        }
+        g.fill(x + 8, y + 1, x + w - 8, y + 2, 0x55FFFFFF);
+        g.fill(x + 1, y + 7, x + 2, y + h - 7, 0x35FFFFFF);
+        g.fill(x + 3, y + 3, x + w - 3, y + 4, 0x16BFA0FF);
+    }
 
     private static void drawInventoryHud(net.minecraft.client.gui.GuiGraphics g, Minecraft client) {
         int slot = 20;
