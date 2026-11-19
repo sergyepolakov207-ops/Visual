@@ -77,7 +77,7 @@ public final class VoidModules {
             case "HUD", "Inventory HUD", "Compact HUD", "Hotkeys HUD", "Potions HUD",
                  "Direction HUD", "FPS Counter", "Coordinates", "Biome HUD",
                  "Online Players HUD", "Status Bar" -> Category.MISC;
-            default -> Category.HUD;
+            default -> Category.MISC;
         };
     }
 
