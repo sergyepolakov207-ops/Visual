@@ -19,7 +19,7 @@ public final class VoidClickScreen extends Screen {
     private static final int PURPLE_DARK = 0xFF7650A8;
 
     private int x, y, w, h, rail, left, right, top, bottom;
-    private int cardW, cardH, gap = 10, columns, scroll;
+    private int cardW, cardH = 66, gap = 12, columns, scroll;
     private boolean searchFocused;
     private String search = "";
     private String selected = "";
@@ -39,11 +39,11 @@ public final class VoidClickScreen extends Screen {
         rail = Math.max(58, Math.min(70, width / 18));
         left = x + rail + 22;
         right = x + w - 24;
-        top = y + 112;
-        bottom = y + h - (selected.isEmpty() ? 26 : 104);
+        top = y + 122;
+        bottom = y + h - 104;
         columns = (right - left) >= 650 ? 3 : (right - left) >= 390 ? 2 : 1;
         cardW = (right - left - gap * (columns - 1)) / columns;
-        cardH = 54;
+        cardH = 66;
         rebuild();
     }
 
@@ -57,7 +57,7 @@ public final class VoidClickScreen extends Screen {
         int rows = (modules.size() + columns - 1) / columns;
         int visible = Math.max(1, (bottom - top + gap) / (cardH + gap));
         scroll = Math.max(0, Math.min(scroll, Math.max(0, rows - visible)));
-        if (!modules.contains(selected)) selected = "";
+        if (!modules.contains(selected)) selected = modules.isEmpty() ? "" : modules.get(0);
     }
 
     private void rounded(GuiGraphics g, int px, int py, int pw, int ph, int color, int radius) {
@@ -104,9 +104,10 @@ public final class VoidClickScreen extends Screen {
         g.fill(0, 0, width, height, 0x62090712);
 
         // Large translucent glass body with a reflected top edge.
-        rounded(g, x, y, w, h, 0xD914121B, 15);
-        rounded(g, x + 2, y + 2, w - 4, h - 4, 0x321F1A2B, 14);
+        rounded(g, x, y, w, h, 0xD90D0C16, 17);
+        rounded(g, x + 2, y + 2, w - 4, h - 4, 0x382B2439, 15);
         g.fill(x + 18, y + 2, x + w - 18, y + 4, 0x66FFFFFF);
+        g.fill(x + 30, y + 5, x + w - 30, y + 6, 0x18D7B8FF);
         g.fill(x + 3, y + 18, x + 4, y + h - 18, 0x44FFFFFF);
         g.fill(x + w - 4, y + 20, x + w - 3, y + h - 20, 0x338D78C5);
         g.fill(x + rail, y + 14, x + rail + 1, y + h - 14, 0x443E354F);
@@ -125,15 +126,18 @@ public final class VoidClickScreen extends Screen {
         }
 
         // Brand and category heading.
-        g.drawString(font, "SWIFT VISUALS", left, y + 20, TEXT, true);
-        rounded(g, left + 126, y + 12, 82, 25, 0xFF30243E, 8);
-        g.drawCenteredString(font, categoryName(), left + 167, y + 20, PURPLE);
-        g.drawString(font, categoryInfo(), left, y + 48, MUTED, false);
-        g.drawString(font, "FABRIC 1.21.11", right - font.width("FABRIC 1.21.11"), y + 22, MUTED, false);
+        g.drawString(font, "SWIFT", left, y + 17, TEXT, true);
+        g.drawString(font, "VISUALS", left + font.width("SWIFT ") + 2, y + 17, PURPLE, true);
+        rounded(g, left, y + 38, 6, 6, PURPLE, 3);
+        g.drawString(font, categoryInfo(), left + 13, y + 37, MUTED, false);
+        g.drawString(font, "FABRIC 1.21.11", right - font.width("FABRIC 1.21.11"), y + 18, MUTED, false);
+        String activeCount = VoidModules.all().entrySet().stream().filter(e -> VoidModules.categoryOf(e.getKey()) == category && e.getValue()).count() + " ACTIVE";
+        rounded(g, right - font.width(activeCount) - 22, y + 37, font.width(activeCount) + 18, 18, 0xFF292333, 7);
+        g.drawString(font, activeCount, right - font.width(activeCount) - 13, y + 42, PURPLE, true);
         g.fill(left, y + 68, right, y + 69, 0x443E354F);
 
         // Search field.
-        rounded(g, left, y + 80, right - left, 27, searchFocused ? 0xFF30263E : 0xB923202C, 8);
+        rounded(g, left, y + 79, right - left, 30, searchFocused ? 0xFF30263E : 0xB923202C, 9);
         g.drawString(font, "⌕", left + 11, y + 89, PURPLE, false);
         String shownSearch = search.isEmpty() ? "Search modules..." : search;
         g.drawString(font, shownSearch + (searchFocused ? "  |" : ""), left + 31, y + 89,
@@ -154,11 +158,16 @@ public final class VoidClickScreen extends Screen {
                 boolean hover = mx >= cx && mx <= cx + cardW && my >= cy && my <= cy + cardH;
                 glassCard(g, cx, cy, cardW, cardH, active, hover);
                 g.drawString(font, enabled ? "✦" : "◇", cx + 13, cy + 13, enabled ? PURPLE : MUTED);
-                g.drawString(font, name, cx + 31, cy + 12, TEXT, true);
-                String state = enabled ? "ON" : "OFF";
-                g.drawString(font, state, cx + 31, cy + 31, enabled ? PURPLE : MUTED, false);
+                g.drawString(font, name, cx + 31, cy + 9, TEXT, true);
+                String description = VoidModules.descriptionOf(name);
+                int maxDescription = Math.max(30, cardW - 100);
+                while (font.width(description) > maxDescription && description.length() > 8) description = description.substring(0, description.length() - 2);
+                if (!description.equals(VoidModules.descriptionOf(name))) description += "...";
+                g.drawString(font, description, cx + 31, cy + 27, MUTED, false);
+                String state = enabled ? "ENABLED" : "DISABLED";
+                g.drawString(font, state, cx + 31, cy + 45, enabled ? PURPLE : MUTED, true);
                 int sx = cx + cardW - 48;
-                int sy = cy + 18;
+                int sy = cy + 24;
                 rounded(g, sx, sy, 35, 18, enabled ? 0xFF7955AA : 0xFF46414F, 9);
                 rounded(g, enabled ? sx + 18 : sx + 2, sy + 2, 14, 14,
                     enabled ? 0xFFF8F0FF : 0xFFB6B0C1, 7);
@@ -170,10 +179,12 @@ public final class VoidClickScreen extends Screen {
         // Selected module's details/settings card.
         if (!selected.isEmpty()) {
             int dy = y + h - 88;
-            rounded(g, left, dy, right - left, 70, 0xE51D1928, 10);
+            rounded(g, left, dy, right - left, 72, 0xE51D1928, 12);
+            g.fill(left + 12, dy + 1, right - 12, dy + 2, 0x44FFFFFF);
             g.fill(left + 10, dy + 1, right - 10, dy + 2, 0x66C49AFF);
             g.drawString(font, selected, left + 14, dy + 10, TEXT, true);
-            g.drawString(font, VoidModules.descriptionOf(selected), left + 14, dy + 29, MUTED, false);
+            g.drawString(font, VoidModules.descriptionOf(selected), left + 14, dy + 30, MUTED, false);
+            g.drawString(font, "MODULE DETAILS", left + 14, dy + 49, 0xFF8D829F, true);
             if (selected.equals("HUD")) {
                 String scale = "HUD SCALE  " + Math.round(VoidModules.hudScale() * 100) + "%";
                 g.drawString(font, scale, left + 14, dy + 48, PURPLE, true);
@@ -203,7 +214,7 @@ public final class VoidClickScreen extends Screen {
     public boolean mouseClicked(MouseButtonEvent e, boolean doubled) {
         if (e.button() != 0) return super.mouseClicked(e, doubled);
         double mx = e.x(), my = e.y();
-        searchFocused = mx >= left && mx <= right && my >= y + 80 && my <= y + 107;
+        searchFocused = mx >= left && mx <= right && my >= y + 79 && my <= y + 109;
         for (int i = 0; i < 3; i++) {
             int iy = y + 70 + i * 62;
             if (mx >= x + 5 && mx <= x + rail - 5 && my >= iy && my <= iy + 48) {
