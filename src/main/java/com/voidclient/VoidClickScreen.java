@@ -7,6 +7,7 @@ import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.FontDescription;
 import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ public final class VoidClickScreen extends Screen {
     private static final Identifier INTER_FONT = Identifier.fromNamespaceAndPath("swiftvisuals", "inter");
 
     private void drawInter(GuiGraphics g, String value, int px, int py, int color, boolean shadow) {
-        Component text = Component.literal(value).setStyle(Style.EMPTY.withFont(INTER_FONT));
+        Component text = Component.literal(value).setStyle(Style.EMPTY.withFont(new FontDescription.Resource(INTER_FONT)));
         g.drawString(font, text, px, py, color, shadow);
     }
 
