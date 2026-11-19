@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class VoidModules {
-    public enum Category { RENDER, HUD, PLAYER, MOVEMENT, MISC }
+    public enum Category { COMBAT, MOVEMENT, RENDER, PLAYER, MISC }
 
     private static final Map<String, Boolean> MODULES = new LinkedHashMap<>();
     private static float hudScale = 1.0F;
@@ -70,14 +70,13 @@ public final class VoidModules {
     public static Category categoryOf(String name) {
         return switch (name) {
             case "Fullbright", "No View Bobbing", "Crosshair Dot" -> Category.RENDER;
-            case "HUD", "Inventory HUD", "Compact HUD", "Hotkeys HUD", "Potions HUD",
-                 "Direction HUD" -> Category.HUD;
-            case "Health HUD", "Armor HUD", "Hunger HUD", "Item Durability HUD",
-                 "Player Card", "Totem Counter", "Armor Durability", "Pearl Cooldown",
-                 "Shield Status", "Target HUD", "Target Range" -> Category.PLAYER;
             case "Keystrokes", "Sprint Status", "Movement HUD" -> Category.MOVEMENT;
-            case "FPS Counter", "Coordinates", "Ping HUD", "Biome HUD",
-                 "Online Players HUD", "Attack Cooldown", "Status Bar" -> Category.MISC;
+            case "Low Health Alert", "Ping HUD", "Attack Cooldown", "Shield Status" -> Category.COMBAT;
+            case "Health HUD", "Armor HUD", "Hunger HUD", "Item Durability HUD",
+                 "Player Card", "Totem Counter", "Armor Durability", "Pearl Cooldown" -> Category.PLAYER;
+            case "HUD", "Inventory HUD", "Compact HUD", "Hotkeys HUD", "Potions HUD",
+                 "Direction HUD", "FPS Counter", "Coordinates", "Biome HUD",
+                 "Online Players HUD", "Status Bar" -> Category.MISC;
             default -> Category.HUD;
         };
     }
