@@ -54,7 +54,7 @@ tasks.register('downloadInterFont') {
             }
             def archive = new java.util.zip.ZipFile(archiveFile)
             try {
-                def fontEntry = archive.entries().find { it.name.endsWith('/extras/ttf/Inter-Regular.ttf') }
+                def fontEntry = archive.entries().find { it.name == 'docs/font-files/InterVariable.ttf' }
                 if (fontEntry == null) throw new GradleException('Inter-Regular.ttf was not found in the Inter archive')
                 interFontFile.parentFile.mkdirs()
                 archive.getInputStream(fontEntry).withCloseable { input ->
