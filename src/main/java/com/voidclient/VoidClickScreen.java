@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.Locale;
 
 public final class VoidClickScreen extends Screen {
-    private static final int BG=0xF20D1018, PANEL=0xFF171C27, ROW=0xFF202735;
-    private static final int WHITE=0xFFF1F4FA, MUTED=0xFF8994A8, ACCENT=0xFF8BE0C1;
-    private int x,y,w,h,navY,listX,listY,listW,listBottom,detailX,detailW,rowH=38,scroll;
+    private static final int BG=0xF20B1019, PANEL=0xFF151D29, ROW=0xFF1B2634;
+    private static final int WHITE=0xFFF3F7FA, MUTED=0xFF91A0B2, ACCENT=0xFF83E6C5;
+    private int x,y,w,h,navY,listX,listY,listW,listBottom,detailX,detailW,rowH=42,scroll;
     private int tabW;
     private String search="", selected="";
     private boolean searchFocused;
@@ -60,28 +60,33 @@ public final class VoidClickScreen extends Screen {
     @Override public void render(GuiGraphics g,int mx,int my,float partialTick){
         try{renderBlurredBackground(g);}catch(RuntimeException|LinkageError ignored){}
         g.fill(0,0,width,height,0xB9090D15);
+        panel(g,x-3,y+3,x+w+3,y+h+3,0x55000000);
         panel(g,x,y,x+w,y+h,BG);
         panel(g,x+1,y+1,x+w-1,y+3,ACCENT);
-        panel(g,x+18,y+18,x+42,y+42,ACCENT);
-        g.drawCenteredString(font,"S",x+30,y+25,0xFF0D1720);
+        panel(g,x,y+3,x+2,y+h-2,0xFF35594F);
+        panel(g,x+18,y+17,x+44,y+43,0xFF29483F);
+        panel(g,x+20,y+19,x+42,y+41,ACCENT);
+        g.drawCenteredString(font,"S",x+31,y+25,0xFF0D1720);
         g.drawString(font,"SWIFT VISUALS",x+52,y+17,WHITE,true);
         g.drawString(font,"CLIENT CONTROL CENTER  /  FABRIC 1.21.11",x+52,y+33,MUTED,false);
         String live=enabledCount()+" ACTIVE";
         g.drawString(font,live,x+w-font.width(live)-22,y+24,ACCENT,true);
-        panel(g,x+18,y+54,x+w-18,y+55,0xFF303B4A);
+        panel(g,x+18,y+56,x+w-18,y+57,0xFF354252);
+        panel(g,x+18,y+58,x+82,y+59,ACCENT);
 
         String[] labels={"COMBAT","MOVEMENT","VISUALS","PLAYER","UTILITY"};
         VoidModules.Category[] cats=VoidModules.Category.values();
         for(int i=0;i<cats.length;i++){
             int tx=x+20+i*tabW; boolean active=category==cats[i];
-            int col=active?0xFF293A3A:0xFF1A202B;
+            int col=active?0xFF263F3C:(mx>=tx&&mx<=tx+tabW-5&&my>=navY&&my<=navY+31?0xFF222D3A:0xFF171F2B);
             panel(g,tx,navY,tx+tabW-5,navY+31,col);
             if(active) panel(g,tx+7,navY+28,tx+tabW-12,navY+30,ACCENT);
             g.drawCenteredString(font,labels[i],tx+(tabW-5)/2,navY+11,active?ACCENT:MUTED);
         }
 
         // Search field and category summary.
-        panel(g,listX,listY-32,listX+listW,listY-5,0xFF1B2330);
+        panel(g,listX,listY-32,listX+listW,listY-5,searchFocused?0xFF253A3A:0xFF182331);
+        if(searchFocused)panel(g,listX,listY-32,listX+listW,listY-30,ACCENT);
         g.drawString(font,"SEARCH  "+(search.isEmpty()?"Type a module name":search)+(searchFocused?"_":""),listX+9,listY-23,search.isEmpty()?MUTED:WHITE,false);
         g.drawString(font,categoryName()+"  /  "+modules.size()+" MODULES",listX,listY-44,WHITE,true);
 
@@ -90,8 +95,9 @@ public final class VoidClickScreen extends Screen {
             int index=scroll+i;if(index>=modules.size())break;
             String name=modules.get(index); int ry=listY+i*(rowH+5);
             boolean on=VoidModules.isEnabled(name),chosen=name.equals(selected);
-            panel(g,listX,ry,listX+listW,ry+rowH,chosen?0xFF293B3A:0xFF1A202B);
-            panel(g,listX,ry,listX+3,ry+rowH,on?ACCENT:0xFF394354);
+            panel(g,listX,ry,listX+listW,ry+rowH,chosen?0xFF263D3A:(mx>=listX&&mx<=listX+listW&&my>=ry&&my<=ry+rowH?0xFF222D3A:0xFF18212D));
+            panel(g,listX,ry,listX+3,ry+rowH,on?ACCENT:0xFF354252);
+            if(chosen)panel(g,listX+3,ry+5,listX+5,ry+rowH-5,0xFF4D8D7D);
             g.drawString(font,name,listX+12,ry+6,WHITE,true);
             String desc=VoidModules.descriptionOf(name);
             int max=Math.max(20,listW-112);
@@ -105,9 +111,11 @@ public final class VoidClickScreen extends Screen {
         if(modules.isEmpty())g.drawString(font,"No modules match this search.",listX+8,listY+12,MUTED,false);
 
         // Right-side detail inspector.
-        panel(g,detailX,listY-44,detailX+detailW,listBottom,0xFF171E29);
+        panel(g,detailX,listY-44,detailX+detailW,listBottom,0xFF151E2A);
+        panel(g,detailX,listY-44,detailX+2,listBottom,0xFF35594F);
         g.drawString(font,"MODULE DETAILS",detailX+12,listY-29,ACCENT,true);
         panel(g,detailX+12,listY-9,detailX+detailW-12,listY-8,0xFF354252);
+        g.drawString(font,"SELECTED MODULE",detailX+12,listY-1,MUTED,false);
         if(!selected.isEmpty()){
             g.drawString(font,selected,detailX+12,listY+7,WHITE,true);
             String d=VoidModules.descriptionOf(selected);
