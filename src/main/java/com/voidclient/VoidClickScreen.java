@@ -16,7 +16,7 @@ import java.util.Locale;
 public final class VoidClickScreen extends Screen {
     private static final int OUTER=0xE90B1018, SURFACE=0xE9141D28, TILE=0xD51C2733;
     private static final int WHITE=0xFFF0F5FA, MUTED=0xFF8798AA, ACCENT=0xFF72D5E8;
-    private int x,y,w,h,sideW,contentX,contentW,detailX,detailW,topY,listY,listBottom,rowH=43,scroll;
+    private int x,y,w,h,sideW,contentX,contentW,detailX,detailW,topY,listY,listBottom,rowH=39,scroll;
     private String search="",selected="";
     private boolean searchFocused;
     private VoidModules.Category category=VoidModules.Category.RENDER;
@@ -27,13 +27,13 @@ public final class VoidClickScreen extends Screen {
     public VoidClickScreen(){super(Component.literal("SWIFT VISUALS"));}
 
     @Override protected void init(){
-        w=Math.min(width-20,Math.max(320,(int)(width*.84)));
-        h=Math.min(height-20,Math.max(240,(int)(height*.86)));
+        w=Math.min(width-12,Math.max(360,(int)(width*.96)));
+        h=Math.min(height-12,Math.max(260,(int)(height*.94)));
         x=(width-w)/2;y=(height-h)/2;
         sideW=Math.max(76,Math.min(112,w/5));
         contentX=x+sideW+12;
         int innerRight=x+w-14;
-        contentW=Math.max(100,(innerRight-contentX-12)*52/100);
+        contentW=Math.max(100,(innerRight-contentX-12)*50/100);
         detailX=contentX+contentW+12;
         detailW=Math.max(92,innerRight-detailX);
         topY=y+72;listY=topY+48;listBottom=y+h-24;
@@ -50,6 +50,20 @@ public final class VoidClickScreen extends Screen {
     }
 
     private void panel(GuiGraphics g,int a,int b,int c,int d,int color){if(c>a&&d>b)g.fill(a,b,c,d,color);}
+    private void roundedPill(GuiGraphics g,int a,int b,int width,int height,int color){
+        int radius=height/2, centerY=b+radius;
+        for(int yy=b;yy<b+height;yy++){
+            int dy=Math.abs(yy-centerY);
+            int inset=dy>=radius?radius:(int)Math.ceil(radius-Math.sqrt(radius*radius-dy*dy));
+            g.fill(a+inset,yy,a+width-inset,yy+1,color);
+        }
+    }
+    private void circle(GuiGraphics g,int cx,int cy,int radius,int color){
+        for(int dy=-radius;dy<=radius;dy++){
+            int half=(int)Math.floor(Math.sqrt(radius*radius-dy*dy));
+            g.fill(cx-half,cy+dy,cx+half+1,cy+dy+1,color);
+        }
+    }
     private String categoryName(){return switch(category){case COMBAT->"COMBAT";case MOVEMENT->"MOVEMENT";case RENDER->"VISUALS";case PLAYER->"PLAYER";case MISC->"UTILITY";};}
     private int enabledCount(){return (int)VoidModules.all().keySet().stream().filter(VoidModules::isEnabled).count();}
 
@@ -69,10 +83,10 @@ public final class VoidClickScreen extends Screen {
         panel(g,x+17,y+16,x+48,y+47,0xFF1D3C4A);
         panel(g,x+20,y+19,x+45,y+44,0xFF72D5E8);
         g.drawCenteredString(font,"S",x+32,y+27,0xFF10202A);
-        g.drawString(font,"SWIFT VISUALS",x+59,y+17,WHITE,true);
+        g.drawString(font,"SWIFT VISUALS",x+59,y+17,WHITE,false);
         g.drawString(font,"PERSONAL CLIENT  /  1.21.11",x+59,y+34,MUTED,false);
         String count=enabledCount()+" ENABLED";
-        g.drawString(font,count,x+w-font.width(count)-18,y+27,ACCENT,true);
+        g.drawString(font,count,x+w-font.width(count)-18,y+27,ACCENT,false);
 
         // Vertical category rail: a new layout rather than the old top tabs.
         panel(g,x+10,y+68,x+sideW,y+h-14,0xA7101822);
@@ -120,12 +134,12 @@ public final class VoidClickScreen extends Screen {
             if(!desc.equals(VoidModules.descriptionOf(name)))desc+="…";
             g.drawString(font,desc,contentX+17,ry+23,MUTED,false);
             int sx=contentX+contentW-39,sy=ry+13;
-            if(progress>0.02F)panel(g,sx-3,sy-3,sx+32,sy+19,0x223CAEFF);
+            if(progress>0.02F)roundedPill(g,sx-3,sy-3,35,22,0x223CAEFF);
             int trackR=(int)(53+(40*progress)),trackG=(int)(65+(38*progress)),trackB=(int)(77+(45*progress));
             int track=0xFF000000|(trackR<<16)|(trackG<<8)|trackB;
-            panel(g,sx,sy,sx+29,sy+16,track);
-            int knobX=sx+2+Math.round(progress*13F);
-            panel(g,knobX,sy+2,knobX+11,sy+14,0xFFEAF5F8);
+            roundedPill(g,sx,sy,29,16,track);
+            int knobX=sx+8+Math.round(progress*13F);
+            circle(g,knobX,sy+8,6,0xFFEAF5F8);
         }
         if(modules.isEmpty())g.drawString(font,"No matching features",contentX+8,listY+12,MUTED,false);
 
