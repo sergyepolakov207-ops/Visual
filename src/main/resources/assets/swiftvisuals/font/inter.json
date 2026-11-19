@@ -3,12 +3,13 @@
     {
       "type": "ttf",
       "file": "swiftvisuals:font/inter.ttf",
-      "shift": [
-        0,
-        0
-      ],
+      "shift": [0, 0],
       "size": 11,
       "oversample": 2
+    },
+    {
+      "type": "reference",
+      "id": "minecraft:default"
     }
   ]
 }
