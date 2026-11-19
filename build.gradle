@@ -42,47 +42,26 @@ java {
 
 def interFontFile = file('src/main/resources/assets/swiftvisuals/font/inter.ttf')
 def interLicenseFile = file('src/main/resources/assets/swiftvisuals/font/OFL.txt')
-def interArchiveFile = layout.buildDirectory.file('downloads/Inter-4.1.zip').get().asFile
 
 tasks.register('downloadInterFont') {
     outputs.files(interFontFile, interLicenseFile)
-    outputs.upToDateWhen { false }
     doLast {
         interFontFile.parentFile.mkdirs()
-        interArchiveFile.parentFile.mkdirs()
-
-        // Use the static TTF: Minecraft's TTF provider may not render variable fonts.
-        new URL('https://github.com/rsms/inter/releases/download/v4.1/Inter-4.1.zip').withInputStream { input ->
-            interArchiveFile.withOutputStream { output -> output << input }
-        }
-
-        def archive = new java.util.zip.ZipFile(interArchiveFile)
-        try {
-            def fontEntry = archive.getEntry('extras/ttf/Inter-Regular.ttf')
-            if (fontEntry == null) {
-                throw new GradleException('Inter-Regular.ttf was not found in the official Inter archive')
-            }
-            archive.getInputStream(fontEntry).withCloseable { input ->
+        if (!interFontFile.exists()) {
+            new URL('https://raw.githubusercontent.com/rsms/inter/v4.1/docs/font-files/InterVariable.ttf').withInputStream { input ->
                 interFontFile.withOutputStream { output -> output << input }
             }
-
-            def licenseEntry = archive.getEntry('LICENSE.txt')
-            if (licenseEntry == null) {
-                throw new GradleException('Inter OFL license was not found in the official Inter archive')
-            }
-            archive.getInputStream(licenseEntry).withCloseable { input ->
+        }
+        if (!interLicenseFile.exists()) {
+            new URL('https://raw.githubusercontent.com/rsms/inter/v4.1/LICENSE.txt').withInputStream { input ->
                 interLicenseFile.withOutputStream { output -> output << input }
             }
-        } finally {
-            archive.close()
-            interArchiveFile.delete()
         }
-
         if (!interFontFile.exists() || interFontFile.length() == 0) {
-            throw new GradleException('Failed to extract static Inter-Regular.ttf')
+            throw new GradleException('Failed to download InterVariable.ttf')
         }
         if (!interLicenseFile.exists() || interLicenseFile.length() == 0) {
-            throw new GradleException('Failed to extract Inter OFL license')
+            throw new GradleException('Failed to download Inter OFL license')
         }
     }
 }
