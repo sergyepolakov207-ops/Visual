@@ -66,4 +66,8 @@ tasks.register('downloadInterFont') {
     }
 }
 
-processResources.dependsOn tasks.named('downloadInterFont')
+def downloadInterFontTask = tasks.named('downloadInterFont')
+processResources.dependsOn downloadInterFontTask
+tasks.named('sourcesJar').configure {
+    dependsOn downloadInterFontTask
+}
