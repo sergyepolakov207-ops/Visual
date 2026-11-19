@@ -19,7 +19,7 @@ public final class VoidClickScreen extends Screen {
     private static final int PURPLE_DARK = 0xFF9B4DFF;
 
     private int x, y, w, h, rail, left, right, top, bottom;
-    private int cardW, cardH = 66, gap = 12, columns, scroll;
+    private int cardW, cardH = 82, gap = 12, columns, scroll;
     private boolean searchFocused;
     private String search = "";
     private String selected = "";
@@ -32,18 +32,18 @@ public final class VoidClickScreen extends Screen {
 
     @Override
     protected void init() {
-        w = Math.min(width - 32, Math.max(360, (int)(width * 0.78)));
-        h = Math.min(height - 28, Math.max(250, (int)(height * 0.82)));
+        w = Math.min(width - 24, Math.max(360, (int)(width * 0.92)));
+        h = Math.min(height - 24, Math.max(250, (int)(height * 0.88)));
         x = (width - w) / 2;
         y = (height - h) / 2;
-        rail = Math.max(58, Math.min(70, width / 18));
+        rail = Math.max(78, Math.min(104, width / 13));
         left = x + rail + 22;
         right = x + w - 24;
-        top = y + 122;
-        bottom = y + h - 104;
-        columns = (right - left) >= 650 ? 3 : (right - left) >= 390 ? 2 : 1;
+        top = y + 126;
+        bottom = y + h - 96;
+        columns = (right - left) >= 500 ? 2 : 1;
         cardW = (right - left - gap * (columns - 1)) / columns;
-        cardH = 66;
+        cardH = 82;
         rebuild();
     }
 
@@ -84,17 +84,21 @@ public final class VoidClickScreen extends Screen {
 
     private String categoryName() {
         return switch (category) {
-            case VISUALS -> "VISUALS";
+            case RENDER -> "RENDER";
             case HUD -> "HUD";
-            case PVP -> "PVP";
+            case PLAYER -> "PLAYER";
+            case MOVEMENT -> "MOVE";
+            case MISC -> "MISC";
         };
     }
 
     private String categoryInfo() {
         return switch (category) {
-            case VISUALS -> "Visual effects and quality of life";
+            case RENDER -> "Visual appearance and camera options";
             case HUD -> "Your interface, your layout";
-            case PVP -> "Combat information and movement";
+            case PLAYER -> "Player status and useful information";
+            case MOVEMENT -> "Movement indicators and key display";
+            case MISC -> "Performance, world and session information";
         };
     }
 
@@ -119,10 +123,11 @@ public final class VoidClickScreen extends Screen {
         rounded(g, x + 12, y + 14, rail - 24, 42, 0xFF352344, 12);
         g.fill(x + 19, y + 15, x + rail - 19, y + 16, 0x88E4C8FF);
         g.drawCenteredString(font, "S", x + rail / 2, y + 29, PURPLE);
-        String[] icons = {"✧", "▦", "⚔"};
-        String[] names = {"VISUALS", "HUD", "PVP"};
-        for (int i = 0; i < 3; i++) {
-            int iy = y + 70 + i * 62;
+        g.drawCenteredString(font, "SWIFT", x + rail / 2, y + 56, MUTED);
+        String[] icons = {"✧", "▦", "♙", "⌁", "⚙"};
+        String[] names = {"RENDER", "HUD", "PLAYER", "MOVE", "MISC"};
+        for (int i = 0; i < names.length; i++) {
+            int iy = y + 70 + i * 58;
             boolean active = category.ordinal() == i;
             if (active) { rounded(g, x + 7, iy, rail - 14, 50, 0xFF39254C, 13); g.fill(x + 7, iy + 10, x + 9, iy + 40, PURPLE); }
             g.drawCenteredString(font, icons[i], x + rail / 2, iy + 8, active ? PURPLE : MUTED);
@@ -168,11 +173,11 @@ public final class VoidClickScreen extends Screen {
                 int maxDescription = Math.max(30, cardW - 100);
                 while (font.width(description) > maxDescription && description.length() > 8) description = description.substring(0, description.length() - 2);
                 if (!description.equals(VoidModules.descriptionOf(name))) description += "...";
-                g.drawString(font, description, cx + 31, cy + 27, MUTED, false);
-                String state = enabled ? "ENABLED" : "DISABLED";
-                g.drawString(font, state, cx + 31, cy + 45, enabled ? PURPLE : MUTED, true);
+                g.drawString(font, description, cx + 31, cy + 29, MUTED, false);
+                String state = enabled ? "ON" : "OFF";
+                g.drawString(font, state, cx + 31, cy + 52, enabled ? PURPLE : MUTED, true);
                 int sx = cx + cardW - 48;
-                int sy = cy + 24;
+                int sy = cy + 30;
                 rounded(g, sx, sy, 37, 20, enabled ? 0xFF9A45E8 : 0xFF484253, 10);
                 rounded(g, enabled ? sx + 19 : sx + 2, sy + 3, 14, 14,
                     enabled ? 0xFFF8F0FF : 0xFFB6B0C1, 7);
@@ -183,7 +188,7 @@ public final class VoidClickScreen extends Screen {
 
         // Selected module's details/settings card.
         if (!selected.isEmpty()) {
-            int dy = y + h - 88;
+            int dy = y + h - 82;
             rounded(g, left, dy, right - left, 72, 0xE51A1525, 14);
             g.fill(left + 12, dy + 1, right - 12, dy + 2, 0x44FFFFFF);
             g.fill(left + 10, dy + 1, right - 10, dy + 2, 0x99D7A5FF);
@@ -220,8 +225,8 @@ public final class VoidClickScreen extends Screen {
         if (e.button() != 0) return super.mouseClicked(e, doubled);
         double mx = e.x(), my = e.y();
         searchFocused = mx >= left && mx <= right && my >= y + 79 && my <= y + 109;
-        for (int i = 0; i < 3; i++) {
-            int iy = y + 70 + i * 62;
+        for (int i = 0; i < VoidModules.Category.values().length; i++) {
+            int iy = y + 70 + i * 58;
             if (mx >= x + 5 && mx <= x + rail - 5 && my >= iy && my <= iy + 48) {
                 category = VoidModules.Category.values()[i];
                 scroll = 0;
