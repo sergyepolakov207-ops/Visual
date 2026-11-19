@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public final class VoidModules {
-    public enum Category { VISUALS, HUD, PVP }
+    public enum Category { RENDER, HUD, PLAYER, MOVEMENT, MISC }
 
     private static final Map<String, Boolean> MODULES = new LinkedHashMap<>();
     private static float hudScale = 1.0F;
@@ -42,7 +42,6 @@ public final class VoidModules {
         MODULES.put("Movement HUD", true);
 
         // Legitimate PvP information and movement helpers
-        MODULES.put("Auto Sprint", false);
         MODULES.put("Low Health Alert", false);
         MODULES.put("Ping HUD", false);
         MODULES.put("Attack Cooldown", false);
@@ -70,15 +69,15 @@ public final class VoidModules {
 
     public static Category categoryOf(String name) {
         return switch (name) {
-            case "Fullbright", "No View Bobbing", "Crosshair Dot" -> Category.VISUALS;
-            case "HUD", "FPS Counter", "Coordinates", "Health HUD", "Armor HUD",
-                 "Hunger HUD", "Keystrokes", "Sprint Status", "Direction HUD",
-                 "Biome HUD", "Item Durability HUD", "Inventory HUD", "Compact HUD",
-                 "Status Bar", "Hotkeys HUD", "Potions HUD", "Player Card",
-                 "Online Players HUD", "Movement HUD" -> Category.HUD;
-            case "Auto Sprint", "Low Health Alert", "Ping HUD", "Attack Cooldown",
-                 "Target HUD", "Target Range", "Totem Counter", "Armor Durability",
-                 "Pearl Cooldown", "Shield Status" -> Category.PVP;
+            case "Fullbright", "No View Bobbing", "Crosshair Dot" -> Category.RENDER;
+            case "HUD", "Inventory HUD", "Compact HUD", "Hotkeys HUD", "Potions HUD",
+                 "Direction HUD" -> Category.HUD;
+            case "Health HUD", "Armor HUD", "Hunger HUD", "Item Durability HUD",
+                 "Player Card", "Totem Counter", "Armor Durability", "Pearl Cooldown",
+                 "Shield Status", "Target HUD", "Target Range" -> Category.PLAYER;
+            case "Keystrokes", "Sprint Status", "Movement HUD" -> Category.MOVEMENT;
+            case "FPS Counter", "Coordinates", "Ping HUD", "Biome HUD",
+                 "Online Players HUD", "Attack Cooldown", "Status Bar" -> Category.MISC;
             default -> Category.HUD;
         };
     }
@@ -107,7 +106,6 @@ public final class VoidModules {
             case "Player Card" -> "Shows your name, health and armor";
             case "Online Players HUD" -> "Shows players currently in the tab list";
             case "Movement HUD" -> "Displays horizontal movement speed";
-            case "Auto Sprint" -> "Sprints while moving forward";
             case "Low Health Alert" -> "Warns when health is critical";
             case "Ping HUD" -> "Shows your server latency";
             case "Attack Cooldown" -> "Shows attack recharge progress";
