@@ -38,36 +38,3 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
     withSourcesJar()
 }
-
-
-def interFontFile = file('src/main/resources/assets/swiftvisuals/font/inter.ttf')
-def interLicenseFile = file('src/main/resources/assets/swiftvisuals/font/OFL.txt')
-
-tasks.register('downloadInterFont') {
-    outputs.files(interFontFile, interLicenseFile)
-    doLast {
-        interFontFile.parentFile.mkdirs()
-        if (!interFontFile.exists()) {
-            new URL('https://raw.githubusercontent.com/rsms/inter/v4.1/docs/font-files/InterVariable.ttf').withInputStream { input ->
-                interFontFile.withOutputStream { output -> output << input }
-            }
-        }
-        if (!interLicenseFile.exists()) {
-            new URL('https://raw.githubusercontent.com/rsms/inter/v4.1/LICENSE.txt').withInputStream { input ->
-                interLicenseFile.withOutputStream { output -> output << input }
-            }
-        }
-        if (!interFontFile.exists() || interFontFile.length() == 0) {
-            throw new GradleException('Failed to download InterVariable.ttf')
-        }
-        if (!interLicenseFile.exists() || interLicenseFile.length() == 0) {
-            throw new GradleException('Failed to download Inter OFL license')
-        }
-    }
-}
-
-def downloadInterFontTask = tasks.named('downloadInterFont')
-processResources.dependsOn downloadInterFontTask
-tasks.named('sourcesJar').configure {
-    dependsOn downloadInterFontTask
-}
