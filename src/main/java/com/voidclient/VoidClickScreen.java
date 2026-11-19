@@ -27,7 +27,7 @@ public final class VoidClickScreen extends Screen {
         w=Math.min(width-24,Math.max(320,(int)(width*.92)));
         h=Math.min(height-24,Math.max(240,(int)(height*.88)));
         x=(width-w)/2; y=(height-h)/2; navY=y+67;
-        listX=x+22; listY=y+128; listBottom=y+h-20;
+        listX=x+22; listY=y+156; listBottom=y+h-20;
         detailW=Math.max(112,Math.min(190,w/3)); detailX=x+w-detailW-20;
         listW=detailX-listX-16; tabW=Math.max(50,(w-44)/5);
         rebuild();
