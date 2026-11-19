@@ -7,325 +7,182 @@ import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 public final class VoidClickScreen extends Screen {
-    private static final int WHITE = 0xFFF5F2FC;
-    private static final int MUTED = 0xFF9B96AA;
-    private static final int PURPLE = 0xFFC69AFF;
-    private static final int PANEL = 0xE9161420;
-    private static final int CARD = 0xD51F1C2B;
-    private static final int CARD_HOVER = 0xE52B2539;
-    private static final int ACCENT = 0xFF9A62E8;
-
-    private int x, y, w, h, rail, contentX, contentRight, listTop, listBottom;
-    private int cardW, cardH = 76, gap = 12, columns, scroll;
+    private static final int BG=0xF20D1018, PANEL=0xFF171C27, ROW=0xFF202735;
+    private static final int WHITE=0xFFF1F4FA, MUTED=0xFF8994A8, ACCENT=0xFF8BE0C1;
+    private int x,y,w,h,navY,listX,listY,listW,listBottom,detailX,detailW,rowH=38,scroll;
+    private int tabW;
+    private String search="", selected="";
     private boolean searchFocused;
-    private String search = "";
-    private String selected = "";
-    private VoidModules.Category category = VoidModules.Category.RENDER;
-    private final List<String> modules = new ArrayList<>();
+    private VoidModules.Category category=VoidModules.Category.RENDER;
+    private final List<String> modules=new ArrayList<>();
 
-    public VoidClickScreen() {
-        super(Component.literal("SWIFT VISUALS"));
-    }
+    public VoidClickScreen(){ super(Component.literal("SWIFT VISUALS")); }
 
-    @Override
-    protected void init() {
-        w = Math.min(width - 20, Math.max(300, (int)(width * 0.94)));
-        h = Math.min(height - 20, Math.max(230, (int)(height * 0.90)));
-        x = (width - w) / 2;
-        y = (height - h) / 2;
-        rail = Math.max(68, Math.min(92, width / 14));
-        contentX = x + rail + 18;
-        contentRight = x + w - 20;
-        listTop = y + 118;
-        listBottom = y + h - 88;
-        columns = contentRight - contentX >= 590 ? 2 : 1;
-        cardW = Math.max(90, (contentRight - contentX - gap * (columns - 1)) / columns);
-        cardH = Math.max(68, Math.min(78, h / 8));
+    @Override protected void init(){
+        w=Math.min(width-24,Math.max(320,(int)(width*.92)));
+        h=Math.min(height-24,Math.max(240,(int)(height*.88)));
+        x=(width-w)/2; y=(height-h)/2; navY=y+67;
+        listX=x+22; listY=y+128; listBottom=y+h-20;
+        detailW=Math.max(112,Math.min(190,w/3)); detailX=x+w-detailW-20;
+        listW=detailX-listX-16; tabW=Math.max(50,(w-44)/5);
         rebuild();
     }
 
-    private void rebuild() {
-        modules.clear();
-        String q = search.toLowerCase(Locale.ROOT).trim();
-        for (String name : VoidModules.all().keySet()) {
-            if (VoidModules.categoryOf(name) == category &&
-                (q.isEmpty() || name.toLowerCase(Locale.ROOT).contains(q) ||
-                 VoidModules.descriptionOf(name).toLowerCase(Locale.ROOT).contains(q))) {
-                modules.add(name);
-            }
-        }
-        int rows = (modules.size() + columns - 1) / columns;
-        int visible = Math.max(1, (listBottom - listTop + gap) / (cardH + gap));
-        scroll = Math.max(0, Math.min(scroll, Math.max(0, rows - visible)));
-        if (!modules.contains(selected)) selected = modules.isEmpty() ? "" : modules.get(0);
+    private void rebuild(){
+        modules.clear(); String q=search.toLowerCase(Locale.ROOT).trim();
+        for(String n:VoidModules.all().keySet())
+            if(VoidModules.categoryOf(n)==category && (q.isEmpty() ||
+                n.toLowerCase(Locale.ROOT).contains(q) ||
+                VoidModules.descriptionOf(n).toLowerCase(Locale.ROOT).contains(q))) modules.add(n);
+        int visible=Math.max(1,(listBottom-listY)/(rowH+5));
+        scroll=Math.max(0,Math.min(scroll,Math.max(0,modules.size()-visible)));
+        if(!modules.contains(selected)) selected=modules.isEmpty()?"":modules.get(0);
     }
 
-    private void round(GuiGraphics g, int px, int py, int pw, int ph, int color, int radius) {
-        if (pw <= 0 || ph <= 0) return;
-        int r = Math.min(radius, Math.min(pw / 2, ph / 2));
-        for (int row = 0; row < ph; row++) {
-            int inset = 0;
-            if (row < r) inset = r - (int)Math.sqrt(r * r - (r - row) * (r - row));
-            else if (row >= ph - r) {
-                int d = row - (ph - r - 1);
-                inset = r - (int)Math.sqrt(r * r - d * d);
-            }
-            g.fill(px + inset, py + row, px + pw - inset, py + row + 1, color);
-        }
+    private void panel(GuiGraphics g,int a,int b,int c,int d,int color){
+        if(c>a && d>b) g.fill(a,b,c,d,color);
     }
-
-    private String categoryLabel() {
-        return switch (category) {
-            case COMBAT -> "Combat";
-            case MOVEMENT -> "Movement";
-            case RENDER -> "Visuals";
-            case PLAYER -> "Player";
-            case MISC -> "Utilities";
+    private String categoryName(){
+        return switch(category){
+            case COMBAT->"COMBAT"; case MOVEMENT->"MOVEMENT"; case RENDER->"VISUALS";
+            case PLAYER->"PLAYER"; case MISC->"UTILITY";
         };
     }
-
-    private String categoryHint() {
-        return switch (category) {
-            case COMBAT -> "Useful combat information";
-            case MOVEMENT -> "Movement and input indicators";
-            case RENDER -> "Visual effects and camera options";
-            case PLAYER -> "Player and inventory information";
-            case MISC -> "HUD widgets and client tools";
-        };
+    private int enabledCount(){
+        return (int)modules.stream().filter(VoidModules::isEnabled).count();
     }
 
-    private int enabledCount() {
-        return (int) modules.stream().filter(VoidModules::isEnabled).count();
+    @Override public void render(GuiGraphics g,int mx,int my,float partialTick){
+        try{renderBlurredBackground(g);}catch(RuntimeException|LinkageError ignored){}
+        g.fill(0,0,width,height,0xB9090D15);
+        panel(g,x,y,x+w,y+h,BG);
+        panel(g,x+1,y+1,x+w-1,y+3,ACCENT);
+        panel(g,x+18,y+18,x+42,y+42,ACCENT);
+        g.drawCenteredString(font,"S",x+30,y+25,0xFF0D1720);
+        g.drawString(font,"SWIFT VISUALS",x+52,y+17,WHITE,true);
+        g.drawString(font,"CLIENT CONTROL CENTER  /  FABRIC 1.21.11",x+52,y+33,MUTED,false);
+        String live=enabledCount()+" ACTIVE";
+        g.drawString(font,live,x+w-font.width(live)-22,y+24,ACCENT,true);
+        panel(g,x+18,y+54,x+w-18,y+55,0xFF303B4A);
+
+        String[] labels={"COMBAT","MOVEMENT","VISUALS","PLAYER","UTILITY"};
+        VoidModules.Category[] cats=VoidModules.Category.values();
+        for(int i=0;i<cats.length;i++){
+            int tx=x+20+i*tabW; boolean active=category==cats[i];
+            int col=active?0xFF293A3A:0xFF1A202B;
+            panel(g,tx,navY,tx+tabW-5,navY+31,col);
+            if(active) panel(g,tx+7,navY+28,tx+tabW-12,navY+30,ACCENT);
+            g.drawCenteredString(font,labels[i],tx+(tabW-5)/2,navY+11,active?ACCENT:MUTED);
+        }
+
+        // Search field and category summary.
+        panel(g,listX,listY-32,listX+listW,listY-5,0xFF1B2330);
+        g.drawString(font,"SEARCH  "+(search.isEmpty()?"Type a module name":search)+(searchFocused?"_":""),listX+9,listY-23,search.isEmpty()?MUTED:WHITE,false);
+        g.drawString(font,categoryName()+"  /  "+modules.size()+" MODULES",listX,listY-44,WHITE,true);
+
+        int visible=Math.max(1,(listBottom-listY)/(rowH+5));
+        for(int i=0;i<visible;i++){
+            int index=scroll+i;if(index>=modules.size())break;
+            String name=modules.get(index); int ry=listY+i*(rowH+5);
+            boolean on=VoidModules.isEnabled(name),chosen=name.equals(selected);
+            panel(g,listX,ry,listX+listW,ry+rowH,chosen?0xFF293B3A:0xFF1A202B);
+            panel(g,listX,ry,listX+3,ry+rowH,on?ACCENT:0xFF394354);
+            g.drawString(font,name,listX+12,ry+6,WHITE,true);
+            String desc=VoidModules.descriptionOf(name);
+            int max=Math.max(20,listW-112);
+            while(font.width(desc)>max && desc.length()>5) desc=desc.substring(0,desc.length()-2);
+            if(!desc.equals(VoidModules.descriptionOf(name)))desc+="…";
+            g.drawString(font,desc,listX+12,ry+21,MUTED,false);
+            int sx=listX+listW-48,sy=ry+10;
+            panel(g,sx,sy,sx+36,sy+18,on?0xFF477C70:0xFF394354);
+            panel(g,on?sx+19:sx+2,sy+2,on?sx+33:sx+16,sy+16,0xFFF1F4FA);
+        }
+        if(modules.isEmpty())g.drawString(font,"No modules match this search.",listX+8,listY+12,MUTED,false);
+
+        // Right-side detail inspector.
+        panel(g,detailX,listY-44,detailX+detailW,listBottom,0xFF171E29);
+        g.drawString(font,"MODULE DETAILS",detailX+12,listY-29,ACCENT,true);
+        panel(g,detailX+12,listY-9,detailX+detailW-12,listY-8,0xFF354252);
+        if(!selected.isEmpty()){
+            g.drawString(font,selected,detailX+12,listY+7,WHITE,true);
+            String d=VoidModules.descriptionOf(selected);
+            int yy=listY+28, max=detailW-24;
+            StringBuilder line=new StringBuilder();
+            for(String word:d.split(" ")){
+                String next=line.isEmpty()?word:line+" "+word;
+                if(font.width(next)>max && !line.isEmpty()){
+                    g.drawString(font,line.toString(),detailX+12,yy,MUTED,false);
+                    yy+=13;line.setLength(0);line.append(word);
+                }else{if(!line.isEmpty())line.append(' ');line.append(word);}
+            }
+            if(!line.isEmpty())g.drawString(font,line.toString(),detailX+12,yy,MUTED,false);
+            int sy=listBottom-65;
+            panel(g,detailX+12,sy,detailX+detailW-12,sy+28,VoidModules.isEnabled(selected)?0xFF29463F:0xFF29313E);
+            g.drawCenteredString(font,VoidModules.isEnabled(selected)?"ENABLED":"DISABLED",detailX+detailW/2,sy+10,VoidModules.isEnabled(selected)?ACCENT:MUTED);
+            if(selected.equals("HUD")){
+                String scale="HUD SCALE  "+Math.round(VoidModules.hudScale()*100)+"%";
+                g.drawString(font,scale,detailX+12,sy-28,WHITE,false);
+                g.drawString(font,"Click − / + below to adjust",detailX+12,sy-14,MUTED,false);
+                panel(g,detailX+12,sy+34,detailX+detailW/2-3,sy+59,0xFF303B4A);
+                panel(g,detailX+detailW/2+3,sy+34,detailX+detailW-12,sy+59,0xFF303B4A);
+                g.drawCenteredString(font,"−",detailX+detailW/4+3,sy+42,WHITE);
+                g.drawCenteredString(font,"+",detailX+detailW*3/4-3,sy+42,WHITE);
+            }
+        }else g.drawString(font,"Choose a module",detailX+12,listY+8,MUTED,false);
+        super.render(g,mx,my,partialTick);
     }
 
-    private String[] wrap(String value, int maxWidth) {
-        List<String> lines = new ArrayList<>();
-        StringBuilder line = new StringBuilder();
-        for (String word : value.split(" ")) {
-            String next = line.isEmpty() ? word : line + " " + word;
-            if (font.width(next) > maxWidth && !line.isEmpty()) {
-                lines.add(line.toString());
-                line.setLength(0);
-                line.append(word);
-            } else {
-                if (!line.isEmpty()) line.append(' ');
-                line.append(word);
+    @Override public boolean mouseClicked(MouseButtonEvent e,boolean doubled){
+        if(e.button()!=0)return super.mouseClicked(e,doubled);
+        double mx=e.x(),my=e.y();
+        searchFocused=mx>=listX&&mx<=listX+listW&&my>=listY-32&&my<=listY-5;
+        VoidModules.Category[] cats=VoidModules.Category.values();
+        for(int i=0;i<cats.length;i++){
+            int tx=x+20+i*tabW;
+            if(mx>=tx&&mx<=tx+tabW-5&&my>=navY&&my<=navY+31){
+                category=cats[i];scroll=0;selected="";rebuild();return true;
             }
         }
-        if (!line.isEmpty()) lines.add(line.toString());
-        if (lines.size() > 2) {
-            String second = lines.get(1);
-            while (!second.isEmpty() && font.width(second + "…") > maxWidth) {
-                second = second.substring(0, second.length() - 1);
-            }
-            lines.set(1, second + "…");
-        }
-        return lines.toArray(new String[0]);
-    }
-
-    @Override
-    public void render(GuiGraphics g, int mx, int my, float partialTick) {
-        try { renderBlurredBackground(g); } catch (RuntimeException | LinkageError ignored) { }
-        g.fill(0, 0, width, height, 0x85070610);
-        g.fill(0, 0, width, height / 2, 0x100F0920);
-
-        // Main glass shell and reflective frame.
-        round(g, x, y, w, h, PANEL, 18);
-        round(g, x + 2, y + 2, w - 4, h - 4, 0x321F1A30, 16);
-        g.fill(x + 18, y + 2, x + w - 18, y + 3, 0x70FFFFFF);
-        g.fill(x + 28, y + 4, x + w - 28, y + 5, 0x45C99CFF);
-        g.fill(x + 2, y + h - 3, x + w - 2, y + h - 2, 0x559A62E8);
-        g.fill(x + rail, y + 12, x + rail + 1, y + h - 12, 0x332C2940);
-
-        // Brand rail.
-        round(g, x + 13, y + 14, rail - 26, 40, 0xFF30233F, 12);
-        g.drawCenteredString(font, "S", x + rail / 2, y + 27, PURPLE);
-        g.drawCenteredString(font, "SWIFT", x + rail / 2, y + 57, MUTED);
-        String[] icons = {"✧", "⌁", "◈", "♙", "⚙"};
-        String[] labels = {"FIGHT", "MOVE", "VISUAL", "PLAYER", "TOOLS"};
-        for (int i = 0; i < VoidModules.Category.values().length; i++) {
-            int iy = y + 78 + i * 58;
-            boolean active = category.ordinal() == i;
-            if (active) {
-                round(g, x + 7, iy, rail - 14, 49, 0xFF382849, 12);
-                g.fill(x + 7, iy + 9, x + 9, iy + 40, PURPLE);
-            }
-            g.drawCenteredString(font, icons[i], x + rail / 2, iy + 7, active ? PURPLE : MUTED);
-            g.drawCenteredString(font, labels[i], x + rail / 2, iy + 27, active ? WHITE : MUTED);
-        }
-
-        // Top bar.
-        g.drawString(font, "SWIFT", contentX, y + 17, WHITE, true);
-        g.drawString(font, "VISUALS", contentX + font.width("SWIFT ") + 2, y + 17, PURPLE, true);
-        round(g, contentX, y + 42, font.width(categoryLabel()) + 22, 20, 0xFF342542, 9);
-        g.drawString(font, categoryLabel().toUpperCase(Locale.ROOT), contentX + 11, y + 48, PURPLE, true);
-        g.drawString(font, categoryHint(), contentX, y + 70, MUTED, false);
-        String version = "FABRIC 1.21.11";
-        g.drawString(font, version, contentRight - font.width(version), y + 20, MUTED, false);
-        g.fill(contentX, y + 91, contentRight, y + 92, 0x443E354F);
-
-        // Search and result summary.
-        round(g, contentX, y + 99, contentRight - contentX, 30,
-            searchFocused ? 0xFF34283F : 0xB923202D, 10);
-        g.drawString(font, "⌕", contentX + 12, y + 108, PURPLE, false);
-        String query = search.isEmpty() ? "Search modules and descriptions..." : search;
-        g.drawString(font, query + (searchFocused ? "  |" : ""), contentX + 31, y + 108,
-            search.isEmpty() ? MUTED : WHITE, false);
-        String count = modules.size() + " MODULES  •  " + enabledCount() + " ENABLED";
-        g.drawString(font, count, contentRight - font.width(count) - 12, y + 108, MUTED, false);
-
-        // Module cards.
-        int visibleRows = Math.max(1, (listBottom - listTop + gap) / (cardH + gap));
-        for (int row = 0; row < visibleRows; row++) {
-            for (int col = 0; col < columns; col++) {
-                int index = (scroll + row) * columns + col;
-                if (index >= modules.size()) continue;
-                String name = modules.get(index);
-                int cx = contentX + col * (cardW + gap);
-                int cy = listTop + row * (cardH + gap);
-                boolean enabled = VoidModules.isEnabled(name);
-                boolean chosen = selected.equals(name);
-                boolean hover = mx >= cx && mx <= cx + cardW && my >= cy && my <= cy + cardH;
-                round(g, cx, cy, cardW, cardH, chosen ? 0xE52D233B : hover ? CARD_HOVER : CARD, 12);
-                g.fill(cx + 12, cy + 1, cx + cardW - 12, cy + 2, chosen ? 0x99D5B0FF : 0x28FFFFFF);
-                g.fill(cx + 1, cy + 12, cx + 2, cy + cardH - 12, enabled ? ACCENT : 0x333F3A4B);
-                g.drawString(font, enabled ? "✦" : "◇", cx + 13, cy + 10, enabled ? PURPLE : MUTED, false);
-                g.drawString(font, name, cx + 31, cy + 9, WHITE, true);
-                String[] desc = wrap(VoidModules.descriptionOf(name), Math.max(50, cardW - 90));
-                g.drawString(font, desc[0], cx + 31, cy + 29, MUTED, false);
-                if (desc.length > 1) g.drawString(font, desc[1], cx + 31, cy + 41, MUTED, false);
-                String status = enabled ? "ACTIVE" : "OFF";
-                g.drawString(font, status, cx + 31, cy + cardH - 17, enabled ? PURPLE : 0xFF777182, true);
-                int sx = cx + cardW - 48;
-                int sy = cy + (cardH - 18) / 2;
-                round(g, sx, sy, 36, 18, enabled ? 0xFF8150B5 : 0xFF45414F, 9);
-                round(g, enabled ? sx + 19 : sx + 2, sy + 2, 14, 14,
-                    enabled ? 0xFFFFF9FF : 0xFFBDB8C8, 7);
-            }
-        }
-        if (modules.isEmpty()) {
-            g.drawCenteredString(font, "Nothing found here", (contentX + contentRight) / 2, listTop + 20, MUTED);
-        }
-
-        // Bottom inspector: selection is now a real second step, separate from toggling.
-        int panelY = y + h - 76;
-        round(g, contentX, panelY, contentRight - contentX, 58, 0xE51D1928, 12);
-        g.fill(contentX + 14, panelY + 1, contentRight - 14, panelY + 2, 0x55FFFFFF);
-        if (!selected.isEmpty()) {
-            g.drawString(font, selected, contentX + 13, panelY + 9, WHITE, true);
-            String[] info = wrap(VoidModules.descriptionOf(selected), Math.max(80, contentRight - contentX - 190));
-            g.drawString(font, info[0], contentX + 13, panelY + 29, MUTED, false);
-            if (selected.equals("HUD")) {
-                String scale = Math.round(VoidModules.hudScale() * 100) + "%";
-                g.drawString(font, "HUD SCALE", contentRight - 142, panelY + 10, MUTED, true);
-                round(g, contentRight - 88, panelY + 27, 25, 22, 0xFF393044, 7);
-                round(g, contentRight - 57, panelY + 27, 25, 22, 0xFF393044, 7);
-                g.drawCenteredString(font, "−", contentRight - 76, panelY + 34, WHITE);
-                g.drawCenteredString(font, "+", contentRight - 45, panelY + 34, WHITE);
-                g.drawString(font, scale, contentRight - 132, panelY + 31, PURPLE, true);
-            } else {
-                String status = VoidModules.isEnabled(selected) ? "ENABLED" : "DISABLED";
-                g.drawString(font, status, contentRight - font.width(status) - 14, panelY + 20,
-                    VoidModules.isEnabled(selected) ? PURPLE : MUTED, true);
-            }
-        } else {
-            g.drawString(font, "MODULE INSPECTOR", contentX + 13, panelY + 10, PURPLE, true);
-            g.drawString(font, "Select a card to view its information and options", contentX + 13, panelY + 30, MUTED, false);
-        }
-
-        int totalRows = (modules.size() + columns - 1) / columns;
-        if (totalRows > visibleRows) {
-            int track = Math.max(1, listBottom - listTop);
-            int thumb = Math.max(18, track * visibleRows / totalRows);
-            int ty = listTop + (track - thumb) * scroll / Math.max(1, totalRows - visibleRows);
-            round(g, contentRight + 6, ty, 3, thumb, ACCENT, 2);
-        }
-        super.render(g, mx, my, partialTick);
-    }
-
-    @Override
-    public boolean mouseClicked(MouseButtonEvent e, boolean doubled) {
-        if (e.button() != 0) return super.mouseClicked(e, doubled);
-        double mx = e.x(), my = e.y();
-        searchFocused = mx >= contentX && mx <= contentRight && my >= y + 99 && my <= y + 129;
-        for (int i = 0; i < VoidModules.Category.values().length; i++) {
-            int iy = y + 78 + i * 58;
-            if (mx >= x + 5 && mx <= x + rail - 5 && my >= iy && my <= iy + 49) {
-                category = VoidModules.Category.values()[i];
-                scroll = 0;
-                selected = "";
-                rebuild();
-                return true;
-            }
-        }
-        int panelY = y + h - 76;
-        if (selected.equals("HUD") && my >= panelY + 25 && my <= panelY + 55) {
-            if (mx >= contentRight - 90 && mx <= contentRight - 62)
-                VoidModules.setHudScale(VoidModules.hudScale() - 0.05F);
-            else if (mx >= contentRight - 59 && mx <= contentRight - 31)
-                VoidModules.setHudScale(VoidModules.hudScale() + 0.05F);
+        if(selected.equals("HUD")&&my>=listBottom-31&&my<=listBottom-6){
+            if(mx>=detailX+12&&mx<detailX+detailW/2)VoidModules.setHudScale(VoidModules.hudScale()-.05F);
+            else if(mx>=detailX+detailW/2&&mx<=detailX+detailW-12)VoidModules.setHudScale(VoidModules.hudScale()+.05F);
             return true;
         }
-        int visibleRows = Math.max(1, (listBottom - listTop + gap) / (cardH + gap));
-        for (int row = 0; row < visibleRows; row++) {
-            for (int col = 0; col < columns; col++) {
-                int index = (scroll + row) * columns + col;
-                if (index >= modules.size()) continue;
-                int cx = contentX + col * (cardW + gap);
-                int cy = listTop + row * (cardH + gap);
-                if (mx >= cx && mx <= cx + cardW && my >= cy && my <= cy + cardH) {
-                    String name = modules.get(index);
-                    if (mx >= cx + cardW - 54) VoidModules.toggle(name);
-                    else selected = selected.equals(name) ? "" : name;
-                    return true;
-                }
+        int visible=Math.max(1,(listBottom-listY)/(rowH+5));
+        for(int i=0;i<visible;i++){
+            int index=scroll+i;if(index>=modules.size())break;
+            int ry=listY+i*(rowH+5);
+            if(mx>=listX&&mx<=listX+listW&&my>=ry&&my<=ry+rowH){
+                String n=modules.get(index);
+                if(mx>=listX+listW-54)VoidModules.toggle(n);else selected=n;
+                return true;
             }
         }
         return true;
     }
 
-    @Override
-    public boolean charTyped(CharacterEvent e) {
-        if (!searchFocused) return super.charTyped(e);
-        char ch = (char)e.codepoint();
-        if (ch >= 32 && ch != 127 && search.length() < 48) {
-            search += ch;
-            scroll = 0;
-            rebuild();
-        }
+    @Override public boolean charTyped(CharacterEvent e){
+        if(!searchFocused)return super.charTyped(e);
+        char c=(char)e.codepoint();
+        if(c>=32&&c!=127&&search.length()<48){search+=c;scroll=0;rebuild();}
         return true;
     }
-
-    @Override
-    public boolean keyPressed(KeyEvent e) {
-        if (searchFocused) {
-            if (e.key() == GLFW.GLFW_KEY_BACKSPACE && !search.isEmpty()) {
-                search = search.substring(0, search.length() - 1);
-                rebuild();
-                return true;
-            }
-            if (e.key() == GLFW.GLFW_KEY_ESCAPE) {
-                searchFocused = false;
-                return true;
-            }
+    @Override public boolean keyPressed(KeyEvent e){
+        if(searchFocused){
+            if(e.key()==GLFW.GLFW_KEY_BACKSPACE&&!search.isEmpty()){search=search.substring(0,search.length()-1);rebuild();return true;}
+            if(e.key()==GLFW.GLFW_KEY_ESCAPE){searchFocused=false;return true;}
         }
         return super.keyPressed(e);
     }
-
-    @Override
-    public boolean mouseScrolled(double mx, double my, double horizontal, double vertical) {
-        int rows = (modules.size() + columns - 1) / columns;
-        int visible = Math.max(1, (listBottom - listTop + gap) / (cardH + gap));
-        scroll = Math.max(0, Math.min(Math.max(0, rows - visible), scroll - (int)Math.signum(vertical)));
+    @Override public boolean mouseScrolled(double mx,double my,double horizontal,double vertical){
+        int visible=Math.max(1,(listBottom-listY)/(rowH+5));
+        scroll=Math.max(0,Math.min(Math.max(0,modules.size()-visible),scroll-(int)Math.signum(vertical)));
         return true;
     }
-
-    @Override
-    public boolean isPauseScreen() { return false; }
+    @Override public boolean isPauseScreen(){return false;}
 }
