@@ -20,12 +20,12 @@ public final class VoidClickScreen extends Screen {
 
     private void drawInter(GuiGraphics g, String value, int px, int py, int color, boolean shadow) {
         Component text = Component.literal(value).setStyle(Style.EMPTY.withFont(INTER_FONT));
-        drawInter(g, text, px, py, color, shadow);
+        g.drawString(font, text, px, py, color, shadow);
     }
 
     private void drawInterCentered(GuiGraphics g, String value, int px, int py, int color) {
         Component text = Component.literal(value).setStyle(Style.EMPTY.withFont(INTER_FONT));
-        drawInterCentered(g, text, px, py, color);
+        g.drawCenteredString(font, text, px, py, color);
     }
 
     private int interWidth(String value) {
