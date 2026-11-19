@@ -8,7 +8,9 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Locale;
 
 public final class VoidClickScreen extends Screen {
@@ -19,6 +21,8 @@ public final class VoidClickScreen extends Screen {
     private boolean searchFocused;
     private VoidModules.Category category=VoidModules.Category.RENDER;
     private final List<String> modules=new ArrayList<>();
+    private final Map<String, Float> toggleProgress=new HashMap<>();
+    private long lastRenderNanos=System.nanoTime();
 
     public VoidClickScreen(){super(Component.literal("SWIFT VISUALS"));}
 
@@ -50,6 +54,9 @@ public final class VoidClickScreen extends Screen {
     private int enabledCount(){return (int)VoidModules.all().keySet().stream().filter(VoidModules::isEnabled).count();}
 
     @Override public void render(GuiGraphics g,int mx,int my,float partialTick){
+        long now=System.nanoTime();
+        float frameDelta=Math.min(0.05F,Math.max(0.001F,(now-lastRenderNanos)/1_000_000_000F));
+        lastRenderNanos=now;
         try{renderBlurredBackground(g);}catch(RuntimeException|LinkageError ignored){}
         g.fill(0,0,width,height,0x7906090F);
         panel(g,x-3,y+4,x+w+3,y+h+4,0x70000000);
@@ -99,6 +106,11 @@ public final class VoidClickScreen extends Screen {
             String name=modules.get(index);int ry=listY+i*(rowH+6);
             boolean on=VoidModules.isEnabled(name),chosen=name.equals(selected);
             boolean hover=mx>=contentX&&mx<=contentX+contentW&&my>=ry&&my<=ry+rowH;
+            float target=on?1F:0F;
+            float progress=toggleProgress.getOrDefault(name,target);
+            progress+= (target-progress)*Math.min(1F,frameDelta*15F);
+            if(Math.abs(target-progress)<0.005F)progress=target;
+            toggleProgress.put(name,progress);
             panel(g,contentX,ry,contentX+contentW,ry+rowH,chosen?0xFF203D4A:hover?0xFF202B37:TILE);
             panel(g,contentX+7,ry+7,contentX+9,ry+rowH-7,on?ACCENT:0xFF465360);
             g.drawString(font,name,contentX+17,ry+7,WHITE,true);
@@ -108,8 +120,12 @@ public final class VoidClickScreen extends Screen {
             if(!desc.equals(VoidModules.descriptionOf(name)))desc+="…";
             g.drawString(font,desc,contentX+17,ry+23,MUTED,false);
             int sx=contentX+contentW-39,sy=ry+13;
-            panel(g,sx,sy,sx+29,sy+16,on?0xFF28677A:0xFF35414D);
-            panel(g,on?sx+16:sx+2,sy+2,on?sx+27:sx+13,sy+14,0xFFEAF5F8);
+            if(progress>0.02F)panel(g,sx-3,sy-3,sx+32,sy+19,0x223CAEFF);
+            int trackR=(int)(53+(40*progress)),trackG=(int)(65+(38*progress)),trackB=(int)(77+(45*progress));
+            int track=0xFF000000|(trackR<<16)|(trackG<<8)|trackB;
+            panel(g,sx,sy,sx+29,sy+16,track);
+            int knobX=sx+2+Math.round(progress*13F);
+            panel(g,knobX,sy+2,knobX+11,sy+14,0xFFEAF5F8);
         }
         if(modules.isEmpty())g.drawString(font,"No matching features",contentX+8,listY+12,MUTED,false);
 
@@ -171,7 +187,7 @@ public final class VoidClickScreen extends Screen {
             int ry=listY+i*(rowH+6);
             if(mx>=contentX&&mx<=contentX+contentW&&my>=ry&&my<=ry+rowH){
                 String n=modules.get(index);
-                if(mx>=contentX+contentW-46)VoidModules.toggle(n);else selected=n;
+                if(mx>=contentX+contentW-46){VoidModules.toggle(n);}else selected=n;
                 return true;
             }
         }
