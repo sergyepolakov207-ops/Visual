@@ -19,7 +19,7 @@ public final class VoidClickScreen extends Screen {
     private static final int PURPLE_DARK = 0xFF9B4DFF;
 
     private int x, y, w, h, rail, left, right, top, bottom;
-    private int cardW, cardH = 82, gap = 12, columns, scroll;
+    private int cardW, cardH = 92, gap = 14, columns, scroll;
     private boolean searchFocused;
     private String search = "";
     private String selected = "";
@@ -43,7 +43,7 @@ public final class VoidClickScreen extends Screen {
         bottom = y + h - 96;
         columns = (right - left) >= 500 ? 2 : 1;
         cardW = (right - left - gap * (columns - 1)) / columns;
-        cardH = 82;
+        cardH = 92;
         rebuild();
     }
 
@@ -82,23 +82,47 @@ public final class VoidClickScreen extends Screen {
         if (active) { g.fill(px + 1, py + 12, px + 3, py + ph - 12, PURPLE); g.fill(px + 4, py + 14, px + 5, py + ph - 14, 0x557D43C7); }
     }
 
+
+    private String[] wrapDescription(String text, int maxWidth) {
+        List<String> lines = new ArrayList<>();
+        StringBuilder line = new StringBuilder();
+        for (String word : text.split(" ")) {
+            String candidate = line.isEmpty() ? word : line + " " + word;
+            if (font.width(candidate) > maxWidth && !line.isEmpty()) {
+                lines.add(line.toString());
+                line.setLength(0);
+                line.append(word);
+            } else {
+                if (!line.isEmpty()) line.append(' ');
+                line.append(word);
+            }
+        }
+        if (!line.isEmpty()) lines.add(line.toString());
+        if (lines.size() > 2) {
+            String last = lines.get(1);
+            while (font.width(last + "...") > maxWidth && !last.isEmpty()) last = last.substring(0, last.length() - 1);
+            lines.set(1, last + "...");
+        }
+        return lines.toArray(new String[0]);
+    }
+
     private String categoryName() {
         return switch (category) {
-            case RENDER -> "RENDER";
-            case HUD -> "HUD";
-            case PLAYER -> "PLAYER";
+            case COMBAT -> "COMBAT";
             case MOVEMENT -> "MOVE";
+            case RENDER -> "RENDER";
+            case PLAYER -> "PLAYER";
             case MISC -> "MISC";
         };
     }
 
     private String categoryInfo() {
         return switch (category) {
-            case RENDER -> "Visual appearance and camera options";
-            case HUD -> "Your interface, your layout";
-            case PLAYER -> "Player status and useful information";
+            case COMBAT -> "Combat information and status indicators";
             case MOVEMENT -> "Movement indicators and key display";
-            case MISC -> "Performance, world and session information";
+            case RENDER -> "Visual appearance and camera options";
+            case PLAYER -> "Player status and useful information";
+            case MISC -> "HUD, performance and world information";
         };
     }
 
@@ -124,8 +148,8 @@ public final class VoidClickScreen extends Screen {
         g.fill(x + 19, y + 15, x + rail - 19, y + 16, 0x88E4C8FF);
         g.drawCenteredString(font, "S", x + rail / 2, y + 29, PURPLE);
         g.drawCenteredString(font, "SWIFT", x + rail / 2, y + 56, MUTED);
-        String[] icons = {"✧", "▦", "♙", "⌁", "⚙"};
-        String[] names = {"RENDER", "HUD", "PLAYER", "MOVE", "MISC"};
+        String[] icons = {"✣", "⌁", "◈", "♙", "⚙"};
+        String[] names = {"COMBAT", "MOVE", "RENDER", "PLAYER", "MISC"};
         for (int i = 0; i < names.length; i++) {
             int iy = y + 70 + i * 58;
             boolean active = category.ordinal() == i;
@@ -170,14 +194,14 @@ public final class VoidClickScreen extends Screen {
                 g.drawString(font, enabled ? "✦" : "◇", cx + 13, cy + 13, enabled ? PURPLE : MUTED);
                 g.drawString(font, name, cx + 31, cy + 9, TEXT, true);
                 String description = VoidModules.descriptionOf(name);
-                int maxDescription = Math.max(30, cardW - 100);
-                while (font.width(description) > maxDescription && description.length() > 8) description = description.substring(0, description.length() - 2);
-                if (!description.equals(VoidModules.descriptionOf(name))) description += "...";
-                g.drawString(font, description, cx + 31, cy + 29, MUTED, false);
+                int maxDescription = Math.max(50, cardW - 112);
+                String[] lines = wrapDescription(description, maxDescription);
+                g.drawString(font, lines[0], cx + 31, cy + 31, MUTED, false);
+                if (lines.length > 1) g.drawString(font, lines[1], cx + 31, cy + 44, MUTED, false);
                 String state = enabled ? "ON" : "OFF";
-                g.drawString(font, state, cx + 31, cy + 52, enabled ? PURPLE : MUTED, true);
+                g.drawString(font, state, cx + 31, cy + 67, enabled ? PURPLE : MUTED, true);
                 int sx = cx + cardW - 48;
-                int sy = cy + 30;
+                int sy = cy + 35;
                 rounded(g, sx, sy, 37, 20, enabled ? 0xFF9A45E8 : 0xFF484253, 10);
                 rounded(g, enabled ? sx + 19 : sx + 2, sy + 3, 14, 14,
                     enabled ? 0xFFF8F0FF : 0xFFB6B0C1, 7);
