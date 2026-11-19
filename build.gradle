@@ -46,29 +46,22 @@ def interLicenseFile = file('src/main/resources/assets/swiftvisuals/font/OFL.txt
 tasks.register('downloadInterFont') {
     outputs.files(interFontFile, interLicenseFile)
     doLast {
-        if (!interFontFile.exists() || !interLicenseFile.exists()) {
-            def archiveFile = file("$buildDir/downloads/Inter-4.1.zip")
-            archiveFile.parentFile.mkdirs()
-            new URL('https://github.com/rsms/inter/releases/download/v4.1/Inter-4.1.zip').withInputStream { input ->
-                archiveFile.withOutputStream { output -> output << input }
+        interFontFile.parentFile.mkdirs()
+        if (!interFontFile.exists()) {
+            new URL('https://raw.githubusercontent.com/rsms/inter/v4.1/docs/font-files/InterVariable.ttf').withInputStream { input ->
+                interFontFile.withOutputStream { output -> output << input }
             }
-            def archive = new java.util.zip.ZipFile(archiveFile)
-            try {
-                def fontEntry = archive.entries().find { it.name == 'docs/font-files/InterVariable.ttf' }
-                if (fontEntry == null) throw new GradleException('Inter-Regular.ttf was not found in the Inter archive')
-                interFontFile.parentFile.mkdirs()
-                archive.getInputStream(fontEntry).withCloseable { input ->
-                    interFontFile.withOutputStream { output -> output << input }
-                }
-                def licenseEntry = archive.entries().find { it.name == 'LICENSE.txt' || it.name.endsWith('/LICENSE.txt') }
-                if (licenseEntry != null) {
-                    archive.getInputStream(licenseEntry).withCloseable { input ->
-                        interLicenseFile.withOutputStream { output -> output << input }
-                    }
-                }
-            } finally {
-                archive.close()
+        }
+        if (!interLicenseFile.exists()) {
+            new URL('https://raw.githubusercontent.com/rsms/inter/v4.1/LICENSE.txt').withInputStream { input ->
+                interLicenseFile.withOutputStream { output -> output << input }
             }
+        }
+        if (!interFontFile.exists() || interFontFile.length() == 0) {
+            throw new GradleException('Failed to download InterVariable.ttf')
+        }
+        if (!interLicenseFile.exists() || interLicenseFile.length() == 0) {
+            throw new GradleException('Failed to download Inter OFL license')
         }
     }
 }
