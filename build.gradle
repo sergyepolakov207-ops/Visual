@@ -42,6 +42,10 @@ processResources {
     }
 }
 
+tasks.named("sourcesJar") {
+    dependsOn tasks.named("downloadInterFont")
+}
+
 tasks.withType(JavaCompile).configureEach {
     options.release = 21
     options.encoding = 'UTF-8'
