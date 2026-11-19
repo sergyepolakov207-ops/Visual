@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Locale;
 
 public final class VoidClickScreen extends Screen {
-    private static final ResourceLocation INTER_FONT = Identifier.fromNamespaceAndPath("swiftvisuals", "inter");
+    private static final Identifier INTER_FONT = Identifier.fromNamespaceAndPath("swiftvisuals", "inter");
 
     private void drawInter(GuiGraphics g, String value, int px, int py, int color, boolean shadow) {
         Component text = Component.literal(value).setStyle(Style.EMPTY.withFont(INTER_FONT));
