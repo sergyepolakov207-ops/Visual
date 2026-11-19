@@ -50,13 +50,6 @@ public final class VoidClientClient implements ClientModInitializer {
                 }
             }
 
-            if (client.player != null && VoidModules.isEnabled("Auto Sprint")) {
-                boolean movingForward = client.options.keyUp.isDown();
-                if (movingForward && !client.player.isCrouching()
-                    && client.player.getFoodData().getFoodLevel() > 6) {
-                    client.player.setSprinting(true);
-                }
-            }
         });
 
         HudElementRegistry.addLast(Identifier.fromNamespaceAndPath("swiftvisuals", "info_hud"), (graphics, tickCounter) -> {
