@@ -6,9 +6,6 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.FontDescription;
-import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,20 +14,16 @@ import java.util.Map;
 import java.util.Locale;
 
 public final class VoidClickScreen extends Screen {
-    private static final Identifier INTER_FONT = Identifier.fromNamespaceAndPath("swiftvisuals", "inter");
-
     private void drawInter(GuiGraphics g, String value, int px, int py, int color, boolean shadow) {
-        Component text = Component.literal(value).setStyle(Style.EMPTY.withFont(new FontDescription.Resource(INTER_FONT)));
-        g.drawString(font, text, px, py, color, shadow);
+        g.drawString(font, value, px, py, color, shadow);
     }
 
     private void drawInterCentered(GuiGraphics g, String value, int px, int py, int color) {
-        Component text = Component.literal(value).setStyle(Style.EMPTY.withFont(new FontDescription.Resource(INTER_FONT)));
-        g.drawCenteredString(font, text, px, py, color);
+        g.drawCenteredString(font, value, px, py, color);
     }
 
     private int interWidth(String value) {
-        return font.width(Component.literal(value).setStyle(Style.EMPTY.withFont(new FontDescription.Resource(INTER_FONT))));
+        return font.width(value);
     }
     private static final int OUTER=0xE90B1018, SURFACE=0xE9141D28, TILE=0xD51C2733;
     private static final int WHITE=0xFFF0F5FA, MUTED=0xFF8798AA, ACCENT=0xFF72D5E8;
