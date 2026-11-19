@@ -15,8 +15,8 @@ import java.util.Locale;
 public final class VoidClickScreen extends Screen {
     private static final int TEXT = 0xFFF5F0FF;
     private static final int MUTED = 0xFFAAA4B8;
-    private static final int PURPLE = 0xFFC49AFF;
-    private static final int PURPLE_DARK = 0xFF7650A8;
+    private static final int PURPLE = 0xFFD7A5FF;
+    private static final int PURPLE_DARK = 0xFF9B4DFF;
 
     private int x, y, w, h, rail, left, right, top, bottom;
     private int cardW, cardH = 66, gap = 12, columns, scroll;
@@ -75,11 +75,11 @@ public final class VoidClickScreen extends Screen {
     }
 
     private void glassCard(GuiGraphics g, int px, int py, int pw, int ph, boolean active, boolean hover) {
-        rounded(g, px, py, pw, ph, active ? 0xE52C223A : hover ? 0xD3262330 : 0xB91A1922, 9);
-        g.fill(px + 9, py + 1, px + pw - 9, py + 2, active ? 0x66D9B8FF : 0x22FFFFFF);
+        rounded(g, px, py, pw, ph, active ? 0xE8322049 : hover ? 0xD52C263A : 0xB91B1925, 13);
+        g.fill(px + 13, py + 1, px + pw - 13, py + 2, active ? 0xBBD7A5FF : 0x44FFFFFF);
         g.fill(px + 1, py + 8, px + 2, py + ph - 8, 0x20FFFFFF);
         g.fill(px + pw - 2, py + 8, px + pw - 1, py + ph - 8, 0x187F73A6);
-        if (active) g.fill(px + 1, py + 12, px + 3, py + ph - 12, PURPLE);
+        if (active) { g.fill(px + 1, py + 12, px + 3, py + ph - 12, PURPLE); g.fill(px + 4, py + 14, px + 5, py + ph - 14, 0x557D43C7); }
     }
 
     private String categoryName() {
@@ -101,26 +101,30 @@ public final class VoidClickScreen extends Screen {
     @Override
     public void render(GuiGraphics g, int mx, int my, float partialTick) {
         try { renderBlurredBackground(g); } catch (RuntimeException | LinkageError ignored) { }
-        g.fill(0, 0, width, height, 0x62090712);
+        g.fill(0, 0, width, height, 0x72070412);
+        g.fill(0, 0, width, height / 3, 0x120F0620);
+        g.fill(0, height * 2 / 3, width, height, 0x180A0615);
 
         // Large translucent glass body with a reflected top edge.
-        rounded(g, x, y, w, h, 0xD90D0C16, 17);
-        rounded(g, x + 2, y + 2, w - 4, h - 4, 0x382B2439, 15);
+        rounded(g, x, y, w, h, 0xE20B0A14, 19);
+        rounded(g, x + 2, y + 2, w - 4, h - 4, 0x4A39264F, 17);
         g.fill(x + 18, y + 2, x + w - 18, y + 4, 0x66FFFFFF);
-        g.fill(x + 30, y + 5, x + w - 30, y + 6, 0x18D7B8FF);
+        g.fill(x + 30, y + 5, x + w - 30, y + 6, 0x35D7B8FF);
+        g.fill(x + 5, y + h - 5, x + w - 5, y + h - 4, 0x337D43C7);
         g.fill(x + 3, y + 18, x + 4, y + h - 18, 0x44FFFFFF);
         g.fill(x + w - 4, y + 20, x + w - 3, y + h - 20, 0x338D78C5);
         g.fill(x + rail, y + 14, x + rail + 1, y + h - 14, 0x443E354F);
 
         // Sidebar.
-        rounded(g, x + 12, y + 14, rail - 24, 38, 0xFF30263E, 10);
-        g.drawCenteredString(font, "S", x + rail / 2, y + 27, PURPLE);
+        rounded(g, x + 12, y + 14, rail - 24, 42, 0xFF352344, 12);
+        g.fill(x + 19, y + 15, x + rail - 19, y + 16, 0x88E4C8FF);
+        g.drawCenteredString(font, "S", x + rail / 2, y + 29, PURPLE);
         String[] icons = {"✧", "▦", "⚔"};
         String[] names = {"VISUALS", "HUD", "PVP"};
         for (int i = 0; i < 3; i++) {
             int iy = y + 70 + i * 62;
             boolean active = category.ordinal() == i;
-            if (active) rounded(g, x + 8, iy, rail - 16, 48, 0xFF342943, 11);
+            if (active) { rounded(g, x + 7, iy, rail - 14, 50, 0xFF39254C, 13); g.fill(x + 7, iy + 10, x + 9, iy + 40, PURPLE); }
             g.drawCenteredString(font, icons[i], x + rail / 2, iy + 8, active ? PURPLE : MUTED);
             g.drawCenteredString(font, names[i], x + rail / 2, iy + 27, active ? TEXT : MUTED);
         }
@@ -137,7 +141,8 @@ public final class VoidClickScreen extends Screen {
         g.fill(left, y + 68, right, y + 69, 0x443E354F);
 
         // Search field.
-        rounded(g, left, y + 79, right - left, 30, searchFocused ? 0xFF30263E : 0xB923202C, 9);
+        rounded(g, left, y + 79, right - left, 32, searchFocused ? 0xFF38284A : 0xC423202E, 11);
+        g.fill(left + 12, y + 80, right - 12, y + 81, searchFocused ? 0x99D7A5FF : 0x33FFFFFF);
         g.drawString(font, "⌕", left + 11, y + 89, PURPLE, false);
         String shownSearch = search.isEmpty() ? "Search modules..." : search;
         g.drawString(font, shownSearch + (searchFocused ? "  |" : ""), left + 31, y + 89,
@@ -168,8 +173,8 @@ public final class VoidClickScreen extends Screen {
                 g.drawString(font, state, cx + 31, cy + 45, enabled ? PURPLE : MUTED, true);
                 int sx = cx + cardW - 48;
                 int sy = cy + 24;
-                rounded(g, sx, sy, 35, 18, enabled ? 0xFF7955AA : 0xFF46414F, 9);
-                rounded(g, enabled ? sx + 18 : sx + 2, sy + 2, 14, 14,
+                rounded(g, sx, sy, 37, 20, enabled ? 0xFF9A45E8 : 0xFF484253, 10);
+                rounded(g, enabled ? sx + 19 : sx + 2, sy + 3, 14, 14,
                     enabled ? 0xFFF8F0FF : 0xFFB6B0C1, 7);
             }
         }
@@ -179,9 +184,9 @@ public final class VoidClickScreen extends Screen {
         // Selected module's details/settings card.
         if (!selected.isEmpty()) {
             int dy = y + h - 88;
-            rounded(g, left, dy, right - left, 72, 0xE51D1928, 12);
+            rounded(g, left, dy, right - left, 72, 0xE51A1525, 14);
             g.fill(left + 12, dy + 1, right - 12, dy + 2, 0x44FFFFFF);
-            g.fill(left + 10, dy + 1, right - 10, dy + 2, 0x66C49AFF);
+            g.fill(left + 10, dy + 1, right - 10, dy + 2, 0x99D7A5FF);
             g.drawString(font, selected, left + 14, dy + 10, TEXT, true);
             g.drawString(font, VoidModules.descriptionOf(selected), left + 14, dy + 30, MUTED, false);
             g.drawString(font, "MODULE DETAILS", left + 14, dy + 49, 0xFF8D829F, true);
