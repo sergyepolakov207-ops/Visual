@@ -2,15 +2,57 @@ package com.voidclient;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Properties;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import net.fabricmc.loader.api.FabricLoader;
 
 public final class VoidModules {
     public enum Category { COMBAT, MOVEMENT, RENDER, PLAYER, MISC }
 
     private static final Map<String, Boolean> MODULES = new LinkedHashMap<>();
     private static float hudScale = 1.0F;
+    private static final Path CONFIG_FILE = FabricLoader.getInstance().getConfigDir().resolve("swiftvisuals.properties");
 
     public static float hudScale() { return hudScale; }
-    public static void setHudScale(float value) { hudScale = Math.max(0.75F, Math.min(1.50F, value)); }
+    public static void setHudScale(float value) {
+        hudScale = Math.max(0.75F, Math.min(1.50F, value));
+        saveSettings();
+    }
+
+    public static void loadSettings() {
+        if (!Files.exists(CONFIG_FILE)) return;
+        Properties properties = new Properties();
+        try (var reader = Files.newBufferedReader(CONFIG_FILE)) {
+            properties.load(reader);
+            hudScale = Math.max(0.75F, Math.min(1.50F,
+                Float.parseFloat(properties.getProperty("hud.scale", "1.0"))));
+            for (String name : MODULES.keySet()) {
+                String key = "module." + name.toLowerCase(java.util.Locale.ROOT).replace(' ', '_');
+                MODULES.put(name, Boolean.parseBoolean(properties.getProperty(key, Boolean.toString(MODULES.get(name)))));
+            }
+        } catch (IOException | NumberFormatException ignored) {
+            // Keep safe defaults if the config is missing or malformed.
+        }
+    }
+
+    public static void saveSettings() {
+        Properties properties = new Properties();
+        properties.setProperty("hud.scale", Float.toString(hudScale));
+        for (Map.Entry<String, Boolean> entry : MODULES.entrySet()) {
+            String key = "module." + entry.getKey().toLowerCase(java.util.Locale.ROOT).replace(' ', '_');
+            properties.setProperty(key, Boolean.toString(entry.getValue()));
+        }
+        try {
+            Files.createDirectories(CONFIG_FILE.getParent());
+            try (var writer = Files.newBufferedWriter(CONFIG_FILE)) {
+                properties.store(writer, "SWIFT VISUALS settings");
+            }
+        } catch (IOException ignored) {
+            // A read-only config folder must not crash the client.
+        }
+    }
 
     static {
         // Visual quality of life
@@ -51,6 +93,7 @@ public final class VoidModules {
         MODULES.put("Armor Durability", false);
         MODULES.put("Pearl Cooldown", false);
         MODULES.put("Shield Status", false);
+        loadSettings();
     }
 
     private VoidModules() {}
@@ -64,7 +107,10 @@ public final class VoidModules {
     }
 
     public static void toggle(String name) {
-        if (MODULES.containsKey(name)) MODULES.put(name, !MODULES.get(name));
+        if (MODULES.containsKey(name)) {
+            MODULES.put(name, !MODULES.get(name));
+            saveSettings();
+        }
     }
 
     public static Category categoryOf(String name) {
