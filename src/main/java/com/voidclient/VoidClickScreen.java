@@ -25,12 +25,12 @@ public final class VoidClickScreen extends Screen {
     }
 
     private void drawInterCentered(GuiGraphics g, String value, int px, int py, int color) {
-        Component text = Component.literal(value).setStyle(Style.EMPTY.withFont(INTER_FONT));
+        Component text = Component.literal(value).setStyle(Style.EMPTY.withFont(new FontDescription.Resource(INTER_FONT)));
         g.drawCenteredString(font, text, px, py, color);
     }
 
     private int interWidth(String value) {
-        return font.width(Component.literal(value).setStyle(Style.EMPTY.withFont(INTER_FONT)));
+        return font.width(Component.literal(value).setStyle(Style.EMPTY.withFont(new FontDescription.Resource(INTER_FONT))));
     }
     private static final int OUTER=0xE90B1018, SURFACE=0xE9141D28, TILE=0xD51C2733;
     private static final int WHITE=0xFFF0F5FA, MUTED=0xFF8798AA, ACCENT=0xFF72D5E8;
