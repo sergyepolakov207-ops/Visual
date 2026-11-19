@@ -20,7 +20,22 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 }
 
+// Fetch the open-source Inter variable font during the build so users do not need to install it.
+def interFontFile = file("src/main/resources/assets/swift/font/inter.ttf")
+tasks.register("downloadInterFont") {
+    outputs.file(interFontFile)
+    doLast {
+        if (!interFontFile.exists()) {
+            interFontFile.parentFile.mkdirs()
+            new URL("https://raw.githubusercontent.com/google/fonts/main/ofl/inter/Inter%5Bopsz,wght%5D.ttf").withInputStream { input ->
+                interFontFile.withOutputStream { output -> output << input }
+            }
+        }
+    }
+}
+
 processResources {
+    dependsOn tasks.named("downloadInterFont")
     inputs.property "version", project.version
     filesMatching("fabric.mod.json") {
         expand "version": project.version
