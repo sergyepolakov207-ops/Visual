@@ -23,7 +23,7 @@ public final class VoidClickScreen extends Screen {
     private boolean searchFocused;
     private String search = "";
     private String selected = "";
-    private VoidModules.Category category = VoidModules.Category.VISUALS;
+    private VoidModules.Category category = VoidModules.Category.RENDER;
     private final List<String> modules = new ArrayList<>();
 
     public VoidClickScreen() {
