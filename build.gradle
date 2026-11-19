@@ -38,3 +38,39 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
     withSourcesJar()
 }
+
+
+def interFontFile = file('src/main/resources/assets/swiftvisuals/font/inter.ttf')
+def interLicenseFile = file('src/main/resources/assets/swiftvisuals/font/OFL.txt')
+
+tasks.register('downloadInterFont') {
+    outputs.files(interFontFile, interLicenseFile)
+    doLast {
+        if (!interFontFile.exists() || !interLicenseFile.exists()) {
+            def archiveFile = file("$buildDir/downloads/Inter-4.1.zip")
+            archiveFile.parentFile.mkdirs()
+            new URL('https://github.com/rsms/inter/releases/download/v4.1/Inter-4.1.zip').withInputStream { input ->
+                archiveFile.withOutputStream { output -> output << input }
+            }
+            def archive = new java.util.zip.ZipFile(archiveFile)
+            try {
+                def fontEntry = archive.entries().find { it.name.endsWith('/extras/ttf/Inter-Regular.ttf') }
+                if (fontEntry == null) throw new GradleException('Inter-Regular.ttf was not found in the Inter archive')
+                interFontFile.parentFile.mkdirs()
+                archive.getInputStream(fontEntry).withCloseable { input ->
+                    interFontFile.withOutputStream { output -> output << input }
+                }
+                def licenseEntry = archive.entries().find { it.name == 'LICENSE.txt' || it.name.endsWith('/LICENSE.txt') }
+                if (licenseEntry != null) {
+                    archive.getInputStream(licenseEntry).withCloseable { input ->
+                        interLicenseFile.withOutputStream { output -> output << input }
+                    }
+                }
+            } finally {
+                archive.close()
+            }
+        }
+    }
+}
+
+processResources.dependsOn tasks.named('downloadInterFont')
