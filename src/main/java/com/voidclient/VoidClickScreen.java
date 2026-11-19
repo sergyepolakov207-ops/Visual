@@ -6,6 +6,8 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +16,21 @@ import java.util.Map;
 import java.util.Locale;
 
 public final class VoidClickScreen extends Screen {
+    private static final ResourceLocation INTER_FONT = ResourceLocation.fromNamespaceAndPath("swiftvisuals", "inter");
+
+    private void drawInter(GuiGraphics g, String value, int px, int py, int color, boolean shadow) {
+        Component text = Component.literal(value).setStyle(Style.EMPTY.withFont(INTER_FONT));
+        drawInter(g, text, px, py, color, shadow);
+    }
+
+    private void drawInterCentered(GuiGraphics g, String value, int px, int py, int color) {
+        Component text = Component.literal(value).setStyle(Style.EMPTY.withFont(INTER_FONT));
+        drawInterCentered(g, text, px, py, color);
+    }
+
+    private int interWidth(String value) {
+        return font.width(Component.literal(value).setStyle(Style.EMPTY.withFont(INTER_FONT)));
+    }
     private static final int OUTER=0xE90B1018, SURFACE=0xE9141D28, TILE=0xD51C2733;
     private static final int WHITE=0xFFF0F5FA, MUTED=0xFF8798AA, ACCENT=0xFF72D5E8;
     private int x,y,w,h,sideW,contentX,contentW,topY,listY,listBottom,rowH=39,scroll;
@@ -84,7 +101,7 @@ public final class VoidClickScreen extends Screen {
         g.drawString(font,"SWIFT VISUALS",x+59,y+17,WHITE,false);
         g.drawString(font,"PERSONAL CLIENT  /  1.21.11",x+59,y+34,MUTED,false);
         String count=enabledCount()+" ENABLED";
-        g.drawString(font,count,x+w-font.width(count)-18,y+27,ACCENT,false);
+        g.drawString(font,count,x+w-interWidth(count)-18,y+27,ACCENT,false);
 
         // Vertical category rail: a new layout rather than the old top tabs.
         panel(g,x+10,y+68,x+sideW,y+h-14,0xA7101822);
@@ -105,7 +122,7 @@ public final class VoidClickScreen extends Screen {
         // Module browser.
         g.drawString(font,categoryName(),contentX,topY-1,WHITE,true);
         String total=modules.size()+" FEATURES";
-        g.drawString(font,total,contentX+contentW-font.width(total),topY,MUTED,false);
+        g.drawString(font,total,contentX+contentW-interWidth(total),topY,MUTED,false);
         panel(g,contentX,topY+19,contentX+contentW,topY+48,searchFocused?0xFF203B49:0xFF19232E);
         if(searchFocused)panel(g,contentX,topY+19,contentX+contentW,topY+21,ACCENT);
         g.drawString(font,"⌕",contentX+9,topY+28,ACCENT,true);
@@ -128,7 +145,7 @@ public final class VoidClickScreen extends Screen {
             g.drawString(font,name,contentX+17,ry+7,WHITE,true);
             String desc=VoidModules.descriptionOf(name);
             int max=Math.max(24,contentW-76);
-            while(font.width(desc)>max&&desc.length()>4)desc=desc.substring(0,desc.length()-2);
+            while(interWidth(desc)>max&&desc.length()>4)desc=desc.substring(0,desc.length()-2);
             if(!desc.equals(VoidModules.descriptionOf(name)))desc+="…";
             g.drawString(font,desc,contentX+17,ry+23,MUTED,false);
             int sx=contentX+contentW-39,sy=ry+13;
