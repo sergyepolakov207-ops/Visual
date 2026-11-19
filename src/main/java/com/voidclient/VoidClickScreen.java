@@ -16,7 +16,7 @@ import java.util.Locale;
 public final class VoidClickScreen extends Screen {
     private static final int OUTER=0xE90B1018, SURFACE=0xE9141D28, TILE=0xD51C2733;
     private static final int WHITE=0xFFF0F5FA, MUTED=0xFF8798AA, ACCENT=0xFF72D5E8;
-    private int x,y,w,h,sideW,contentX,contentW,detailX,detailW,topY,listY,listBottom,rowH=39,scroll;
+    private int x,y,w,h,sideW,contentX,contentW,topY,listY,listBottom,rowH=39,scroll;
     private String search="",selected="";
     private boolean searchFocused;
     private VoidModules.Category category=VoidModules.Category.RENDER;
@@ -33,9 +33,7 @@ public final class VoidClickScreen extends Screen {
         sideW=Math.max(76,Math.min(112,w/5));
         contentX=x+sideW+12;
         int innerRight=x+w-14;
-        contentW=Math.max(100,(innerRight-contentX-12)*50/100);
-        detailX=contentX+contentW+12;
-        detailW=Math.max(92,innerRight-detailX);
+        contentW=Math.max(100,innerRight-contentX);
         topY=y+72;listY=topY+48;listBottom=y+h-24;
         rebuild();
     }
@@ -143,40 +141,6 @@ public final class VoidClickScreen extends Screen {
         }
         if(modules.isEmpty())g.drawString(font,"No matching features",contentX+8,listY+12,MUTED,false);
 
-        // Inspector panel with a distinct hierarchy.
-        panel(g,detailX,topY,detailX+detailW,listBottom,0xB517222D);
-        panel(g,detailX,topY,detailX+detailW,topY+2,0xFF344653);
-        g.drawString(font,"INSPECTOR",detailX+12,topY+13,MUTED,true);
-        panel(g,detailX+12,topY+34,detailX+detailW-12,topY+35,0xFF344653);
-        if(!selected.isEmpty()){
-            boolean on=VoidModules.isEnabled(selected);
-            g.drawString(font,selected,detailX+12,topY+48,WHITE,true);
-            String desc=VoidModules.descriptionOf(selected);
-            int yy=topY+69,max=Math.max(32,detailW-24);
-            StringBuilder line=new StringBuilder();
-            for(String word:desc.split(" ")){
-                String next=line.isEmpty()?word:line+" "+word;
-                if(font.width(next)>max&&!line.isEmpty()){
-                    g.drawString(font,line.toString(),detailX+12,yy,MUTED,false);yy+=13;line.setLength(0);line.append(word);
-                }else{if(!line.isEmpty())line.append(' ');line.append(word);}
-            }
-            if(!line.isEmpty())g.drawString(font,line.toString(),detailX+12,yy,MUTED,false);
-            int statusY=topY+Math.max(110,(listBottom-topY)/2);
-            panel(g,detailX+12,statusY,detailX+detailW-12,statusY+36,on?0xFF1D4651:0xFF29343F);
-            g.drawString(font,"STATUS",detailX+20,statusY+6,MUTED,false);
-            g.drawString(font,on?"ACTIVE":"INACTIVE",detailX+20,statusY+19,on?ACCENT:WHITE,true);
-            if(selected.equals("HUD")){
-                int sy=listBottom-78;
-                g.drawString(font,"HUD SCALE  "+Math.round(VoidModules.hudScale()*100)+"%",detailX+12,sy-17,WHITE,false);
-                panel(g,detailX+12,sy,detailX+detailW/2-3,sy+25,0xFF344653);
-                panel(g,detailX+detailW/2+3,sy,detailX+detailW-12,sy+25,0xFF344653);
-                g.drawCenteredString(font,"−",detailX+detailW/4+3,sy+8,WHITE);
-                g.drawCenteredString(font,"+",detailX+detailW*3/4-3,sy+8,WHITE);
-            }
-        }else{
-            g.drawString(font,"Select a feature",detailX+12,topY+51,WHITE,true);
-            g.drawString(font,"Details will appear here.",detailX+12,topY+68,MUTED,false);
-        }
         g.drawString(font,"SWIFT  /  "+categoryName(),x+18,y+h-13,0xFF647789,false);
         super.render(g,mx,my,partialTick);
     }
@@ -189,11 +153,6 @@ public final class VoidClickScreen extends Screen {
         for(int i=0;i<cats.length;i++){
             int cy=y+105+i*39;
             if(mx>=x+12&&mx<=x+sideW-2&&my>=cy&&my<=cy+32){category=cats[i];scroll=0;selected="";rebuild();return true;}
-        }
-        if(selected.equals("HUD")&&my>=listBottom-78&&my<=listBottom-53){
-            if(mx>=detailX+12&&mx<detailX+detailW/2)VoidModules.setHudScale(VoidModules.hudScale()-.05F);
-            else if(mx>=detailX+detailW/2&&mx<=detailX+detailW-12)VoidModules.setHudScale(VoidModules.hudScale()+.05F);
-            return true;
         }
         int visible=Math.max(1,(listBottom-listY)/(rowH+6));
         for(int i=0;i<visible;i++){
