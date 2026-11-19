@@ -69,7 +69,7 @@ public final class VoidClickScreen extends Screen {
         long now=System.nanoTime();
         float frameDelta=Math.min(0.05F,Math.max(0.001F,(now-lastRenderNanos)/1_000_000_000F));
         lastRenderNanos=now;
-        try{renderBlurredBackground(g);}catch(RuntimeException|LinkageError ignored){}
+        // Avoid Minecraft post-processing blur: it is unreliable on mobile OpenGL drivers.
         g.fill(0,0,width,height,0x7906090F);
         panel(g,x-3,y+4,x+w+3,y+h+4,0x70000000);
         panel(g,x,y,x+w,y+h,OUTER);
