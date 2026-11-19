@@ -97,15 +97,15 @@ public final class VoidClickScreen extends Screen {
         // Compact identity header.
         panel(g,x+17,y+16,x+48,y+47,0xFF1D3C4A);
         panel(g,x+20,y+19,x+45,y+44,0xFF72D5E8);
-        g.drawCenteredString(font,"S",x+32,y+27,0xFF10202A);
-        g.drawString(font,"SWIFT VISUALS",x+59,y+17,WHITE,false);
-        g.drawString(font,"PERSONAL CLIENT  /  1.21.11",x+59,y+34,MUTED,false);
+        drawInterCentered(g,"S",x+32,y+27,0xFF10202A);
+        drawInter(g,"SWIFT VISUALS",x+59,y+17,WHITE,false);
+        drawInter(g,"PERSONAL CLIENT  /  1.21.11",x+59,y+34,MUTED,false);
         String count=enabledCount()+" ENABLED";
-        g.drawString(font,count,x+w-interWidth(count)-18,y+27,ACCENT,false);
+        drawInter(g,count,x+w-interWidth(count)-18,y+27,ACCENT,false);
 
         // Vertical category rail: a new layout rather than the old top tabs.
         panel(g,x+10,y+68,x+sideW,y+h-14,0xA7101822);
-        g.drawString(font,"LIBRARY",x+18,y+82,MUTED,true);
+        drawInter(g,"LIBRARY",x+18,y+82,MUTED,true);
         VoidModules.Category[] cats=VoidModules.Category.values();
         String[] labels={"Combat","Movement","Visuals","Player","Utility"};
         for(int i=0;i<cats.length;i++){
@@ -114,20 +114,20 @@ public final class VoidClickScreen extends Screen {
             if(active)panel(g,x+12,cy,x+sideW-2,cy+32,0xFF244654);
             else if(hover)panel(g,x+12,cy,x+sideW-2,cy+32,0xFF202C38);
             if(active)panel(g,x+12,cy+5,x+14,cy+27,ACCENT);
-            g.drawString(font,labels[i],x+22,cy+11,active?WHITE:MUTED,active);
+            drawInter(g,labels[i],x+22,cy+11,active?WHITE:MUTED,active);
         }
         panel(g,x+18,y+h-51,x+sideW-8,y+h-50,0xFF2A3947);
-        g.drawString(font,"FABRIC",x+20,y+h-40,MUTED,false);
+        drawInter(g,"FABRIC",x+20,y+h-40,MUTED,false);
 
         // Module browser.
-        g.drawString(font,categoryName(),contentX,topY-1,WHITE,true);
+        drawInter(g,categoryName(),contentX,topY-1,WHITE,true);
         String total=modules.size()+" FEATURES";
-        g.drawString(font,total,contentX+contentW-interWidth(total),topY,MUTED,false);
+        drawInter(g,total,contentX+contentW-interWidth(total),topY,MUTED,false);
         panel(g,contentX,topY+19,contentX+contentW,topY+48,searchFocused?0xFF203B49:0xFF19232E);
         if(searchFocused)panel(g,contentX,topY+19,contentX+contentW,topY+21,ACCENT);
-        g.drawString(font,"⌕",contentX+9,topY+28,ACCENT,true);
+        drawInter(g,"⌕",contentX+9,topY+28,ACCENT,true);
         String searchText=search.isEmpty()?"Search features":search;
-        g.drawString(font,searchText+(searchFocused?"_":""),contentX+23,topY+28,search.isEmpty()?MUTED:WHITE,false);
+        drawInter(g,searchText+(searchFocused?"_":""),contentX+23,topY+28,search.isEmpty()?MUTED:WHITE,false);
 
         int visible=Math.max(1,(listBottom-listY)/(rowH+6));
         for(int i=0;i<visible;i++){
@@ -142,12 +142,12 @@ public final class VoidClickScreen extends Screen {
             toggleProgress.put(name,progress);
             panel(g,contentX,ry,contentX+contentW,ry+rowH,chosen?0xFF203D4A:hover?0xFF202B37:TILE);
             panel(g,contentX+7,ry+7,contentX+9,ry+rowH-7,on?ACCENT:0xFF465360);
-            g.drawString(font,name,contentX+17,ry+7,WHITE,true);
+            drawInter(g,name,contentX+17,ry+7,WHITE,true);
             String desc=VoidModules.descriptionOf(name);
             int max=Math.max(24,contentW-76);
             while(interWidth(desc)>max&&desc.length()>4)desc=desc.substring(0,desc.length()-2);
             if(!desc.equals(VoidModules.descriptionOf(name)))desc+="…";
-            g.drawString(font,desc,contentX+17,ry+23,MUTED,false);
+            drawInter(g,desc,contentX+17,ry+23,MUTED,false);
             int sx=contentX+contentW-39,sy=ry+13;
             if(progress>0.02F)roundedPill(g,sx-3,sy-3,35,22,0x223CAEFF);
             int trackR=(int)(53+(40*progress)),trackG=(int)(65+(38*progress)),trackB=(int)(77+(45*progress));
@@ -156,9 +156,9 @@ public final class VoidClickScreen extends Screen {
             int knobX=sx+8+Math.round(progress*13F);
             circle(g,knobX,sy+8,6,0xFFEAF5F8);
         }
-        if(modules.isEmpty())g.drawString(font,"No matching features",contentX+8,listY+12,MUTED,false);
+        if(modules.isEmpty())drawInter(g,"No matching features",contentX+8,listY+12,MUTED,false);
 
-        g.drawString(font,"SWIFT  /  "+categoryName(),x+18,y+h-13,0xFF647789,false);
+        drawInter(g,"SWIFT  /  "+categoryName(),x+18,y+h-13,0xFF647789,false);
         super.render(g,mx,my,partialTick);
     }
 
