@@ -43,8 +43,8 @@ public final class VoidClickScreen extends Screen {
     private int interWidth(String value) {
         return font.width(regular(value));
     }
-    private static final int OUTER=0xE90B1018, SURFACE=0xE9141D28, TILE=0xD51C2733;
-    private static final int WHITE=0xFFF0F5FA, MUTED=0xFF8798AA, ACCENT=0xFF72D5E8;
+    private static final int OUTER=0xF0090B10, SURFACE=0xE910141D, TILE=0xD5171E2A;
+    private static final int WHITE=0xFFF0F2F8, MUTED=0xFF8792A5, ACCENT=0xFF9A83FF;
     private int x,y,w,h,sideW,contentX,contentW,topY,listY,listBottom,rowH=39,scroll;
     private String search="",selected="";
     private boolean searchFocused;
@@ -59,11 +59,11 @@ public final class VoidClickScreen extends Screen {
         w=Math.min(width-12,Math.max(360,(int)(width*.96)));
         h=Math.min(height-12,Math.max(260,(int)(height*.94)));
         x=(width-w)/2;y=(height-h)/2;
-        sideW=Math.max(76,Math.min(112,w/5));
+        sideW=Math.max(76,Math.min(132,w/4));
         contentX=x+sideW+12;
         int innerRight=x+w-14;
         contentW=Math.max(100,innerRight-contentX);
-        topY=y+72;listY=topY+48;listBottom=y+h-24;
+        topY=y+68;listY=topY+54;listBottom=y+h-24;
         rebuild();
     }
 
@@ -102,44 +102,45 @@ public final class VoidClickScreen extends Screen {
         g.fill(0,0,width,height,0x7906090F);
         panel(g,x-3,y+4,x+w+3,y+h+4,0x70000000);
         panel(g,x,y,x+w,y+h,OUTER);
-        panel(g,x+1,y+1,x+w-1,y+2,0x55FFFFFF);
-        panel(g,x,y,x+w,y+3,ACCENT);
-        panel(g,x+12,y+57,x+w-12,y+58,0xFF2A3947);
+        panel(g,x+1,y+1,x+w-1,y+2,0x22FFFFFF);
+        panel(g,x+12,y+12,x+sideW,y+h-14,0xA710141D);
 
-        // Compact identity header.
-        panel(g,x+17,y+16,x+48,y+47,0xFF1D3C4A);
-        panel(g,x+20,y+19,x+45,y+44,0xFF72D5E8);
-        drawInterCentered(g,"S",x+32,y+27,0xFF10202A);
-        drawInter(g,"SWIFT VISUALS",x+59,y+17,WHITE,false);
-        drawInter(g,"PERSONAL CLIENT  /  1.21.11",x+59,y+34,MUTED,false);
-        String count=enabledCount()+" ENABLED";
-        drawInter(g,count,x+w-interWidth(count)-18,y+27,ACCENT,false);
+        // Brand block in the left navigation rail.
+        panel(g,x+19,y+19,x+48,y+48,0xFF33295B);
+        panel(g,x+22,y+22,x+45,y+45,0xFF9A83FF);
+        drawInterCentered(g,"S",x+33,y+29,0xFF151020);
+        drawInter(g,"SWIFT",x+55,y+20,WHITE,false);
+        drawInter(g,"VISUALS",x+55,y+34,MUTED,false);
+        panel(g,x+18,y+60,x+sideW-8,y+61,0xFF252D3B);
 
-        // Vertical category rail: a new layout rather than the old top tabs.
-        panel(g,x+10,y+68,x+sideW,y+h-14,0xA7101822);
-        drawInter(g,"LIBRARY",x+18,y+82,MUTED,true);
+        // Sidebar categories.
+        drawInter(g,"MAIN MENU",x+20,y+74,MUTED,true);
         VoidModules.Category[] cats=VoidModules.Category.values();
-        String[] labels={"Combat","Movement","Visuals","Player","Utility"};
+        String[] labels={"Combat","Movement","Render","Player","Misc"};
         for(int i=0;i<cats.length;i++){
-            int cy=y+105+i*39;
+            int cy=y+96+i*39;
             boolean active=category==cats[i],hover=mx>=x+12&&mx<=x+sideW-2&&my>=cy&&my<=cy+32;
-            if(active)panel(g,x+12,cy,x+sideW-2,cy+32,0xFF244654);
-            else if(hover)panel(g,x+12,cy,x+sideW-2,cy+32,0xFF202C38);
+            if(active)panel(g,x+12,cy,x+sideW-2,cy+32,0xFF29233F);
+            else if(hover)panel(g,x+12,cy,x+sideW-2,cy+32,0xFF1B202C);
             if(active)panel(g,x+12,cy+5,x+14,cy+27,ACCENT);
             drawInter(g,labels[i],x+22,cy+11,active?WHITE:MUTED,active);
         }
-        panel(g,x+18,y+h-51,x+sideW-8,y+h-50,0xFF2A3947);
-        drawInter(g,"FABRIC",x+20,y+h-40,MUTED,false);
+        panel(g,x+18,y+h-51,x+sideW-8,y+h-50,0xFF252D3B);
+        drawInter(g,"FABRIC  1.21.11",x+20,y+h-40,MUTED,false);
 
-        // Module browser.
-        drawInter(g,categoryName(),contentX,topY-1,WHITE,true);
+        // Main content header and search field.
+        drawInter(g,"SWIFT VISUALS  /",contentX, y+22,MUTED,false);
+        drawInter(g,categoryName(),contentX+interWidth("SWIFT VISUALS  / "),y+22,WHITE,false);
+        String count=enabledCount()+" ENABLED";
+        drawInter(g,count,contentX+contentW-interWidth(count),y+22,ACCENT,false);
+        drawInter(g,categoryName(),contentX,topY-8,WHITE,true);
         String total=modules.size()+" FEATURES";
-        drawInter(g,total,contentX+contentW-interWidth(total),topY,MUTED,false);
-        panel(g,contentX,topY+19,contentX+contentW,topY+48,searchFocused?0xFF203B49:0xFF19232E);
-        if(searchFocused)panel(g,contentX,topY+19,contentX+contentW,topY+21,ACCENT);
-        drawInter(g,"⌕",contentX+9,topY+28,ACCENT,true);
-        String searchText=search.isEmpty()?"Search features":search;
-        drawInter(g,searchText+(searchFocused?"_":""),contentX+23,topY+28,search.isEmpty()?MUTED:WHITE,false);
+        drawInter(g,total,contentX+contentW-interWidth(total),topY-7,MUTED,false);
+        panel(g,contentX,topY+12,contentX+contentW,topY+43,searchFocused?0xFF211C35:0xFF151B27);
+        if(searchFocused)panel(g,contentX,topY+12,contentX+contentW,topY+14,ACCENT);
+        drawInter(g,"⌕",contentX+9,topY+22,ACCENT,true);
+        String searchText=search.isEmpty()?"Search modules...":search;
+        drawInter(g,searchText+(searchFocused?"_":""),contentX+23,topY+22,search.isEmpty()?MUTED:WHITE,false);
 
         int visible=Math.max(1,(listBottom-listY)/(rowH+6));
         for(int i=0;i<visible;i++){
@@ -152,7 +153,7 @@ public final class VoidClickScreen extends Screen {
             progress+= (target-progress)*Math.min(1F,frameDelta*15F);
             if(Math.abs(target-progress)<0.005F)progress=target;
             toggleProgress.put(name,progress);
-            panel(g,contentX,ry,contentX+contentW,ry+rowH,chosen?0xFF203D4A:hover?0xFF202B37:TILE);
+            panel(g,contentX,ry,contentX+contentW,ry+rowH,chosen?0xFF211D32:hover?0xFF1C2431:TILE);
             panel(g,contentX+7,ry+7,contentX+9,ry+rowH-7,on?ACCENT:0xFF465360);
             drawInter(g,name,contentX+17,ry+7,WHITE,true);
             String desc=VoidModules.descriptionOf(name);
@@ -170,7 +171,7 @@ public final class VoidClickScreen extends Screen {
         }
         if(modules.isEmpty())drawInter(g,"No matching features",contentX+8,listY+12,MUTED,false);
 
-        drawInter(g,"SWIFT  /  "+categoryName(),x+18,y+h-13,0xFF647789,false);
+        drawInter(g,"SWIFT VISUALS",x+18,y+h-13,0xFF647789,false);
         super.render(g,mx,my,partialTick);
     }
 
@@ -180,7 +181,7 @@ public final class VoidClickScreen extends Screen {
         searchFocused=mx>=contentX&&mx<=contentX+contentW&&my>=topY+19&&my<=topY+48;
         VoidModules.Category[] cats=VoidModules.Category.values();
         for(int i=0;i<cats.length;i++){
-            int cy=y+105+i*39;
+            int cy=y+96+i*39;
             if(mx>=x+12&&mx<=x+sideW-2&&my>=cy&&my<=cy+32){category=cats[i];scroll=0;selected="";rebuild();return true;}
         }
         int visible=Math.max(1,(listBottom-listY)/(rowH+6));
