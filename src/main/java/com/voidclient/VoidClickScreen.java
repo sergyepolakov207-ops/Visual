@@ -7,6 +7,7 @@ import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.network.chat.FontDescription;
 import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,15 +21,15 @@ public final class VoidClickScreen extends Screen {
     private static final Identifier SEGOE_LIGHT = Identifier.fromNamespaceAndPath("swiftvisuals", "segoe_ui_light");
 
     private Component regular(String value) {
-        return Component.literal(value).withStyle(style -> style.withFont(SEGOE_REGULAR));
+        return Component.literal(value).withStyle(style -> style.withFont(new FontDescription.Resource(SEGOE_REGULAR)));
     }
 
     private Component semibold(String value) {
-        return Component.literal(value).withStyle(style -> style.withFont(SEGOE_SEMIBOLD));
+        return Component.literal(value).withStyle(style -> style.withFont(new FontDescription.Resource(SEGOE_SEMIBOLD)));
     }
 
     private Component light(String value) {
-        return Component.literal(value).withStyle(style -> style.withFont(SEGOE_LIGHT));
+        return Component.literal(value).withStyle(style -> style.withFont(new FontDescription.Resource(SEGOE_LIGHT)));
     }
 
     private void drawInter(GuiGraphics g, String value, int px, int py, int color, boolean shadow) {
