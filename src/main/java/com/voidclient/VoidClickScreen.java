@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Locale;
 
 public final class VoidClickScreen extends Screen {
-    private static final int BG=0xF708090B, PANEL=0xF7101216, CARD=0xFF15181D, LINE=0xFF292D34;
-    private static final int WHITE=0xFFF2F3F5, MUTED=0xFF858B95, ACCENT=0xFFE8EAED;
+    private static final int BG=0xF7060A12, PANEL=0xF70A1220, CARD=0xFF0D1725, LINE=0xFF17364B;
+    private static final int WHITE=0xFFEAFBFF, MUTED=0xFF7898AD, ACCENT=0xFF00D9FF;
     private int x,y,w,h,railW,mainX,mainW,detailX,detailW,gridY,gridBottom,cardW,cardH;
     private int scroll;
     private String search="", selected="";
@@ -54,32 +54,32 @@ public final class VoidClickScreen extends Screen {
         if(!modules.contains(selected))selected=modules.isEmpty()?"":modules.get(0);
     }
     private void toggle(GuiGraphics g,int sx,int sy,boolean on){
-        pill(g,sx,sy,34,18,on?0xFFE7E9EC:0xFF353941);
-        int cx=sx+(on?25:9);for(int dy=-5;dy<=5;dy++){int half=(int)Math.sqrt(25-dy*dy);g.fill(cx-half,sy+9+dy,cx+half+1,sy+10+dy,on?0xFF101216:0xFFE8EAED);}
+        pill(g,sx,sy,34,18,on?0xFF00D9FF:0xFF20384A);
+        int cx=sx+(on?25:9);for(int dy=-5;dy<=5;dy++){int half=(int)Math.sqrt(25-dy*dy);g.fill(cx-half,sy+9+dy,cx+half+1,sy+10+dy,on?0xFF101216:0xFF00D9FF);}
     }
     @Override public void render(GuiGraphics g,int mx,int my,float partial){
         long now=System.nanoTime();float dt=Math.min(.05f,Math.max(.001f,(now-last)/1e9f));last=now;intro=Math.min(1,intro+dt*3f);
         g.fill(0,0,width,height,0xB5000000);
         int lift=Math.round((1-intro)*8);int py=y+lift;
         box(g,x-2,py+5,x+w+2,py+h+5,0x70000000);box(g,x,py,x+w,py+h,BG);
-        box(g,x,py,x+w,py+1,0xFFE2E5E9);box(g,x+railW,py+1,x+railW+1,py+h-1,LINE);
+        box(g,x,py,x+w,py+2,0xFF00D9FF);box(g,x,py+2,x+4,py+h,0xFF087FA8);box(g,x+railW,py+1,x+railW+1,py+h-1,LINE);
         // Compact icon rail
-        box(g,x+13,py+15,x+45,py+47,ACCENT);g.drawCenteredString(font,c("S"),x+29,py+25,0xFF111318);
+        box(g,x+13,py+15,x+45,py+47,ACCENT);g.drawCenteredString(font,c("S"),x+29,py+25,0xFF06101A);
         String[] names={"Combat","Move","Visual","Player","Utility"};String[] glyph={"C","M","V","P","U"};
         VoidModules.Category[] cats=VoidModules.Category.values();
         for(int i=0;i<cats.length;i++){
             int cy=py+76+i*43;boolean active=category==cats[i],hover=mx>=x+8&&mx<=x+50&&my>=cy&&my<=cy+34;
-            if(active)box(g,x+8,cy,x+50,cy+34,ACCENT);else if(hover)box(g,x+8,cy,x+50,cy+34,0xFF252930);
-            g.drawCenteredString(font,c(glyph[i]),x+29,cy+11,active?0xFF111318:hover?WHITE:MUTED);
+            if(active)box(g,x+8,cy,x+50,cy+34,ACCENT);else if(hover)box(g,x+8,cy,x+50,cy+34,0xFF102A3B);
+            g.drawCenteredString(font,c(glyph[i]),x+29,cy+11,active?0xFF06101A:hover?WHITE:MUTED);
         }
         txt(g,"1.21",x+17,py+h-24,MUTED);
         // Top bar
-        txt(g,"SWIFT VISUALS",mainX,py+17,MUTED);
+        txt(g,"SWIFT VISUALS",mainX,py+17,0xFF00D9FF);
         txt(g,"/"+cat().toUpperCase(Locale.ROOT),mainX+tw("SWIFT VISUALS")+8,py+17,WHITE);
-        String active=enabled()+" ACTIVE";pill(g,x+w-tw(active)-34,py+13,tw(active)+22,22,0xFF20242A);
+        String active=enabled()+" ACTIVE";pill(g,x+w-tw(active)-34,py+13,tw(active)+22,22,0xFF102638);
         txt(g,active,x+w-tw(active)-23,py+20,ACCENT);
         txt(g,cat(),mainX,py+49,WHITE);
-        txt(g,"A focused control surface for your game.",mainX,py+68,MUTED);
+        txt(g,"NEON CONTROL SYSTEM  /  GAME OVERLAY",mainX,py+68,0xFF5D91AA);
         // Search and category count
         int sy=py+91;box(g,mainX,sy,mainX+mainW,sy+25,0xFF171A1F);box(g,mainX,sy,mainX+mainW,sy+1,searchFocused?ACCENT:LINE);
         txt(g,search.isEmpty()?"⌕  Search modules":searchFocused?search+"_":search,mainX+9,sy+8,search.isEmpty()?MUTED:WHITE);
@@ -91,9 +91,9 @@ public final class VoidClickScreen extends Screen {
             String n=modules.get(idx);int col=i%cols,row=i/cols;
             int cx=mainX+col*(cardW+10),cy=gridY+row*(cardH+8)+lift;
             boolean on=VoidModules.isEnabled(n),chosen=n.equals(selected),hover=mx>=cx&&mx<=cx+cardW&&my>=cy&&my<=cy+cardH;
-            box(g,cx,cy,cx+cardW,cy+cardH,chosen?0xFF242930:hover?0xFF1D2127:CARD);
-            box(g,cx,cy,cx+cardW,cy+1,chosen?ACCENT:LINE);
-            box(g,cx+11,cy+12,cx+13,cy+cardH-12,on?ACCENT:0xFF41464D);
+            box(g,cx,cy,cx+cardW,cy+cardH,chosen?0xFF242930:hover?0xFF102033:CARD);
+            box(g,cx,cy,cx+cardW,cy+1,chosen?ACCENT:LINE); if(chosen){box(g,cx,cy,cx+1,cy+cardH,0xFF00D9FF);box(g,cx+cardW-1,cy,cx+cardW,cy+cardH,0xFF00D9FF);}
+            box(g,cx+11,cy+12,cx+13,cy+cardH-12,on?ACCENT:0xFF24536B);
             txt(g,n,cx+21,cy+12,WHITE);
             String d=VoidModules.descriptionOf(n);int max=Math.max(30,cardW-30);
             while(tw(d)>max&&d.length()>8)d=d.substring(0,d.length()-2);if(!d.equals(VoidModules.descriptionOf(n)))d+="…";
@@ -104,8 +104,8 @@ public final class VoidClickScreen extends Screen {
         if(modules.isEmpty()){box(g,mainX,gridY,mainX+mainW,gridY+65,CARD);g.drawCenteredString(font,c("NOTHING HERE"),mainX+mainW/2,gridY+18,WHITE);g.drawCenteredString(font,c("Try a different search"),mainX+mainW/2,gridY+36,MUTED);}
         // Right-side live inspector on roomy screens
         if(detailW>0){
-            box(g,detailX,py+12,detailX+detailW,py+h-14,PANEL);box(g,detailX,py+12,detailX+detailW,py+13,LINE);
-            txt(g,"MODULE INSPECTOR",detailX+13,py+26,MUTED);
+            box(g,detailX,py+12,detailX+detailW,py+h-14,PANEL);box(g,detailX,py+12,detailX+detailW,py+13,0xFF00D9FF);box(g,detailX,py+12,detailX+detailW,py+13,LINE);
+            txt(g,"// MODULE INSPECTOR",detailX+13,py+26,0xFF00C8EC);
             box(g,detailX+13,py+48,detailX+detailW-13,py+49,LINE);
             if(!selected.isEmpty()){
                 boolean on=VoidModules.isEnabled(selected);
@@ -113,21 +113,21 @@ public final class VoidClickScreen extends Screen {
                 String[] words=VoidModules.descriptionOf(selected).split(" ");String line="";int yy=py+84;
                 for(String word:words){String next=line.isEmpty()?word:line+" "+word;if(tw(next)>detailW-28){txt(g,line,detailX+13,yy,MUTED);yy+=12;line=word;}else line=next;}
                 if(!line.isEmpty())txt(g,line,detailX+13,yy,MUTED);
-                int ty=yy+24;txt(g,"STATUS",detailX+13,ty,MUTED);txt(g,on?"ENABLED":"DISABLED",detailX+13,ty+18,on?ACCENT:MUTED);
+                int ty=yy+24;txt(g,"// STATUS",detailX+13,ty,0xFF00C8EC);txt(g,on?"ENABLED":"DISABLED",detailX+13,ty+18,on?ACCENT:MUTED);
                 toggle(g,detailX+detailW-54,ty+13,on);
                 box(g,detailX+13,ty+42,detailX+detailW-13,ty+43,LINE);
                 txt(g,"CATEGORY",detailX+13,ty+56,MUTED);txt(g,cat().toUpperCase(Locale.ROOT),detailX+13,ty+73,WHITE);
             }else txt(g,"Select a module",detailX+13,py+68,MUTED);
             int fy=py+h-104;box(g,detailX+13,fy,detailX+detailW-13,fy+1,LINE);
-            txt(g,"HUD SCALE",detailX+13,fy+15,MUTED);
+            txt(g,"// HUD SCALE",detailX+13,fy+15,0xFF00C8EC);
             String scale=String.format(Locale.ROOT,"%.2fx",VoidModules.hudScale());txt(g,scale,detailX+detailW-13-tw(scale),fy+15,WHITE);
-            int bx=detailX+13,by=fy+43,bw=detailW-26;box(g,bx,by,bx+bw,by+3,0xFF343941);
+            int bx=detailX+13,by=fy+43,bw=detailW-26;box(g,bx,by,bx+bw,by+3,0xFF21465B);
             int knob=bx+Math.round((VoidModules.hudScale()-.75f)/.75f*bw);box(g,bx,by,knob,by+3,ACCENT);
             pill(g,knob-5,by-4,10,11,ACCENT);
             txt(g,"0.75x",bx,by+15,MUTED);String max="1.50x";txt(g,max,bx+bw-tw(max),by+15,MUTED);
         }
         box(g,mainX,y+h-25+lift,mainX+mainW,y+h-24+lift,LINE);
-        txt(g,"SWIFT  /  MINIMAL INTERFACE",mainX,y+h-16+lift,MUTED);
+        txt(g,"SWIFT  /  CYBERPUNK INTERFACE",mainX,y+h-16+lift,0xFF00AFCF);
         txt(g,"ESC  CLOSE",mainX+mainW-tw("ESC  CLOSE"),y+h-16+lift,MUTED);
         super.render(g,mx,my,partial);
     }
