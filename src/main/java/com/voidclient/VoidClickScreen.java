@@ -172,9 +172,6 @@ public final class VoidClickScreen extends Screen {
             if(e.key()==GLFW.GLFW_KEY_ESCAPE){searchFocused=false;return true;}}
         return super.keyPressed(e);
     }
-    @Override public boolean mouseScrolled(double mx,double my,double horizontal,double vertical){
-        int cols=mainW>=390?2:1,rows=Math.max(1,(gridBottom-gridY)/(cardH+8));
-        int max=Math.max(0,(modules.size()+cols-1)/cols-rows);scroll=Math.max(0,Math.min(max,scroll-(int)Math.signum(vertical)));return true;
-    }
+
     @Override public boolean isPauseScreen(){return false;}
 }
