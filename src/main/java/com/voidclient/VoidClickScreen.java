@@ -41,16 +41,16 @@ public final class VoidClickScreen extends Screen {
     private void pill(GuiGraphics g,int l,int t,int ww,int hh,int color){rr(g,l,t,l+ww,t+hh,hh/2,color);}
     private void toggle(GuiGraphics g,int sx,int sy,boolean on){pill(g,sx,sy,32,16,on?PURPLE:OFF);int cx=sx+(on?24:8),col=on?WHITE:0xFF94A3B8;for(int dy=-5;dy<=5;dy++){int half=(int)Math.sqrt(25-dy*dy);g.fill(cx-half,sy+8+dy,cx+half+1,sy+9+dy,col);}}
     private String label(VoidModules.Category cat){return switch(cat){case COMBAT->"Combat";case MOVEMENT->"Movement";case RENDER->"Visuals";case PLAYER->"Player";case MISC->"Utility";};}
-    private void tabs(){int tx=gridX;VoidModules.Category[] cats=VoidModules.Category.values();for(int i=0;i<cats.length;i++){tabL[i]=tx;tabR[i]=tx+tw(label(cats[i]));tx=tabR[i]+tw("/")+12;}}
+    private void tabs(){for(int i=0;i<5;i++){tabL[i]=x+8;tabR[i]=x+36;}}
     private int visibleRows(){return Math.max(1,(gridBottom-gridY+GAP)/(ROW_H+GAP));}
     private int totalRows(){return (modules.size()+cols-1)/cols;}
     private String fit(String s,int max){if(max<=0)return "";if(tw(s)<=max)return s;String out="";for(int i=0;i<s.length();i++){if(tw(out+s.charAt(i)+"…")>max)break;out+=s.charAt(i);}return out+"…";}
     private String keyName(int key){if(key==GLFW.GLFW_KEY_SPACE)return "SPC";if(key==GLFW.GLFW_KEY_ESCAPE)return "ESC";if(key>=GLFW.GLFW_KEY_F1&&key<=GLFW.GLFW_KEY_F12)return "F"+(key-GLFW.GLFW_KEY_F1+1);String n=GLFW.glfwGetKeyName(key,0);return n==null?"K"+key:n.toUpperCase(Locale.ROOT);}
     @Override protected void init(){
-        w=Math.min(width-16,760);h=Math.min(height-16,320);x=(width-w)/2;y=(height-h)/2;gridX=x+14;gridY=y+48;gridBottom=y+h-FOOT;
-        cols=w>=540?4:w>=340?2:1;colW=(w-28-(cols-1)*GAP)/cols;tabs();
+        w=Math.min(width-16,760);h=Math.min(height-16,320);x=(width-w)/2;y=(height-h)/2;gridX=x+50;gridY=y+62;gridBottom=y+h-FOOT;
+        cols=w>=520?3:w>=330?2:1;colW=(w-64-(cols-1)*GAP)/cols;tabs();
         clearW=tw("Выкл все")+14;clearH=18;clearX=x+w-14-clearW;clearY=y+9;
-        int minLeft=tabR[4]+12;int avail=clearX-8-minLeft;searchH=18;searchW=avail>=56?Math.min(115,avail):0;searchX=searchW>0?clearX-8-searchW:-1000;searchY=y+9;
+        searchH=18;searchW=Math.max(0,Math.min(112,clearX-(x+260)-8));searchX=searchW>0?clearX-8-searchW:-1000;searchY=y+9;
         intro=0;draggingHudScale=false;draggingParam=false;listeningModule=null;rebuild();
     }
     private void rebuild(){
@@ -68,10 +68,13 @@ public final class VoidClickScreen extends Screen {
         long now=System.nanoTime();float dt=Math.min(.05f,Math.max(.001f,(now-last)/1e9f));last=now;intro=Math.min(1,intro+dt*2.8f);int lift=Math.round((1-intro)*10),py=y+lift;
         g.fill(0,0,width,height,0xB0000000);card(g,x,py,x+w,py+h,12,BG,LINE);g.fillGradient(x+8,py+1,x+w-8,py+70,0x55583EC8,0x00583EC8);
         tabs();VoidModules.Category[] cats=VoidModules.Category.values();
-        for(int i=0;i<cats.length;i++){boolean active=cats[i]==category,hover=mx>=tabL[i]&&mx<=tabR[i]&&my>=py+10&&my<=py+26;txt(g,label(cats[i]),tabL[i],py+14,active?WHITE:hover?0xFF9A9AB5:MUTED);if(i<cats.length-1)txt(g,"/",tabR[i]+5,py+14,0xFF333844);}
+        txt(g,"SWIFT VISUALS",x+50,py+9,WHITE);
+        txt(g,"Client-side modules and visual enhancements",x+50,py+22,MUTED);
+        for(int i=0;i<cats.length;i++){int iy=py+46+i*36;boolean active=cats[i]==category,hover=mx>=tabL[i]&&mx<=tabR[i]&&my>=iy&&my<=iy+27;card(g,tabL[i],iy,tabR[i],iy+27,7,active?0xFF29233F:hover?ROW:BADGE,active?PURPLE:LINE);String glyph=switch(cats[i]){case COMBAT->"C";case MOVEMENT->"M";case RENDER->"V";case PLAYER->"P";case MISC->"U";};txt(g,glyph,tabL[i]+10,iy+9,active?VIOLET:MUTED);}
         if(searchW>0){card(g,searchX,py+9,searchX+searchW,py+27,6,ROW,searchFocused?HOVER:LINE);String s=search.isEmpty()&&!searchFocused?"Поиск":searchFocused?search+"_":search;txt(g,fit(s,searchW-12),searchX+7,py+14,search.isEmpty()?MUTED:WHITE);}
         boolean ch=mx>=clearX&&mx<=clearX+clearW&&my>=py+9&&my<=py+27;card(g,clearX,py+9,clearX+clearW,py+27,6,ROW,ch?HOVER:LINE);txt(g,"Выкл все",clearX+7,py+14,ch?WHITE:MUTED);
-        fill(g,gridX,py+36,x+w-14,py+37,LINE);
+        fill(g,x+43,py+43,x+44,py+h-14,LINE);
+        fill(g,gridX,py+51,x+w-14,py+52,LINE);
         int vr=visibleRows();for(int r=0;r<vr;r++)for(int cc=0;cc<cols;cc++){int idx=(scroll+r)*cols+cc;if(idx>=modules.size())break;String n=modules.get(idx);int rx=gridX+cc*(colW+GAP),ry=gridY+r*(ROW_H+GAP)+lift;boolean on=VoidModules.isEnabled(n),hover=mx>=rx&&mx<=rx+colW&&my>=ry&&my<=ry+ROW_H,selected=n.equals(selectedParamModule);card(g,rx,ry,rx+colW,ry+ROW_H,8,ROW,selected?PURPLE:hover?HOVER:LINE);fill(g,rx+8,ry+12,rx+12,ry+16,on?WHITE:MUTED);
             int toggleX=rx+colW-40,bindX=toggleX-29;String bind=listeningModule!=null&&listeningModule.equals(n)?"...":VoidModules.keyBinds().containsKey(n)?keyName(VoidModules.keyBinds().get(n)):"·";card(g,bindX,ry+6,bindX+24,ry+22,4,BADGE,LINE);txt(g,fit(bind,20),bindX+4,ry+10,VoidModules.keyBinds().containsKey(n)||n.equals(listeningModule)?WHITE:MUTED);txt(g,fit(n,Math.max(0,bindX-rx-24)),rx+16,ry+10,on?WHITE:MUTED);toggle(g,toggleX,ry+6,on);}
         if(modules.isEmpty())txt(g,"Ничего не найдено",gridX,gridY+4,MUTED);
@@ -83,7 +86,7 @@ public final class VoidClickScreen extends Screen {
     @Override public boolean mouseClicked(MouseButtonEvent e,boolean doubled){
         double mx=e.x(),my=e.y();if(e.button()==1){for(int r=0;r<visibleRows();r++)for(int cc=0;cc<cols;cc++){int idx=(scroll+r)*cols+cc;if(idx>=modules.size())break;int rx=gridX+cc*(colW+GAP),ry=gridY+r*(ROW_H+GAP);if(mx>=rx&&mx<=rx+colW&&my>=ry&&my<=ry+ROW_H){String n=modules.get(idx);selectedParamModule=n.equals(selectedParamModule)?null:n;return true;}}return super.mouseClicked(e,doubled);}
         if(e.button()!=0)return super.mouseClicked(e,doubled);tabs();VoidModules.Category[] cats=VoidModules.Category.values();
-        for(int i=0;i<cats.length;i++)if(mx>=tabL[i]&&mx<=tabR[i]&&my>=y+10&&my<=y+26){category=cats[i];scroll=0;searchFocused=false;listeningModule=null;rebuild();return true;}
+        for(int i=0;i<cats.length;i++){int iy=y+46+i*36;if(mx>=tabL[i]&&mx<=tabR[i]&&my>=iy&&my<=iy+27){category=cats[i];scroll=0;searchFocused=false;listeningModule=null;selectedParamModule=null;rebuild();return true;}}
         if(mx>=clearX&&mx<=clearX+clearW&&my>=clearY&&my<=clearY+clearH){searchFocused=false;listeningModule=null;for(String n:VoidModules.all().keySet())if(VoidModules.isEnabled(n))VoidModules.toggle(n);return true;}
         searchFocused=searchW>0&&mx>=searchX&&mx<=searchX+searchW&&my>=searchY&&my<=searchY+searchH;if(searchFocused){listeningModule=null;return true;}
         if(selectedParamModule!=null&&mx>=paramX()-4&&mx<=paramX()+paramW()+4&&my>=y+h-70&&my<=y+h-50){draggingParam=true;applyParam(mx);return true;}
