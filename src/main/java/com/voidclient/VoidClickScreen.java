@@ -63,6 +63,17 @@ public final class VoidClickScreen extends Screen {
             g.fill(cx - half, sy + 7 + dy, cx + half + 1, sy + 8 + dy, col);
         }
     }
+    private void drawMiniKeyboard(GuiGraphics g, int kx, int ky) {
+        rr(g, kx, ky, kx + 18, ky + 9, 2, 0xFF8D79B8);
+        int key = 0xFFD8C8F2;
+        for (int row = 0; row < 2; row++) {
+            for (int col = 0; col < 5; col++) {
+                int px = kx + 2 + col * 3, py = ky + 2 + row * 3;
+                fill(g, px, py, px + 2, py + 2, key);
+            }
+        }
+        fill(g, kx + 6, ky + 7, kx + 13, ky + 8, key);
+    }
     private String tabTitle(int idx) {
         return switch (idx) { case 0 -> "Visuals"; case 1 -> "HUD"; case 2 -> "Utils"; default -> "Misc"; };
     }
@@ -127,7 +138,7 @@ public final class VoidClickScreen extends Screen {
         scroll = Math.max(0, Math.min(scroll, Math.max(0, totalRows() - visibleRows())));
     }
     @Override protected void init() {
-        w = Math.min(width - 24, 480); h = Math.min(height - 72, 292);
+        w = Math.min(width - 32, 560); h = Math.min(height - 48, 344);
         x = (width - w) / 2; y = Math.max(12, (height - h - 38) / 2);
         bannerH = 66; tabsY = y + bannerH + 8; gridX = x + 12; gridY = tabsY + 26;
         int paramReserve = selectedParamModule != null ? 24 : 0;
@@ -136,7 +147,7 @@ public final class VoidClickScreen extends Screen {
     }
     private void renderMirrorGlassBackground(GuiGraphics g, int py) {
         fill(g, 0, 0, width, height, SCRIM);
-        card(g, x, py, x + w, py + h, 10, GLASS_BG, BORDER);
+        card(g, x, py, x + w, py + h, 18, GLASS_BG, BORDER);
         int bTop = py + 1, bBot = py + bannerH;
         g.fillGradient(x + 1, bTop, x + w - 1, bBot, 0xCC1E1038, 0x990D071B);
         fill(g, x + 2, bTop + 1, x + w - 2, bTop + 2, 0x44C084FC);
@@ -178,12 +189,16 @@ public final class VoidClickScreen extends Screen {
             boolean selected = n.equals(selectedParamModule);
             card(g, rx, ry, rx + colW, ry + ROW_H, 6, selected ? 0xF028154A : on ? CARD_ON : hover ? CARD_HOVER : CARD,
                     selected ? BORDER_ACTIVE : on ? 0x889333EA : hover ? 0x77A855F7 : BORDER);
-            int toggleX = rx + colW - 34, bindX = toggleX - 24;
+            int toggleX = rx + colW - 34, bindX = toggleX - 38;
             String bindLabel = n.equals(listeningModule) ? "..." : VoidModules.keyBinds().containsKey(n)
                     ? keyName(VoidModules.keyBinds().get(n)) : "·";
             boolean hasBind = VoidModules.keyBinds().containsKey(n) || n.equals(listeningModule);
-            card(g, bindX, ry + 6, bindX + 20, ry + 20, 4, GLASS_BG, BORDER);
-            txt(g, fit(bindLabel, 16), bindX + 3, ry + 9, hasBind ? VIOLET : MUTED);
+            card(g, bindX, ry + 5, bindX + 34, ry + 21, 5, GLASS_BG, hasBind ? BORDER_ACTIVE : BORDER);
+            if (hasBind) {
+                txt(g, fit(bindLabel, 28), bindX + 3, ry + 9, VIOLET);
+            } else {
+                drawMiniKeyboard(g, bindX + 8, ry + 9);
+            }
             txt(g, fit(n, Math.max(0, bindX - rx - 16)), rx + 9, ry + 9, on ? WHITE : MUTED);
             toggle(g, toggleX, ry + 6, on);
         }
@@ -232,8 +247,8 @@ public final class VoidClickScreen extends Screen {
         for (int r = 0; r < visibleRows(); r++) for (int cc = 0; cc < COLS; cc++) {
             int idx = (scroll + r) * COLS + cc; if (idx >= modules.size()) break;
             int rx = gridX + cc * (colW + GAP), ry = gridY + r * (ROW_H + GAP);
-            int tx = rx + colW - 34, bx = tx - 24;
-            if (mx >= bx && mx <= bx + 20 && my >= ry + 6 && my <= ry + 20) {
+            int tx = rx + colW - 34, bx = tx - 38;
+            if (mx >= bx && mx <= bx + 34 && my >= ry + 5 && my <= ry + 21) {
                 String n = modules.get(idx); listeningModule = n.equals(listeningModule) ? null : n; return true;
             }
             if (mx >= rx && mx <= rx + colW && my >= ry && my <= ry + ROW_H) {
