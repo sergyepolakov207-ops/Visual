@@ -111,7 +111,7 @@ public final class VoidClickScreen extends Screen {
             tabL[i] = curX; tabR[i] = curX + bw; curX += bw + 6;
         }
         searchH = 18;
-        searchW = Math.max(76, Math.min(148, x + w - pad - (curX + 10)));
+        searchW = Math.max(96, Math.min(210, x + w - pad - (curX + 10)));
         searchX = x + w - pad - searchW; searchY = tabsY;
         int dockW = 148, dockH = 26, dx = (width - dockW) / 2, itemW = 24;
         int gap = (dockW - TAB_COUNT * itemW) / (TAB_COUNT + 1);
@@ -138,7 +138,7 @@ public final class VoidClickScreen extends Screen {
         scroll = Math.max(0, Math.min(scroll, Math.max(0, totalRows() - visibleRows())));
     }
     @Override protected void init() {
-        w = Math.min(width - 32, 560); h = Math.min(height - 48, 344);
+        w = Math.min(width - 32, 740); h = Math.min(height - 48, 344);
         x = (width - w) / 2; y = Math.max(12, (height - h - 38) / 2);
         bannerH = 66; tabsY = y + bannerH + 8; gridX = x + 12; gridY = tabsY + 26;
         int paramReserve = selectedParamModule != null ? 24 : 0;
