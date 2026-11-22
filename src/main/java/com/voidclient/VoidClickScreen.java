@@ -12,14 +12,16 @@ import java.util.List;
 import java.util.Locale;
 
 public final class VoidClickScreen extends Screen {
-    // palette: near-black panel, soft purple glow, purple switches
-    private static final int BG = 0xFA08080D, ROW = 0xFF0E0E15, LINE = 0xFF191925, LINE_HOVER = 0xFF3A2F7A;
-    private static final int WHITE = 0xFFF1F1F8, MUTED = 0xFF5D5D72, SEP = 0xFF2A2A3A;
-    private static final int PURPLE = 0xFF6B4DF2, TOG_OFF = 0xFF1A1A25, KNOB = 0xFFE4E4F3, KNOB_OFF = 0xFF5A5A70;
-    private static final int ROW_H = 30, GAP = 8, FOOT = 34;
+    // palette: charcoal & slate panel, soft purple accent, green S / purple V brand mark
+    private static final int BG = 0xFA0B0C0E, ROW = 0xFF1C1E24, LINE = 0xFF262932, LINE_HOVER = 0xFF4A4E5E;
+    private static final int WHITE = 0xFFF1F5F9, MUTED = 0xFF8B92A0, SEP = 0xFF333844;
+    private static final int PURPLE = 0xFF6B4DF2, TOG_OFF = 0xFF22252C, KNOB = 0xFFFFFFFF, KNOB_OFF = 0xFF94A3B8;
+    private static final int GREEN_S = 0xFF4ADE80, VIOLET_V = 0xFFC084FC, BADGE_BG = 0xFF181A20;
+    private static final int ROW_H = 28, GAP = 8, FOOT = 52;
 
     private int x, y, w, h, cols, colW, gridX, gridY, gridBottom, scroll;
     private int searchX, searchY, searchW, searchH;
+    private int clearBtnX, clearBtnY, clearBtnW, clearBtnH;
     private final int[] tabL = new int[5], tabR = new int[5];
     private String search = "";
     private boolean searchFocused;
@@ -29,7 +31,7 @@ public final class VoidClickScreen extends Screen {
     private long last = System.nanoTime();
     private float intro;
 
-    public VoidClickScreen() { super(Component.literal("SWIFT VISUALS")); }
+    public VoidClickScreen() { super(Component.literal("SV VISUALS")); }
 
     private Component c(String s) { return Component.literal(s); }
     private void txt(GuiGraphics g, String s, int px, int py, int color) { g.drawString(font, c(s), px, py, color, false); }
@@ -60,11 +62,11 @@ public final class VoidClickScreen extends Screen {
     private void pill(GuiGraphics g, int l, int t, int ww, int hh, int color) { rrect(g, l, t, l + ww, t + hh, hh / 2, color); }
 
     private void toggle(GuiGraphics g, int sx, int sy, boolean on) {
-        pill(g, sx, sy, 34, 18, on ? PURPLE : TOG_OFF);
-        int cx = sx + (on ? 25 : 9), col = on ? KNOB : KNOB_OFF;
+        pill(g, sx, sy, 32, 16, on ? PURPLE : TOG_OFF);
+        int cx = sx + (on ? 24 : 8), col = on ? KNOB : KNOB_OFF;
         for (int dy = -5; dy <= 5; dy++) {
             int half = (int) Math.sqrt(25 - dy * dy);
-            g.fill(cx - half, sy + 9 + dy, cx + half + 1, sy + 10 + dy, col);
+            g.fill(cx - half, sy + 8 + dy, cx + half + 1, sy + 9 + dy, col);
         }
     }
 
@@ -84,7 +86,7 @@ public final class VoidClickScreen extends Screen {
         for (int i = 0; i < cats.length && i < tabL.length; i++) {
             tabL[i] = tx;
             tabR[i] = tx + tw(label(cats[i]));
-            tx = tabR[i] + tw("/") + 14;
+            tx = tabR[i] + tw("/") + 12;
         }
     }
 
@@ -92,19 +94,28 @@ public final class VoidClickScreen extends Screen {
     private int totalRows() { return (modules.size() + cols - 1) / cols; }
 
     @Override protected void init() {
-        w = Math.min(width - 12, 460);
-        h = Math.min(height - 12, 280);
+        w = Math.min(width - 16, 760);
+        h = Math.min(height - 16, 320);
         x = (width - w) / 2;
         y = (height - h) / 2;
         gridX = x + 14;
         gridY = y + 48;
         gridBottom = y + h - FOOT;
-        cols = w >= 330 ? 2 : 1;
+        if (w >= 540) cols = 4;
+        else if (w >= 340) cols = 2;
+        else cols = 1;
         colW = (w - 28 - (cols - 1) * GAP) / cols;
-        searchW = Math.max(70, Math.min(110, w - 320));
+
+        clearBtnW = tw("Выкл все") + 14;
+        clearBtnH = 18;
+        clearBtnX = x + w - 14 - clearBtnW;
+        clearBtnY = y + 9;
+
+        searchW = Math.max(64, Math.min(115, clearBtnX - (gridX + 265)));
         searchH = 18;
-        searchX = x + w - 14 - searchW;
+        searchX = clearBtnX - 8 - searchW;
         searchY = y + 9;
+
         intro = 0;
         draggingHudScale = false;
         rebuild();
@@ -119,6 +130,14 @@ public final class VoidClickScreen extends Screen {
                     || VoidModules.descriptionOf(n).toLowerCase(Locale.ROOT).contains(q))) modules.add(n);
         }
         scroll = Math.max(0, Math.min(scroll, Math.max(0, totalRows() - visibleRows())));
+    }
+
+    private void disableAllModules() {
+        for (String n : VoidModules.all().keySet()) {
+            if (VoidModules.isEnabled(n)) {
+                VoidModules.toggle(n);
+            }
+        }
     }
 
     private int sliderX() { return gridX + tw("HUD scale") + 12; }
@@ -139,24 +158,32 @@ public final class VoidClickScreen extends Screen {
         int lift = Math.round((1 - intro) * 10), py = y + lift;
 
         g.fill(0, 0, width, height, 0xB0000000);
-        card(g, x, py, x + w, py + h, 10, BG, LINE);
+        card(g, x, py, x + w, py + h, 12, BG, LINE);
         g.fillGradient(x + 8, py + 1, x + w - 8, py + 70, 0x55583EC8, 0x00583EC8);
 
-        // header: category tabs + search
+        // header: category tabs + search + clear button + SV mark (S green, V purple)
         tabs();
         VoidModules.Category[] cats = VoidModules.Category.values();
         for (int i = 0; i < cats.length && i < tabL.length; i++) {
             boolean active = cats[i] == category;
             boolean hover = mx >= tabL[i] && mx <= tabR[i] && my >= py + 10 && my <= py + 26;
-            txt(g, label(cats[i]), tabL[i], py + 15, active ? WHITE : hover ? 0xFF9A9AB5 : MUTED);
-            if (i < cats.length - 1) txt(g, "/", tabR[i] + 6, py + 15, SEP);
+            txt(g, label(cats[i]), tabL[i], py + 14, active ? WHITE : hover ? 0xFF9A9AB5 : MUTED);
+            if (i < cats.length - 1) txt(g, "/", tabR[i] + 5, py + 14, SEP);
         }
-        card(g, searchX, py + 9, searchX + searchW, py + 9 + searchH, 6, ROW, searchFocused ? LINE_HOVER : LINE);
-        txt(g, search.isEmpty() && !searchFocused ? "Поиск" : searchFocused ? search + "_" : search,
-                searchX + 8, py + 14, search.isEmpty() ? MUTED : WHITE);
+
+        if (searchX > tabR[Math.min(cats.length, tabR.length) - 1] + 16) {
+            card(g, searchX, py + 9, searchX + searchW, py + 9 + searchH, 6, ROW, searchFocused ? LINE_HOVER : LINE);
+            txt(g, search.isEmpty() && !searchFocused ? "Поиск" : searchFocused ? search + "_" : search,
+                    searchX + 7, py + 14, search.isEmpty() ? MUTED : WHITE);
+        }
+
+        boolean clearHover = mx >= clearBtnX && mx <= clearBtnX + clearBtnW && my >= py + 9 && my <= py + 9 + clearBtnH;
+        card(g, clearBtnX, py + 9, clearBtnX + clearBtnW, py + 9 + clearBtnH, 6, ROW, clearHover ? LINE_HOVER : LINE);
+        txt(g, "Выкл все", clearBtnX + 7, py + 14, clearHover ? WHITE : MUTED);
+
         box(g, gridX, py + 36, x + w - 14, py + 37, LINE);
 
-        // module rows
+        // module cards
         int vr = visibleRows();
         for (int r = 0; r < vr; r++) {
             for (int cc = 0; cc < cols; cc++) {
@@ -167,25 +194,37 @@ public final class VoidClickScreen extends Screen {
                 boolean on = VoidModules.isEnabled(n);
                 boolean hover = mx >= rx && mx <= rx + colW && my >= ry && my <= ry + ROW_H;
                 card(g, rx, ry, rx + colW, ry + ROW_H, 8, ROW, hover ? LINE_HOVER : LINE);
-                txt(g, n, rx + 14, ry + (ROW_H - 8) / 2, on ? WHITE : MUTED);
-                toggle(g, rx + colW - 14 - 34, ry + (ROW_H - 18) / 2, on);
+                box(g, rx + 9, ry + (ROW_H - 4) / 2, rx + 13, ry + (ROW_H + 4) / 2, on ? WHITE : MUTED);
+                txt(g, n, rx + 18, ry + (ROW_H - 8) / 2, on ? WHITE : MUTED);
+                toggle(g, rx + colW - 10 - 32, ry + (ROW_H - 16) / 2, on);
             }
         }
         if (modules.isEmpty()) txt(g, "Ничего не найдено", gridX, gridY + 4, MUTED);
-        // fade out at the bottom when more rows are hidden below
         if (scroll + vr < totalRows())
-            g.fillGradient(x + 8, gridBottom - 34 + lift, x + w - 8, gridBottom + lift, 0x0008080D, BG);
+            g.fillGradient(x + 8, gridBottom - 34 + lift, x + w - 8, gridBottom + lift, 0x000B0C0E, BG);
 
-        // footer: HUD scale
-        box(g, gridX, py + h - 30, x + w - 14, py + h - 29, LINE);
-        txt(g, "HUD scale", gridX, py + h - 21, MUTED);
+        // footer row 1: HUD scale
+        int scaleRowY = py + h - 46;
+        box(g, gridX, scaleRowY - 3, x + w - 14, scaleRowY - 2, LINE);
+        txt(g, "HUD scale", gridX, scaleRowY + 2, MUTED);
         String scale = String.format(Locale.ROOT, "%.2fx", VoidModules.hudScale());
-        txt(g, scale, x + w - 14 - tw(scale), py + h - 21, WHITE);
-        int bx = sliderX(), bw = sliderW(), by = py + h - 18;
+        txt(g, scale, x + w - 14 - tw(scale), scaleRowY + 2, WHITE);
+        int bx = sliderX(), bw = sliderW(), by = scaleRowY + 5;
         box(g, bx, by, bx + bw, by + 3, TOG_OFF);
         int knob = bx + Math.round((VoidModules.hudScale() - .75f) / .75f * bw);
         box(g, bx, by, knob, by + 3, PURPLE);
         pill(g, knob - 5, by - 4, 10, 11, KNOB);
+
+        // footer row 2: neutral profile badge + SV brand mark (S green, V purple)
+        int profY = py + h - 24;
+        card(g, gridX, profY, gridX + 18, profY + 18, 5, BADGE_BG, LINE);
+        txt(g, "V", gridX + 6, profY + 5, WHITE);
+        txt(g, "vbiver", gridX + 24, profY + 2, WHITE);
+        txt(g, "Member", gridX + 24, profY + 11, MUTED);
+
+        int svX = x + w - 14 - tw("SV");
+        txt(g, "S", svX, profY + 5, GREEN_S);
+        txt(g, "V", svX + tw("S"), profY + 5, VIOLET_V);
 
         super.render(g, mx, my, partial);
     }
@@ -200,7 +239,12 @@ public final class VoidClickScreen extends Screen {
                 category = cats[i]; scroll = 0; searchFocused = false; rebuild(); return true;
             }
         }
-        searchFocused = mx >= searchX && mx <= searchX + searchW && my >= y + 9 && my <= y + 9 + searchH;
+        if (mx >= clearBtnX && mx <= clearBtnX + clearBtnW && my >= clearBtnY && my <= clearBtnY + clearBtnH) {
+            searchFocused = false;
+            disableAllModules();
+            return true;
+        }
+        searchFocused = mx >= searchX && mx <= searchX + searchW && my >= searchY && my <= searchY + searchH;
         if (searchFocused) return true;
         int vr = visibleRows();
         for (int r = 0; r < vr; r++) {
@@ -214,8 +258,8 @@ public final class VoidClickScreen extends Screen {
                 }
             }
         }
-        int bx = sliderX(), bw = sliderW();
-        if (mx >= bx - 5 && mx <= bx + bw + 5 && my >= y + h - 27 && my <= y + h - 8) {
+        int bx = sliderX(), bw = sliderW(), scaleRowY = y + h - 46;
+        if (mx >= bx - 5 && mx <= bx + bw + 5 && my >= scaleRowY - 4 && my <= scaleRowY + 14) {
             draggingHudScale = true;
             applyHudScaleFromMouse(mx);
             return true;
