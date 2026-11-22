@@ -28,6 +28,7 @@ public final class VoidClientClient implements ClientModInitializer {
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            VoidModules.handleKeyBinds(client);
             while (openMenuKey.consumeClick()) {
                 if (client.screen == null) client.setScreen(new VoidClickScreen());
                 else if (client.screen instanceof VoidClickScreen) client.setScreen(null);
