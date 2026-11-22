@@ -2,6 +2,11 @@ package com.voidclient;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+import org.lwjgl.glfw.GLFW;
+import net.minecraft.client.Minecraft;
 import java.util.Properties;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,6 +18,9 @@ public final class VoidModules {
 
     private static final Map<String, Boolean> MODULES = new LinkedHashMap<>();
     private static float hudScale = 1.0F;
+    private static final Map<String, Integer> KEY_BINDS = new LinkedHashMap<>();
+    private static final Map<String, Float> MODULE_VALUES = new LinkedHashMap<>();
+    private static final Set<Integer> KEYS_DOWN = new HashSet<>();
     private static final Path CONFIG_FILE = FabricLoader.getInstance().getConfigDir().resolve("swiftvisuals.properties");
 
     public static float hudScale() { return hudScale; }
@@ -28,6 +36,19 @@ public final class VoidModules {
             properties.load(reader);
             hudScale = Math.max(0.75F, Math.min(1.50F,
                 Float.parseFloat(properties.getProperty("hud.scale", "1.0"))));
+            KEY_BINDS.clear();
+            MODULE_VALUES.clear();
+            for (String name : MODULES.keySet()) {
+                String suffix = name.toLowerCase(java.util.Locale.ROOT).replace(' ', '_');
+                try {
+                    int key = Integer.parseInt(properties.getProperty("bind." + suffix, "-1"));
+                    if (key >= 0) KEY_BINDS.put(name, key);
+                } catch (NumberFormatException ignored) { }
+                try {
+                    float value = Float.parseFloat(properties.getProperty("value." + suffix, "0.75"));
+                    MODULE_VALUES.put(name, Math.max(0.0F, Math.min(1.0F, value)));
+                } catch (NumberFormatException ignored) { }
+            }
             for (String name : MODULES.keySet()) {
                 String key = "module." + name.toLowerCase(java.util.Locale.ROOT).replace(' ', '_');
                 MODULES.put(name, Boolean.parseBoolean(properties.getProperty(key, Boolean.toString(MODULES.get(name)))));
@@ -41,8 +62,10 @@ public final class VoidModules {
         Properties properties = new Properties();
         properties.setProperty("hud.scale", Float.toString(hudScale));
         for (Map.Entry<String, Boolean> entry : MODULES.entrySet()) {
-            String key = "module." + entry.getKey().toLowerCase(java.util.Locale.ROOT).replace(' ', '_');
-            properties.setProperty(key, Boolean.toString(entry.getValue()));
+            String suffix = entry.getKey().toLowerCase(java.util.Locale.ROOT).replace(' ', '_');
+            properties.setProperty("module." + suffix, Boolean.toString(entry.getValue()));
+            if (KEY_BINDS.containsKey(entry.getKey())) properties.setProperty("bind." + suffix, Integer.toString(KEY_BINDS.get(entry.getKey())));
+            if (MODULE_VALUES.containsKey(entry.getKey())) properties.setProperty("value." + suffix, Float.toString(MODULE_VALUES.get(entry.getKey())));
         }
         try {
             Files.createDirectories(CONFIG_FILE.getParent());
@@ -111,6 +134,33 @@ public final class VoidModules {
             MODULES.put(name, !MODULES.get(name));
             saveSettings();
         }
+    }
+
+    public static Map<String, Integer> keyBinds() { return KEY_BINDS; }
+    public static void setKeyBind(String name, Integer key) {
+        if (!MODULES.containsKey(name)) return;
+        if (key == null || key < 0) KEY_BINDS.remove(name); else KEY_BINDS.put(name, key);
+        saveSettings();
+    }
+    public static float moduleValue(String name) { return MODULE_VALUES.getOrDefault(name, 0.75F); }
+    public static void setModuleValue(String name, float value) {
+        if (!MODULES.containsKey(name)) return;
+        MODULE_VALUES.put(name, Math.max(0.0F, Math.min(1.0F, value)));
+        saveSettings();
+    }
+    public static void handleKeyBinds(Minecraft client) {
+        if (client == null || client.screen != null || client.getWindow() == null) { KEYS_DOWN.clear(); return; }
+        long window = client.getWindow().getWindow();
+        Set<Integer> nowDown = new HashSet<>();
+        for (Map.Entry<String, Integer> entry : KEY_BINDS.entrySet()) {
+            int key = entry.getValue();
+            if (key >= 0 && GLFW.glfwGetKey(window, key) == GLFW.GLFW_PRESS) {
+                nowDown.add(key);
+                if (!KEYS_DOWN.contains(key)) toggle(entry.getKey());
+            }
+        }
+        KEYS_DOWN.clear();
+        KEYS_DOWN.addAll(nowDown);
     }
 
     public static Category categoryOf(String name) {
