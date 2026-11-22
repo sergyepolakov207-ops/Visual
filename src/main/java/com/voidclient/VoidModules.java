@@ -150,7 +150,7 @@ public final class VoidModules {
     }
     public static void handleKeyBinds(Minecraft client) {
         if (client == null || client.screen != null || client.getWindow() == null) { KEYS_DOWN.clear(); return; }
-        long window = client.getWindow().getHandle();
+        long window = client.getWindow().handle();
         Set<Integer> nowDown = new HashSet<>();
         for (Map.Entry<String, Integer> entry : KEY_BINDS.entrySet()) {
             int key = entry.getValue();
