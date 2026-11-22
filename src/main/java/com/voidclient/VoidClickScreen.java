@@ -147,14 +147,7 @@ public final class VoidClickScreen extends Screen {
         fill(g, sceneR - 82, bTop + 18, sceneR - 18, sceneB, 0x36321B59);
         int refTop = py + h - 38;
         g.fillGradient(x + 2, refTop, x + w - 2, py + h - 1, 0x00A855F7, 0x28A855F7);
-        String brand = "PulseVisuals"; int iconW = 24, totalBrandW = iconW + 8 + tw(brand);
-        int startX = x + (w - totalBrandW) / 2, midY = bTop + bannerH / 2;
-        fill(g, startX, midY, startX + 7, midY + 1, VIOLET);
-        fill(g, startX + 6, midY - 6, startX + 8, midY + 1, VIOLET);
-        fill(g, startX + 8, midY - 8, startX + 10, midY + 7, BRIGHT);
-        fill(g, startX + 10, midY - 4, startX + 12, midY + 5, VIOLET);
-        fill(g, startX + 12, midY, startX + 20, midY + 1, VIOLET);
-        txt(g, brand, startX + iconW + 6, midY - 4, WHITE);
+
     }
     @Override public void render(GuiGraphics g, int mx, int my, float partial) {
         long now = System.nanoTime();
@@ -207,14 +200,7 @@ public final class VoidClickScreen extends Screen {
             String pct = Math.round(v * 100) + "%";
             txt(g, pct, x + w - 18 - tw(pct), pBarY + 5, VIOLET);
         }
-        int dockW = 148, dockH = 26, dx = (width - dockW) / 2, dy = dockY + lift;
-        card(g, dx, dy, dx + dockW, dy + dockH, 8, DOCK_BG, BORDER);
-        for (int i = 0; i < TAB_COUNT; i++) {
-            boolean active = i == activeTabIndex; int iw = dockR[i] - dockL[i], ih = 18, iy = dy + (dockH - ih) / 2;
-            if (active) card(g, dockL[i], iy, dockR[i], iy + ih, 5, BRIGHT, VIOLET);
-            String icon = switch (i) { case 0 -> "◈"; case 1 -> "▣"; case 2 -> "❖"; default -> "☰"; };
-            txt(g, icon, dockL[i] + (iw - tw(icon)) / 2, iy + 5, active ? WHITE : MUTED);
-        }
+
         super.render(g, mx, my, partial);
     }
     @Override public boolean mouseClicked(MouseButtonEvent e, boolean doubled) {
@@ -234,9 +220,7 @@ public final class VoidClickScreen extends Screen {
         for (int i = 0; i < TAB_COUNT; i++) if (mx >= tabL[i] && mx <= tabR[i] && my >= tabsY && my <= tabsY + 18) {
             activeTabIndex = i; scroll = 0; searchFocused = false; listeningModule = null; selectedParamModule = null; init(); return true;
         }
-        for (int i = 0; i < TAB_COUNT; i++) if (mx >= dockL[i] && mx <= dockR[i] && my >= dockY && my <= dockY + 26) {
-            activeTabIndex = i; scroll = 0; searchFocused = false; listeningModule = null; selectedParamModule = null; init(); return true;
-        }
+
         searchFocused = mx >= searchX && mx <= searchX + searchW && my >= searchY && my <= searchY + searchH;
         if (searchFocused) { listeningModule = null; return true; }
         if (selectedParamModule != null) {
