@@ -64,8 +64,14 @@ public final class VoidClickScreen extends Screen {
     private String tabTitle(int i){ return switch(i){case 0->"Visuals";case 1->"HUD";case 2->"Player";default->"Misc";}; }
     private boolean matchesTab(String n,int i){
         VoidModules.Category cat=VoidModules.categoryOf(n);
-        return switch(i){case 0->cat==VoidModules.Category.RENDER;case 1->cat==VoidModules.Category.PLAYER;
-            case 2->cat==VoidModules.Category.COMBAT||cat==VoidModules.Category.MOVEMENT;default->cat==VoidModules.Category.MISC;};
+        return switch(i){
+            case 0 -> cat == VoidModules.Category.RENDER
+                    || cat == VoidModules.Category.COMBAT
+                    || cat == VoidModules.Category.MOVEMENT;
+            case 1 -> cat == VoidModules.Category.PLAYER;
+            case 2 -> false; // Modules from the former Player tab are now in Visuals.
+            default -> cat == VoidModules.Category.MISC;
+        };
     }
     private int enabledCountInTab(int i){ int count=0; for(String n:VoidModules.all().keySet())if(matchesTab(n,i)&&VoidModules.isEnabled(n))count++; return count; }
     private int totalEnabledCount(){ int count=0; for(String n:VoidModules.all().keySet())if(VoidModules.isEnabled(n))count++; return count; }
