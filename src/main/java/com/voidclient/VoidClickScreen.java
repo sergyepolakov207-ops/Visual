@@ -13,14 +13,32 @@ import java.util.List;
 import java.util.Locale;
 
 public final class VoidClickScreen extends Screen {
-    private static final int SCRIM=0xB8090A0D, WINDOW_BG=0xF0101115, TOPBAR_BG=0xF515161B;
-    private static final int SIDEBAR_BG=0xF20D0E12, CARD_BG=0xE8181A1F, CARD_HOVER=0xF520222A;
-    private static final int CARD_ON=0xF5211E2C, TAB_ACTIVE_BG=0xF22E2A3E, FOOTER_BG=0xE80B0C10;
-    private static final int LINE_SOFT=0x26FFFFFF, LINE_MID=0x38FFFFFF, LINE_VIOLET=0x7A8B5CF6, LINE_VIOLET_BRIGHT=0xB8A855F7;
-    private static final int TXT_MAIN=0xFFF1F3F5, TXT_SUB=0xFF8D939E, TXT_DIM=0xFF626770;
-    private static final int VIOLET_LIGHT=0xFFD8B4FE, VIOLET_PIP=0xFFC084FC, VIOLET_SW_START=0xFF7C3AED, VIOLET_SW_END=0xFFA855F7;
-    private static final int SW_OFF=0xFF2C2F36, KNOB_OFF=0xFF878D98;
-    private static final int TAB_COUNT=4, HEADER_H=32, FOOTER_H=26, SIDEBAR_W=136, ROW_H=26, ROW_GAP=5;
+    // Colors & layout adapted from the supplied reference design.
+    private static final int SCRIM = 0x9609090B;
+    private static final int SHADOW_OUTER = 0x26000000;
+    private static final int SHADOW_MID = 0x44000000;
+    private static final int WINDOW_BG = 0xEA141010;
+    private static final int TOPBAR_BG = 0xF21B1617;
+    private static final int SIDEBAR_BG = 0xB2130E0E;
+    private static final int CARD_BG = 0xDC1E191A;
+    private static final int CARD_HOVER = 0xEE282224;
+    private static final int CARD_ON = 0xF025202A;
+    private static final int TAB_ACTIVE_BG = 0xF22D272B;
+    private static final int FOOTER_BG = 0xE8110D0E;
+    private static final int LINE_SOFT = 0x24FFFFFF;
+    private static final int LINE_MID = 0x36FFFFFF;
+    private static final int LINE_VIOLET = 0x66A89FA8;
+    private static final int LINE_VIOLET_BRIGHT = 0x99D4C8E8;
+    private static final int TXT_MAIN = 0xFFF3F4F6;
+    private static final int TXT_SUB = 0xFF9CA3AF;
+    private static final int TXT_DIM = 0xFF6B7280;
+    private static final int VIOLET_LIGHT = 0xFFE5E7EB;
+    private static final int VIOLET_PIP = 0xFFC4B5FD;
+    private static final int VIOLET_SW_START = 0xFF8B5CF6;
+    private static final int VIOLET_SW_END = 0xFF8B5CF6;
+    private static final int SW_OFF = 0xFF2D282A;
+    private static final int KNOB_OFF = 0xFF9CA3AF;
+    private static final int TAB_COUNT = 4, HEADER_H = 32, FOOTER_H = 26, SIDEBAR_W = 148, ROW_H = 26, ROW_GAP = 5;
 
     private int x,y,w,h,sidebarL,sidebarR,bodyTop,bodyBottom,footerY,listL,listR,listTop,listBottom,scroll;
     private int searchX,searchY,searchW,searchH,resetBtnL,resetBtnR,resetBtnT,resetBtnB;
@@ -32,7 +50,7 @@ public final class VoidClickScreen extends Screen {
     private long last=System.nanoTime();
     private float intro,pulsePhase;
 
-    public VoidClickScreen(){ super(Component.literal("Monolith")); }
+    public VoidClickScreen(){ super(Component.literal("Menu")); }
     private Component c(String s){ return Component.literal(s); }
     private int tw(String s){ return font.width(c(s)); }
     private void txt(GuiGraphics g,String s,int px,int py,int color){ g.drawString(font,c(s),px,py,color,false); }
@@ -65,11 +83,9 @@ public final class VoidClickScreen extends Screen {
     private boolean matchesTab(String n,int i){
         VoidModules.Category cat=VoidModules.categoryOf(n);
         return switch(i){
-            case 0 -> cat == VoidModules.Category.RENDER
-                    || cat == VoidModules.Category.COMBAT
-                    || cat == VoidModules.Category.MOVEMENT;
+            case 0 -> cat == VoidModules.Category.RENDER;
             case 1 -> cat == VoidModules.Category.PLAYER;
-            case 2 -> false; // Modules from the former Player tab are now in Visuals.
+            case 2 -> cat == VoidModules.Category.COMBAT || cat == VoidModules.Category.MOVEMENT;
             default -> cat == VoidModules.Category.MISC;
         };
     }
@@ -104,16 +120,17 @@ public final class VoidClickScreen extends Screen {
         int maxScroll=Math.max(0,modules.size()-visibleRows()); scroll=Math.max(0,Math.min(scroll,maxScroll));
     }
     @Override protected void init(){
-        w=Math.min(width-28,720); h=Math.min(height-32,336); x=(width-w)/2; y=Math.max(10,(height-h)/2);
+        w=Math.min(width-28,740); h=Math.min(height-32,340); x=(width-w)/2; y=Math.max(10,(height-h)/2);
         layoutSections(); intro=0f; draggingParam=false; listeningModule=null; rebuild();
     }
     private void renderWindowFrame(GuiGraphics g,int py){
-        fill(g,0,0,width,height,SCRIM); card(g,x,py,x+w,py+h,10,WINDOW_BG,LINE_MID);
-        fill(g,x+w/8,py+1,x+w-w/8,py+2,LINE_VIOLET_BRIGHT);
+        fill(g,0,0,width,height,SCRIM);
+        rr(g,x-7,py-5,x+w+7,py+h+9,16,SHADOW_OUTER);
+        rr(g,x-4,py-2,x+w+4,py+h+6,14,SHADOW_MID);
+        card(g,x,py,x+w,py+h,12,WINDOW_BG,LINE_MID);
         int hdrBot=py+HEADER_H; fill(g,x+1,py+1,x+w-1,hdrBot,TOPBAR_BG); fill(g,x+1,hdrBot-1,x+w-1,hdrBot,LINE_SOFT);
-        rr(g,x+12,py+12,x+20,py+20,2,VIOLET_SW_END); txt(g,"Monolith",x+26,py+12,TXT_MAIN);
-        int badgeL=x+26+tw("Monolith")+8,badgeR=badgeL+tw("v2")+10;
-        card(g,badgeL,py+11,badgeR,py+21,4,0x338B5CF6,LINE_VIOLET); txt(g,"v2",badgeL+5,py+12,VIOLET_LIGHT);
+        rr(g,x+12,py+12,x+20,py+20,2,VIOLET_PIP);
+        txt(g,"VoidClient",x+26,py+12,TXT_MAIN);
         int bTop=py+(bodyTop-y),bBot=py+(bodyBottom-y);
         fill(g,x+1,bTop,x+SIDEBAR_W,bBot,SIDEBAR_BG); fill(g,x+SIDEBAR_W,bTop,x+SIDEBAR_W+1,bBot,LINE_SOFT);
         int fTop=py+(footerY-y); fill(g,x+1,fTop,x+w-1,py+h-1,FOOTER_BG); fill(g,x+1,fTop,x+w-1,fTop+1,LINE_SOFT);
