@@ -14,35 +14,35 @@ import java.util.Locale;
 
 public final class VoidClickScreen extends Screen {
     // Exact compact dark-grid clone matching the screenshot layout
-    private static final int SCRIM = 0xAA0A0A0C;
-    private static final int WINDOW_BG = 0xF5101012;
-    private static final int SIDEBAR_BG = 0xFA0C0C0E;
-    private static final int CARD_BG = 0xF5151518;
-    private static final int CARD_HOVER = 0xFA1C1C20;
-    private static final int CARD_ON = 0xFA181A24;
+    private static final int SCRIM = 0x00000000;
+    private static final int WINDOW_BG = 0x4823262D;
+    private static final int SIDEBAR_BG = 0x282B2E36;
+    private static final int CARD_BG = 0x50383B44;
+    private static final int CARD_HOVER = 0x70464A55;
+    private static final int CARD_ON = 0x68403955;
 
-    private static final int LINE_WINDOW = 0x22FFFFFF;
+    private static final int LINE_WINDOW = 0x66FFFFFF;
     private static final int LINE_CARD = 0x16FFFFFF;
-    private static final int LINE_CARD_ON = 0x446378D8;
+    private static final int LINE_CARD_ON = 0xCCAA72FF;
 
-    private static final int TXT_NAME = 0xFFD4D4D8;
-    private static final int TXT_BIND = 0xFF9CA3AF;
-    private static final int TXT_BIND_ON = 0xFF93C5FD;
-    private static final int ICON_BLUE = 0xFF6B84D6;
-    private static final int ICON_DIM = 0xFF52525B;
+    private static final int TXT_NAME = 0xFFF4F2F8;
+    private static final int TXT_BIND = 0xFFB8BAC4;
+    private static final int TXT_BIND_ON = 0xFFD2B4FF;
+    private static final int ICON_BLUE = 0xFFB16CFF;
+    private static final int ICON_DIM = 0xFF85838D;
 
-    private static final int SW_TRACK_ON = 0xFF4F67B8;
-    private static final int SW_TRACK_OFF = 0xFF232327;
-    private static final int SW_KNOB_ON = 0xFFF4F4F5;
-    private static final int SW_KNOB_OFF = 0xFF71717A;
+    private static final int SW_TRACK_ON = 0xFF9D55F5;
+    private static final int SW_TRACK_OFF = 0x885B5D66;
+    private static final int SW_KNOB_ON = 0xFFFFFFFF;
+    private static final int SW_KNOB_OFF = 0xFFB5B5BE;
 
     private static final int TAB_COUNT = 4;
     private static final int COLS = 3;
-    private static final int ROWS = 8;
-    private static final int SIDEBAR_W = 34;
-    private static final int ROW_H = 21;
-    private static final int GAP_X = 7;
-    private static final int GAP_Y = 5;
+    private static final int ROWS = 12;
+    private static final int SIDEBAR_W = 48;
+    private static final int ROW_H = 30;
+    private static final int GAP_X = 9;
+    private static final int GAP_Y = 7;
 
     private int x, y, w, h;
     private int gridL, gridR, gridTop, gridBottom, colW, scroll;
@@ -109,10 +109,10 @@ public final class VoidClickScreen extends Screen {
     }
 
     private void toggle(GuiGraphics g, int sx, int sy, boolean on) {
-        int sw = 22;
-        int sh = 11;
+        int sw = 24;
+        int sh = 12;
         pill(g, sx, sy, sw, sh, on ? SW_TRACK_ON : SW_TRACK_OFF);
-        int rad = 4;
+        int rad = 5;
         int cx = sx + (on ? sw - 6 : 6);
         int cy = sy + sh / 2;
         int col = on ? SW_KNOB_ON : SW_KNOB_OFF;
@@ -243,8 +243,8 @@ public final class VoidClickScreen extends Screen {
 
     @Override
     protected void init() {
-        w = Math.min(width - 20, 640);
-        h = Math.min(height - 24, 224);
+        w = Math.min(width - 28, 820);
+        h = Math.min(height - 28, 430);
         x = (width - w) / 2;
         y = Math.max(8, (height - h) / 2);
 
@@ -308,9 +308,9 @@ public final class VoidClickScreen extends Screen {
                 int brdCol = selected || on ? LINE_CARD_ON : LINE_CARD;
                 card(g, rx, ry, rx + colW, rb, 5, bgCol, brdCol);
 
-                int toggleX = rx + colW - 27;
-                int bindW = 24;
-                int bindX = toggleX - bindW - 6;
+                int toggleX = rx + colW - 31;
+                int bindW = 34;
+                int bindX = toggleX - bindW - 8;
 
                 String bindLabel = name.equals(listeningModule)
                         ? "..."
@@ -318,13 +318,13 @@ public final class VoidClickScreen extends Screen {
                 boolean hasBind = VoidModules.keyBinds().containsKey(name) || name.equals(listeningModule);
 
                 int nameMaxW = Math.max(12, bindX - rx - 10);
-                txt(g, fit(name, nameMaxW), rx + 7, ry + 6, TXT_NAME);
+                txt(g, fit(name, nameMaxW), rx + 10, ry + 10, TXT_NAME);
 
                 String fittedBind = fit(bindLabel, bindW);
                 int bindTextX = bindX + Math.max(0, (bindW - tw(fittedBind)) / 2);
-                txt(g, fittedBind, bindTextX, ry + 6, hasBind ? TXT_BIND_ON : TXT_BIND);
+                txt(g, fittedBind, bindTextX, ry + 10, hasBind ? TXT_BIND_ON : TXT_BIND);
 
-                toggle(g, toggleX, ry + 5, on);
+                toggle(g, toggleX, ry + 9, on);
             }
         }
 
